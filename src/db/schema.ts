@@ -150,7 +150,7 @@ export const jobs = appSchema.table(
     headers: jsonb('headers')
       .$type<RequestHeaders[]>()
       .notNull()
-      .default('[]' as any),
+      .default('[]' as unknown as RequestHeaders[]),
     body: text('body'),
     timeoutMs: integer('timeout_ms').notNull().default(10000),
     maxRetries: integer('max_retries').notNull().default(2),
