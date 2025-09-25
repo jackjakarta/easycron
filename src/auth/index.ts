@@ -42,9 +42,9 @@ export const auth = betterAuth({
   },
   appName: 'easyCron',
   plugins: [
-    // haveIBeenPwned({
-    //   customPasswordCompromisedMessage: 'Please choose a more secure password.',
-    // }),
+    haveIBeenPwned({
+      customPasswordCompromisedMessage: 'Please choose a more secure password.',
+    }),
     twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],

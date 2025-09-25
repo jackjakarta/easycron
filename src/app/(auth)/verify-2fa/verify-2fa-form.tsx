@@ -23,7 +23,6 @@ export default function Verify2FAForm() {
     register,
     handleSubmit,
     formState: { isSubmitting, errors },
-    watch,
     setError,
     clearErrors,
   } = useForm<Verify2FAFormData>({
@@ -48,8 +47,6 @@ export default function Verify2FAForm() {
 
     router.replace('/');
   }
-
-  const codeValue = watch('code');
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">

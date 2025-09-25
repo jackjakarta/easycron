@@ -2,6 +2,7 @@
   "name": "nextjs-15-template",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build --experimental-build-mode compile",
     "build:dev": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- next build",

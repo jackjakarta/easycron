@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 
-import { env } from '@/env';
 import { request } from 'undici';
 
 export type OutboundRequest = {
@@ -80,7 +79,7 @@ export async function executeHttp(req: OutboundRequest): Promise<OutboundRespons
       responsePreview: preview,
       responseSize: bytes,
     };
-  } catch (e: any) {
+  } catch (e) {
     clearTimeout(to);
     throw e;
   }
