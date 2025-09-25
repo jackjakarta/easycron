@@ -148,10 +148,10 @@ async function main() {
   });
 
   worker.on('active', (job) => {
-    // console.log('active', job.id);
+    console.log('active', job.id);
   });
   worker.on('completed', (job) => {
-    // console.log('completed', job.id);
+    console.log('completed', job.id);
   });
   worker.on('failed', (job, err) => {
     console.error('worker failed', job?.id, err);
