@@ -134,8 +134,8 @@ export type HttpMethod = z.infer<typeof httpMethodSchema>;
 
 type RequestHeaders = { k: string; v: string };
 
-export const jobs = appSchema.table(
-  'jobs',
+export const jobTable = appSchema.table(
+  'job',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     projectId: uuid('project_id')
@@ -170,6 +170,51 @@ export const jobs = appSchema.table(
   (table) => [index('jobs_project_id_idx').on(table.nextRunAt, table.projectId)],
 );
 
-export type JobModel = typeof jobs.$inferSelect;
-export type InsertJobModel = typeof jobs.$inferInsert;
+export type JobModel = typeof jobTable.$inferSelect;
+export type InsertJobModel = typeof jobTable.$inferInsert;
 export type UpdateJobModel = UpdateDbRow<JobModel>;
+
+export const executionTable = appSchema.table(
+  'execution',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    jobId: uuid('job_id')
+      .notNull()
+      .references(() => jobTable.id),
+    scheduledFor: timestamp('scheduled_for', { withTimezone: true }).notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp('finished_at', { withTimezone: true }),
+    attempt: integer('attempt').notNull().default(1),
+    status: text('status').notNull(), // "succeeded" | "failed" | "timed_out" | "skipped"
+    httpStatus: integer('http_status'),
+    latencyMs: integer('latency_ms'),
+    requestSize: integer('request_size'),
+    responseSize: integer('response_size'),
+    responseTruncated: boolean('response_truncated').notNull().default(false),
+    errorMessage: text('error_message'),
+    responsePreview: text('response_preview'),
+  },
+  (table) => [index('exec_job_started_idx').on(table.startedAt, table.jobId)],
+);
+
+export type ExecutionModel = typeof executionTable.$inferSelect;
+export type InsertExecutionModel = typeof executionTable.$inferInsert;
+export type UpdateExecutionModel = UpdateDbRow<ExecutionModel>;
+
+export const secretTable = appSchema.table('secret', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  projectId: uuid('project_id')
+    .notNull()
+    .references(() => projectTable.id),
+  name: text('name').notNull(),
+  value: text('value').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type SecretModel = typeof secretTable.$inferSelect;
+export type InsertSecretModel = typeof secretTable.$inferInsert;
+export type UpdateSecretModel = UpdateDbRow<SecretModel>;

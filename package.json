@@ -19,6 +19,8 @@
     "pipeline": "chmod +x $(git rev-parse --show-toplevel)/scripts/pipeline.sh && $(git rev-parse --show-toplevel)/scripts/pipeline.sh",
     "start": "next start",
     "start:dev": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- next start",
+    "start:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx scheduler/index.ts",
+    "start:worker": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx worker/index.ts",
     "types": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,9 +34,12 @@
     "@tanstack/react-query": "5.90.2",
     "bcrypt": "6.0.0",
     "better-auth": "1.3.9",
+    "bullmq": "5.58.8",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "cron-parser": "5.4.0",
     "drizzle-orm": "0.44.4",
+    "ioredis": "5.8.0",
     "lucide-react": "0.511.0",
     "next": "15.5.4",
     "pg": "8.16.3",
@@ -42,8 +47,10 @@
     "react-dom": "19.1.1",
     "react-hook-form": "7.62.0",
     "react-qr-code": "2.0.18",
+    "redis": "5.8.2",
     "tailwind-merge": "3.3.1",
     "tw-animate-css": "1.2.5",
+    "undici": "7.16.0",
     "zod": "4.1.11"
   },
   "devDependencies": {

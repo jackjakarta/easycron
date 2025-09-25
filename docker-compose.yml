@@ -24,9 +24,7 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
-    environment:
-      REDIS_PASSWORD: 'mysecretpassword'
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    command: ['redis-server', '--requirepass', 'mysecretpassword']
     volumes:
       - redis_data:/data
 

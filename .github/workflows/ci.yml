@@ -1,15 +1,15 @@
 name: Checks
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
   workflow_dispatch:
 
 jobs:
   checks:
+    if: ${{ github.event.pull_request.draft == false }}
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +22,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: Install PNPM
-        run: npm install -g pnpm@10.11.0
+        run: npm install -g pnpm@9.15.3
 
       - name: Install dependencies
         run: pnpm install
