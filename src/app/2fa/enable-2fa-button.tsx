@@ -2,6 +2,15 @@
 
 import { authClient } from '@/auth/client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import QRCode from 'react-qr-code';
+import { z } from 'zod';
+
 // import {
 //   Dialog,
 //   DialogContent,
@@ -11,14 +20,6 @@ import { Button } from '@/components/ui/button';
 //   DialogTitle,
 //   DialogTrigger,
 // } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import QRCode from 'react-qr-code';
-import { z } from 'zod';
 
 const passwordSchema = z.object({ password: z.string().min(1, 'Password is required') });
 const verify2FASchema = z.object({
@@ -70,7 +71,7 @@ export default function Enable2FAButton() {
 
     setTotpURI(null);
     setBackupCodes(null);
-    router.push('/');
+    router.refresh();
   }
 
   async function onSubmitPassword(passwordData: PasswordFormData) {
@@ -91,7 +92,10 @@ export default function Enable2FAButton() {
   }
 
   async function downloadBackupCodes() {
-    if (backupCodes === null) return;
+    if (backupCodes === null || backupCodes.length === 0) {
+      return;
+    }
+
     const element = document.createElement('a');
     const file = new Blob([backupCodes.join('\n')], { type: 'text/plain' });
     element.href = URL.createObjectURL(file);
@@ -167,13 +171,10 @@ function extractOtpauthSecret(otpauthUrl: string): string {
       throw new Error(`Expected otpauth protocol, got "${url.protocol}"`);
     }
 
-    const secret = url.searchParams.get('secret');
+    const secret = url.searchParams.get('secret')?.trim();
+    const parsedSecret = z.string().min(1, 'secret is undefined or empty').parse(secret);
 
-    if (!secret || !secret.trim()) {
-      throw new Error("Missing 'secret' in otpauth URL.");
-    }
-
-    return secret.trim();
+    return parsedSecret;
   } catch (error) {
     console.error('Failed to parse otpauth URL:', error);
     return 'Invalid otpauth URL';

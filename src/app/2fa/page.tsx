@@ -1,6 +1,7 @@
 import { getUser } from '@/auth/utils';
 import { dbGetAccountByUserIdAndProvider } from '@/db/functions/account';
 
+import Disable2FAButton from './disable-2fa-button';
 import Enable2FAButton from './enable-2fa-button';
 
 export default async function Page() {
@@ -15,7 +16,7 @@ export default async function Page() {
   }
 
   if (user.twoFactorEnabled) {
-    return <span>2FA is already enabled.</span>;
+    return <Disable2FAButton />;
   }
 
   return <Enable2FAButton />;
