@@ -17,7 +17,24 @@ CREATE TABLE "app"."account" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "app"."jobs" (
+CREATE TABLE "app"."execution" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"job_id" uuid NOT NULL,
+	"scheduled_for" timestamp with time zone NOT NULL,
+	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"finished_at" timestamp with time zone,
+	"attempt" integer DEFAULT 1 NOT NULL,
+	"status" text NOT NULL,
+	"http_status" integer,
+	"latency_ms" integer,
+	"request_size" integer,
+	"response_size" integer,
+	"response_truncated" boolean DEFAULT false NOT NULL,
+	"error_message" text,
+	"response_preview" text
+);
+--> statement-breakpoint
+CREATE TABLE "app"."job" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"name" text NOT NULL,
@@ -46,6 +63,15 @@ CREATE TABLE "app"."project" (
 	"user_id" uuid NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "app"."secret" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" uuid NOT NULL,
+	"name" text NOT NULL,
+	"value" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -94,8 +120,11 @@ CREATE TABLE "app"."verification" (
 );
 --> statement-breakpoint
 ALTER TABLE "app"."account" ADD CONSTRAINT "account_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "app"."jobs" ADD CONSTRAINT "jobs_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."execution" ADD CONSTRAINT "execution_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "app"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."job" ADD CONSTRAINT "job_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."project" ADD CONSTRAINT "project_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."session" ADD CONSTRAINT "session_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."two_factor" ADD CONSTRAINT "two_factor_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "jobs_project_id_idx" ON "app"."jobs" USING btree ("next_run_at","project_id");
+CREATE INDEX "exec_job_started_idx" ON "app"."execution" USING btree ("started_at","job_id");--> statement-breakpoint
+CREATE INDEX "jobs_project_id_idx" ON "app"."job" USING btree ("next_run_at","project_id");
