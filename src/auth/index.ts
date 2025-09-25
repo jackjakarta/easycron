@@ -55,7 +55,7 @@ export const auth = betterAuth({
       session: sessionTable,
       account: accountTable,
       verification: verificationTable,
-      two_factor: twoFactorTable,
+      twoFactor: twoFactorTable,
     },
   }),
   user: {
