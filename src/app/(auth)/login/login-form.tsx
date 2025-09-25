@@ -32,21 +32,30 @@ export default function LoginForm() {
     },
   });
 
-  async function onSubmit(data: LoginFormData) {
-    const { email: _email, password } = data;
+  async function onSubmit(loginData: LoginFormData) {
+    const { email: _email, password } = loginData;
     const email = _email.trim().toLowerCase();
 
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-    });
+    await authClient.signIn.email(
+      {
+        email,
+        password,
+      },
+      {
+        async onSuccess(context) {
+          if (context.data.twoFactorRedirect) {
+            router.replace('/verify-2fa');
+            return;
+          }
 
-    if (error !== null) {
-      setError('root', { type: 'server', message: error.message });
-      return;
-    }
-
-    router.replace('/');
+          router.replace('/');
+        },
+        onError(context) {
+          console.error('Login error:', context.error);
+          setError('root', { type: 'server', message: context.error.message });
+        },
+      },
+    );
   }
 
   const emailValue = watch('email');

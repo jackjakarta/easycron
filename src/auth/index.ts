@@ -1,28 +1,51 @@
 import { db } from '@/db';
-import { accountTable, sessionTable, userTable, verificationTable } from '@/db/schema';
+import {
+  accountTable,
+  sessionTable,
+  twoFactorTable,
+  userTable,
+  verificationTable,
+} from '@/db/schema';
+import { env } from '@/env';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
+import { haveIBeenPwned, twoFactor } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sendResetPassword: async ({ user, url }, request) => {
-      console.info({ info: 'Sending reset password email' });
+    sendResetPassword: async ({ user, url }) => {
+      console.info({ user, url });
     },
   },
   emailVerification: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    sendVerificationEmail: async ({ user, url }, request) => {
-      console.info({ info: 'Sending verification email' });
+    sendVerificationEmail: async ({ user, url }) => {
+      console.info({ user, url });
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
   },
+  socialProviders: {
+    google: {
+      clientId: env.googleClientId,
+      clientSecret: env.googleClientSecret,
+      prompt: 'select_account',
+      accessType: 'offline',
+    },
+    github: {
+      clientId: env.githubClientId,
+      clientSecret: env.githubClientSecret,
+    },
+  },
+  appName: 'easyCron',
   plugins: [
+    haveIBeenPwned({
+      customPasswordCompromisedMessage: 'Please choose a more secure password.',
+    }),
+    twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
   database: drizzleAdapter(db, {
@@ -32,6 +55,7 @@ export const auth = betterAuth({
       session: sessionTable,
       account: accountTable,
       verification: verificationTable,
+      twoFactor: twoFactorTable,
     },
   }),
   user: {
