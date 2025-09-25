@@ -6,6 +6,7 @@ import Enable2FAButton from './enable-2fa-button';
 
 export default async function Page() {
   const user = await getUser();
+
   const account = await dbGetAccountByUserIdAndProvider({
     userId: user.id,
     provider: 'credential',
