@@ -28,6 +28,14 @@ services:
     volumes:
       - redis_data:/data
 
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    restart: unless-stopped
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+
 volumes:
   postgres_data:
     driver: local
