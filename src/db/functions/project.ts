@@ -22,7 +22,7 @@ export async function dbGetProjectById({
   const rows = await db
     .select()
     .from(projectTable)
-    .leftJoin(jobTable, eq(jobTable.projectId, projectTable.id))
+    .leftJoin(jobTable, and(eq(jobTable.projectId, projectTable.id), eq(jobTable.userId, userId)))
     .where(and(eq(projectTable.id, projectId), eq(projectTable.userId, userId)));
 
   if (rows.length === 0) {
@@ -55,7 +55,7 @@ export async function dbGetProjectsAndJobsByUserId({
   const rows = await db
     .select()
     .from(projectTable)
-    .leftJoin(jobTable, eq(jobTable.projectId, projectTable.id))
+    .leftJoin(jobTable, and(eq(jobTable.projectId, projectTable.id), eq(jobTable.userId, userId)))
     .where(eq(projectTable.userId, userId))
     .orderBy(desc(projectTable.updatedAt));
 

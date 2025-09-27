@@ -1,5 +1,5 @@
 {
-  "id": "83e8e855-41ef-4d20-9bc4-678d79f1b0c5",
+  "id": "0fd08ba9-c57b-468b-aad3-0c2c636426d0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -97,8 +97,12 @@
           "tableFrom": "account",
           "tableTo": "user_entity",
           "schemaTo": "app",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -154,7 +158,7 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "execution_status",
           "primaryKey": false,
           "notNull": true
         },
@@ -231,8 +235,12 @@
           "tableFrom": "execution",
           "tableTo": "job",
           "schemaTo": "app",
-          "columnsFrom": ["job_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -253,12 +261,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
-        },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
         },
         "name": {
           "name": "name",
@@ -372,6 +374,18 @@
           "notNull": true,
           "default": 0
         },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -388,8 +402,8 @@
         }
       },
       "indexes": {
-        "jobs_project_id_idx": {
-          "name": "jobs_project_id_idx",
+        "jobs_project_id_user_id_next_run_at_idx": {
+          "name": "jobs_project_id_user_id_next_run_at_idx",
           "columns": [
             {
               "expression": "next_run_at",
@@ -399,6 +413,33 @@
             },
             {
               "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "jobs_project_id_user_id_idx": {
+          "name": "jobs_project_id_user_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -416,8 +457,26 @@
           "tableFrom": "job",
           "tableTo": "project",
           "schemaTo": "app",
-          "columnsFrom": ["project_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "job_user_id_user_entity_id_fk": {
+          "name": "job_user_id_user_entity_id_fk",
+          "tableFrom": "job",
+          "tableTo": "user_entity",
+          "schemaTo": "app",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -479,8 +538,12 @@
           "tableFrom": "project",
           "tableTo": "user_entity",
           "schemaTo": "app",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -542,8 +605,12 @@
           "tableFrom": "secret",
           "tableTo": "project",
           "schemaTo": "app",
-          "columnsFrom": ["project_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -617,8 +684,12 @@
           "tableFrom": "session",
           "tableTo": "user_entity",
           "schemaTo": "app",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -628,7 +699,9 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
       "policies": {},
@@ -686,8 +759,12 @@
           "tableFrom": "two_factor",
           "tableTo": "user_entity",
           "schemaTo": "app",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -697,7 +774,9 @@
         "two_factor_user_id_unique": {
           "name": "two_factor_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": [
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -769,7 +848,9 @@
         "user_entity_email_unique": {
           "name": "user_entity_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -830,10 +911,23 @@
     }
   },
   "enums": {
+    "app.execution_status": {
+      "name": "execution_status",
+      "schema": "app",
+      "values": [
+        "succeeded",
+        "failed",
+        "timed_out",
+        "skipped"
+      ]
+    },
     "app.http_method": {
       "name": "http_method",
       "schema": "app",
-      "values": ["GET", "POST"]
+      "values": [
+        "GET",
+        "POST"
+      ]
     }
   },
   "schemas": {

@@ -138,9 +138,6 @@ export const jobTable = appSchema.table(
   'job',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    projectId: uuid('project_id')
-      .notNull()
-      .references(() => projectTable.id),
     name: text('name').notNull(),
     enabled: boolean('enabled').default(true).notNull(),
     scheduleCron: text('schedule_cron').notNull(),
@@ -161,31 +158,51 @@ export const jobTable = appSchema.table(
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
     nextRunAt: timestamp('next_run_at', { withTimezone: true }).notNull(),
     consecutiveFailures: integer('consecutive_failures').notNull().default(0),
+    projectId: uuid('project_id')
+      .references(() => projectTable.id)
+      .notNull(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
       .notNull()
       .$onUpdate(() => new Date()),
   },
-  (table) => [index('jobs_project_id_idx').on(table.nextRunAt, table.projectId)],
+  (table) => [
+    index('jobs_project_id_user_id_next_run_at_idx').on(
+      table.nextRunAt,
+      table.projectId,
+      table.userId,
+    ),
+    index('jobs_project_id_user_id_idx').on(table.projectId, table.userId),
+  ],
 );
 
 export type JobModel = typeof jobTable.$inferSelect;
 export type InsertJobModel = typeof jobTable.$inferInsert;
 export type UpdateJobModel = UpdateDbRow<JobModel>;
 
+export const exectutionStatusSchema = z.enum(['succeeded', 'failed', 'timed_out', 'skipped']);
+export const executionStatusPgEnum = appSchema.enum(
+  'execution_status',
+  exectutionStatusSchema.enum,
+);
+export type ExecutionStatus = z.infer<typeof exectutionStatusSchema>;
+
 export const executionTable = appSchema.table(
   'execution',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     jobId: uuid('job_id')
-      .notNull()
-      .references(() => jobTable.id),
+      .references(() => jobTable.id)
+      .notNull(),
     scheduledFor: timestamp('scheduled_for', { withTimezone: true }).notNull(),
     startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp('finished_at', { withTimezone: true }),
     attempt: integer('attempt').notNull().default(1),
-    status: text('status').notNull(), // "succeeded" | "failed" | "timed_out" | "skipped"
+    status: executionStatusPgEnum('status').notNull(),
     httpStatus: integer('http_status'),
     latencyMs: integer('latency_ms'),
     requestSize: integer('request_size'),

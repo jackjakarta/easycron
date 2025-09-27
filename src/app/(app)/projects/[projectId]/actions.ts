@@ -5,8 +5,8 @@ import { dbDeleteJob, dbGetJobById, dbUpdateJob } from '@/db/functions/job';
 import { getRunQueue } from '@/queue/queue';
 
 export async function runJobNowAction({ jobId }: { jobId: string }) {
-  await getUser();
-  const job = await dbGetJobById({ jobId });
+  const user = await getUser();
+  const job = await dbGetJobById({ jobId, userId: user.id });
 
   if (job === undefined) {
     throw new Error('Job not found');
@@ -35,8 +35,8 @@ export async function enableOrDisableJobAction({
   jobId: string;
   enabled: boolean;
 }) {
-  await getUser();
-  const updatedJob = await dbUpdateJob({ jobId, data: { enabled } });
+  const user = await getUser();
+  const updatedJob = await dbUpdateJob({ jobId, userId: user.id, data: { enabled } });
 
   if (updatedJob === undefined) {
     throw new Error('Failed to update job');
@@ -46,8 +46,8 @@ export async function enableOrDisableJobAction({
 }
 
 export async function deleteJobAction({ jobId }: { jobId: string }) {
-  await getUser();
-  const deletedJob = await dbDeleteJob({ jobId });
+  const user = await getUser();
+  const deletedJob = await dbDeleteJob({ jobId, userId: user.id });
 
   if (deletedJob === undefined) {
     throw new Error('Failed to delete job');
