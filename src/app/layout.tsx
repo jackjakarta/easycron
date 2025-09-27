@@ -1,6 +1,8 @@
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/utils/tailwind';
 import { type Metadata } from 'next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale } from 'next-intl/server';
 import { ThemeProvider } from 'next-themes';
 import { Geist_Mono, Lato } from 'next/font/google';
 
@@ -26,13 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={cn(latoSans.variable, geistMono.variable, 'antialiased')}>
         <ThemeProvider
           defaultTheme="system"
@@ -40,8 +44,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster position="top-right" />
+          <NextIntlClientProvider>
+            {children}
+            <Toaster position="top-right" />
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

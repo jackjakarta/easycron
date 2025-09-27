@@ -1,5 +1,7 @@
 import { cookies } from 'next/headers';
 
+import { siteLanguageSchema, type SiteLanguage } from './types';
+
 export async function setCookie(
   name: string,
   value: string,
@@ -38,4 +40,15 @@ export async function getSidebarOpenStateFromCookies(): Promise<boolean> {
   const isSidebarOpen = sidebarState !== undefined ? sidebarState === 'true' : true;
 
   return isSidebarOpen;
+}
+
+export async function getLocaleFromCookies(): Promise<SiteLanguage | undefined> {
+  const locale = await getCookieValue('site_language');
+  const parsedLocale = siteLanguageSchema.safeParse(locale);
+
+  if (!parsedLocale.success) {
+    return undefined;
+  }
+
+  return parsedLocale.data;
 }

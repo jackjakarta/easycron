@@ -8,7 +8,7 @@ export default function NavHeader() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" asChild>
-          <Link href="/">
+          <Link href="/dashboard">
             <div className="bg-background text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
               <Clock className="size-5" />
             </div>
