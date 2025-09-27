@@ -1,5 +1,6 @@
 import { cn } from '@/utils/tailwind';
 import { type Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
 import { Geist_Mono, Lato } from 'next/font/google';
 
 import './globals.css';
@@ -17,8 +18,9 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Next.js 15 Template',
-    description: 'Template by @jackjakarta',
+    title: 'easyCron - Free and Open Source Cron Job Manager',
+    description:
+      'A free and open source cron job manager to schedule and manage your cron jobs with ease.',
     icons: { icon: '/favicon.ico' },
   };
 }
@@ -29,8 +31,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={cn(latoSans.variable, geistMono.variable, 'antialiased')}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn(latoSans.variable, geistMono.variable, 'antialiased')}>
+        <ThemeProvider
+          defaultTheme="system"
+          attribute="class"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -11,16 +11,6 @@ import { useForm } from 'react-hook-form';
 import QRCode from 'react-qr-code';
 import { z } from 'zod';
 
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogTrigger,
-// } from '@/components/ui/dialog';
-
 const passwordSchema = z.object({ password: z.string().min(1, 'Password is required') });
 const verify2FASchema = z.object({
   code: z.string().min(6, 'Invalid 2FA code').max(6, 'Invalid 2FA code'),

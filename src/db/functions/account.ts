@@ -1,3 +1,4 @@
+import { type AuthProvider } from '@/auth/types';
 import { and, eq } from 'drizzle-orm';
 
 import { db } from '..';
@@ -8,7 +9,7 @@ export async function dbGetAccountByUserIdAndProvider({
   provider,
 }: {
   userId: string;
-  provider: 'credential' | 'google' | 'github';
+  provider: AuthProvider;
 }): Promise<AccountModel | undefined> {
   const [account] = await db
     .select()

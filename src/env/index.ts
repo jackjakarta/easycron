@@ -10,6 +10,9 @@ export const env = createEnv({
     googleClientSecret: z.string().min(1),
     githubClientId: z.string().min(1),
     githubClientSecret: z.string().min(1),
+    mailjetApiKey: z.string().min(1),
+    mailjetApiSecret: z.string().min(1),
+    devMode: z.enum(['true', 'false']).default('false'),
   },
   client: {},
   runtimeEnv: {
@@ -20,5 +23,8 @@ export const env = createEnv({
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
     githubClientId: process.env.GITHUB_CLIENT_ID,
     githubClientSecret: process.env.GITHUB_CLIENT_SECRET,
+    mailjetApiKey: process.env.MAILJET_API_KEY,
+    mailjetApiSecret: process.env.MAILJET_API_SECRET,
+    devMode: process.env.DEV_MODE,
   },
 });

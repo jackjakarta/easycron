@@ -6,6 +6,7 @@ import {
   userTable,
   verificationTable,
 } from '@/db/schema';
+import { sendUserActionEmail } from '@/email/send';
 import { env } from '@/env';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
@@ -18,12 +19,20 @@ export const auth = betterAuth({
     autoSignIn: false,
     requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      console.info({ user, url });
+      await sendUserActionEmail({
+        action: 'reset-password',
+        actionUrl: url,
+        to: user.email,
+      });
     },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      console.info({ user, url });
+      await sendUserActionEmail({
+        action: 'verify-email',
+        actionUrl: url,
+        to: user.email,
+      });
     },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
