@@ -17,7 +17,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { type UserModel } from '@/db/schema';
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NavUser({ user }: { user: UserModel }) {
