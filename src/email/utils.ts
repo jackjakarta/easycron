@@ -18,7 +18,7 @@ export async function mailjetSendEmail({
     Messages: [
       {
         From: {
-          Email: 'info@sharedocs.app',
+          Email: 'info@easycron.xyz',
           Name: 'PDF Exporter App',
         },
         To: [
@@ -56,7 +56,7 @@ export async function sendTestEmail({
   });
 
   const mailOptions = {
-    from: 'info@codebyalex.dev',
+    from: 'info@easycron.xyz',
     to,
     subject,
     html,

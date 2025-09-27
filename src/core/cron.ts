@@ -10,10 +10,9 @@ export function now(): Date {
 export function computeNextRun(cronExpr: string, tz: string, from: Date): Date {
   try {
     const it = parser.parse(cronExpr, { tz, currentDate: from });
-    const value = it.next(); // next occurrence strictly after `from`
+    const value = it.next();
     return value.toDate();
   } catch (err) {
-    // surface a helpful error for bad expressions or tz
     throw new Error(`Invalid cron (${cronExpr}) or timezone (${err}`);
   }
 }

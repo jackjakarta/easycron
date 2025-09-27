@@ -43,7 +43,7 @@ CREATE TABLE "app"."job" (
 	"timezone" text DEFAULT 'UTC' NOT NULL,
 	"http_method" "app"."http_method" DEFAULT 'GET' NOT NULL,
 	"url" text NOT NULL,
-	"headers" jsonb DEFAULT '[]' NOT NULL,
+	"headers" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"body" text,
 	"timeout_ms" integer DEFAULT 10000 NOT NULL,
 	"max_retries" integer DEFAULT 2 NOT NULL,

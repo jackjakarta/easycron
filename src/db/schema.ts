@@ -132,7 +132,10 @@ export const httpMethodSchema = z.enum(['GET', 'POST']);
 export const httpMethodPgEnum = appSchema.enum('http_method', httpMethodSchema.enum);
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 
-type RequestHeaders = { k: string; v: string };
+export type JobRequestHeaders = {
+  k: string;
+  v: string;
+};
 
 export const jobTable = appSchema.table(
   'job',
@@ -144,10 +147,7 @@ export const jobTable = appSchema.table(
     timezone: text('timezone').default('UTC').notNull(),
     httpMethod: httpMethodPgEnum('http_method').notNull().default('GET'),
     url: text('url').notNull(),
-    headers: jsonb('headers')
-      .$type<RequestHeaders[]>()
-      .notNull()
-      .default('[]' as unknown as RequestHeaders[]),
+    headers: jsonb('headers').$type<JobRequestHeaders[]>().notNull().default([]),
     body: text('body'),
     timeoutMs: integer('timeout_ms').notNull().default(10000),
     maxRetries: integer('max_retries').notNull().default(2),
