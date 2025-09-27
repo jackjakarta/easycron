@@ -1,6 +1,7 @@
-import { Command } from 'lucide-react';
+import { Clock, Command } from 'lucide-react';
 import Link from 'next/link';
 
+import LogoOnlyIcon from '../icons/logo-only';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
 
 export default function NavHeader() {
@@ -8,13 +9,13 @@ export default function NavHeader() {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" asChild>
-          <Link href="#">
-            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-              <Command className="size-4" />
+          <Link href="/">
+            <div className="bg-background text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+              <Clock className="size-5" />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">Acme Inc</span>
-              <span className="truncate text-xs">Enterprise</span>
+              <span className="truncate font-medium">easyCron</span>
+              <span className="truncate text-xs">Jakarta Enterprise</span>
             </div>
           </Link>
         </SidebarMenuButton>

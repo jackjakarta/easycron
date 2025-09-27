@@ -28,8 +28,7 @@ export default async function Page(context: PageContext) {
   }
 
   return (
-    <div className="p-6">
-      Project: {project.name}
+    <div className="p-4">
       <CronJobsTable cronJobs={project.jobs} />
     </div>
   );
