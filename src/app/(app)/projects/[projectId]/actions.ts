@@ -3,6 +3,8 @@
 import { getUser } from '@/auth/utils';
 import { dbDeleteJob, dbUpdateJob } from '@/db/functions/job';
 
+// TODO: add proper authentication
+
 export async function enableOrDisableJobAction({
   jobId,
   enabled,

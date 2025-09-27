@@ -36,7 +36,7 @@ type CronJobsTableProps = {
 export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
   const router = useRouter();
 
-  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
   async function handleEnableOrDisableJob(jobId: string, enabled: boolean) {
     try {
@@ -59,7 +59,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
   }
 
   async function handleDeleteJob(jobId: string) {
-    setIsDeleting(true);
+    setDeletingJobId(jobId);
 
     try {
       await deleteJobAction({ jobId });
@@ -69,7 +69,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
       console.error('Failed to delete job:', error);
       toast.error('Failed to delete job');
     } finally {
-      setIsDeleting(false);
+      setDeletingJobId(null);
     }
   }
 
@@ -208,7 +208,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                           type="destructive"
                           description="Are you sure you want to delete this job? This action cannot be undone."
                           onConfirm={() => handleDeleteJob(job.id)}
-                          isLoading={isDeleting}
+                          isLoading={deletingJobId === job.id}
                           trigger={
                             <DropdownMenuItem
                               className="text-destructive"

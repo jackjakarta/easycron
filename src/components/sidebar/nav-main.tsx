@@ -3,7 +3,6 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
-  // SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -26,11 +25,9 @@ export default function NavMain() {
       <SidebarMenu>
         <Collapsible key={'projects'} asChild defaultOpen={true}>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Projects">
-              <Link href={'item.url'}>
-                <Clock />
-                <span>Projects</span>
-              </Link>
+            <SidebarMenuButton tooltip="Projects">
+              <Clock />
+              <span>Projects</span>
             </SidebarMenuButton>
             {isLoading &&
               Array.from({ length: 8 }).map((_, index) => <SidebarMenuSkeleton key={index} />)}
@@ -42,7 +39,7 @@ export default function NavMain() {
             {!isLoading && !isError && projects.length > 0 && (
               <>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuAction className="data-[state=open]:rotate-90">
+                  <SidebarMenuAction className="cursor-pointer data-[state=open]:rotate-90">
                     <ChevronRight />
                     <span className="sr-only">Toggle</span>
                   </SidebarMenuAction>
