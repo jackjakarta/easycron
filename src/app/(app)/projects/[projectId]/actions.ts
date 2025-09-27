@@ -1,15 +1,22 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { dbDeleteJob, dbUpdateJob } from '@/db/functions/job';
+import { dbDeleteJob, dbGetJobById, dbUpdateJob } from '@/db/functions/job';
 import { getRunQueue } from '@/queue/queue';
 
 export async function runJobNowAction({ jobId }: { jobId: string }) {
+  await getUser();
+  const job = await dbGetJobById({ jobId });
+
+  if (job === undefined) {
+    throw new Error('Job not found');
+  }
+
   const q = getRunQueue();
   const iso = new Date().toISOString();
 
-  const payload = { jobId, scheduledForISO: iso };
-  const customId = occurrenceJobId(jobId, payload.scheduledForISO);
+  const payload = { jobId: job.id, scheduledForISO: iso };
+  const customId = occurrenceJobId(job.id, payload.scheduledForISO);
 
   await q.add('run', payload, {
     jobId: customId,
@@ -19,11 +26,6 @@ export async function runJobNowAction({ jobId }: { jobId: string }) {
   });
 
   return;
-}
-
-function occurrenceJobId(jobId: string, scheduledISO: string) {
-  const safeISO = scheduledISO.replace(/[:.]/g, '');
-  return `run-${jobId}-${safeISO}`;
 }
 
 export async function enableOrDisableJobAction({
@@ -52,4 +54,9 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
   }
 
   return deletedJob;
+}
+
+function occurrenceJobId(jobId: string, scheduledISO: string) {
+  const safeISO = scheduledISO.replace(/[:.]/g, '');
+  return `run-${jobId}-${safeISO}`;
 }
