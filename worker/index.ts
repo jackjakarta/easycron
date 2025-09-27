@@ -22,7 +22,7 @@ async function fetchHmacSecret(keyId: string | null): Promise<string | null> {
   return row.value;
 }
 
-async function runOnce(bull: Job<RunJobPayload>) {
+export async function runOnce(bull: Job<RunJobPayload>) {
   const runId = randomUUID();
   const [jobRow] = await db.select().from(jobTable).where(eq(jobTable.id, bull.data.jobId));
 

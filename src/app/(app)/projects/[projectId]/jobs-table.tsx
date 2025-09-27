@@ -25,7 +25,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { deleteJobAction, enableOrDisableJobAction } from './actions';
+import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from './actions';
 import CreateJobDialog from './create-job-dialog';
 import EditJobSheet from './edit-job-sheet';
 
@@ -51,7 +51,8 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
 
   async function handleRunJobNow(jobId: string) {
     try {
-      console.info('NOT IMPLEMENTED:', jobId);
+      await runJobNowAction({ jobId });
+      toast.success('Job enqueued successfully');
     } catch (error) {
       console.error('Failed to run job now:', error);
       toast.error('Failed to run job now');
@@ -183,7 +184,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                         />
 
                         <DropdownMenuItem
-                          onClick={() => handleEnableOrDisableJob(job.id, !job.enabled)}
+                          onSelect={() => handleEnableOrDisableJob(job.id, !job.enabled)}
                         >
                           {job.enabled ? (
                             <>
@@ -198,7 +199,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                           )}
                         </DropdownMenuItem>
                         {/* TODO: Implement "Run Now" functionality */}
-                        <DropdownMenuItem onClick={() => handleRunJobNow(job.id)}>
+                        <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
                           <Play className="mr-2 h-4 w-4" />
                           Run Now
                         </DropdownMenuItem>
