@@ -25,6 +25,7 @@ import { type JobModel } from '@/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 const editJobSchema = z.object({
@@ -68,7 +69,13 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
   });
 
   async function onSubmit(data: EditJobFormData) {
-    console.debug({ data });
+    try {
+      console.debug({ data });
+      toast.success('Job updated successfully');
+    } catch (error) {
+      console.error('Failed to update job:', error);
+      toast.error('Failed to update job');
+    }
   }
 
   return (

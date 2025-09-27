@@ -1,7 +1,6 @@
-import { Clock, Command } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import Link from 'next/link';
 
-import LogoOnlyIcon from '../icons/logo-only';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
 
 export default function NavHeader() {
