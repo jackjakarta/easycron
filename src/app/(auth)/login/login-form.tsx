@@ -48,7 +48,7 @@ export default function LoginForm() {
             return;
           }
 
-          router.replace('/');
+          router.replace('/dashboard');
         },
         onError(context) {
           console.error('Login error:', context.error);

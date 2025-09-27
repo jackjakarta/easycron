@@ -45,7 +45,7 @@ export default function Verify2FAForm() {
       return;
     }
 
-    router.replace('/');
+    router.replace('/dashboard');
   }
 
   return (

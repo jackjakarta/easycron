@@ -1,5 +1,6 @@
 'use client';
 
+import ConfirmationDialog from '@/components/common/confirmation-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,46 +20,68 @@ import {
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Clock, Globe, MoreHorizontal, Pause, Play, Trash2 } from 'lucide-react';
+import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { toast } from 'sonner';
 
-type CronJob = Pick<
-  JobModel,
-  'id' | 'name' | 'enabled' | 'scheduleCron' | 'timezone' | 'httpMethod' | 'lastRunAt' | 'nextRunAt'
->;
+import { deleteJobAction, enableOrDisableJobAction } from './actions';
+import CreateJobDialog from './create-job-dialog';
+import EditJobSheet from './edit-job-sheet';
 
 type CronJobsTableProps = {
-  cronJobs: CronJob[];
+  cronJobs: JobModel[];
 };
-
-const httpMethodColors: Record<HttpMethod, string> = {
-  GET: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  POST: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-  // PUT: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  // DELETE: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-  // PATCH: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-};
-
-function parseCronExpression(cron: string): string {
-  const parts = cron.split(' ');
-  if (parts.length !== 5) return cron;
-
-  // const [minute, hour, day, month, dayOfWeek] = parts;
-
-  if (cron === '0 2 * * *') return 'Daily at 2:00 AM';
-  if (cron === '0 9 * * 1') return 'Weekly on Monday at 9:00 AM';
-  if (cron === '*/5 * * * *') return 'Every 5 minutes';
-  if (cron === '0 0 1 * *') return 'Monthly on the 1st at midnight';
-
-  return cron;
-}
 
 export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
+  const router = useRouter();
+
+  const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
+
+  async function handleEnableOrDisableJob(jobId: string, enabled: boolean) {
+    try {
+      await enableOrDisableJobAction({ jobId, enabled });
+      toast.success(`Job ${enabled ? 'enabled' : 'disabled'} successfully`);
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to update job:', error);
+      toast.error('Failed to update job');
+    }
+  }
+
+  async function handleRunJobNow(jobId: string) {
+    try {
+      console.info('NOT IMPLEMENTED:', jobId);
+    } catch (error) {
+      console.error('Failed to run job now:', error);
+      toast.error('Failed to run job now');
+    }
+  }
+
+  async function handleDeleteJob(jobId: string) {
+    setDeletingJobId(jobId);
+
+    try {
+      await deleteJobAction({ jobId });
+      toast.success('Job deleted successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to delete job:', error);
+      toast.error('Failed to delete job');
+    } finally {
+      setDeletingJobId(null);
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Scheduled Jobs ({cronJobs.length})
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Scheduled Jobs ({cronJobs.length})
+          </div>
+          <CreateJobDialog trigger={<Button>Create Job</Button>} />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -101,7 +124,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className={httpMethodColors[job.httpMethod]}>
+                    <Badge variant="outline" className={methodToClassName(job.httpMethod)}>
                       {job.httpMethod}
                     </Badge>
                   </TableCell>
@@ -127,12 +150,18 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="text-sm">
-                        {formatDistanceToNow(job.nextRunAt, { addSuffix: true })}
-                      </div>
-                      <div className="text-muted-foreground text-xs">
-                        {format(job.nextRunAt, 'MMM d, HH:mm')}
-                      </div>
+                      {job.enabled ? (
+                        <>
+                          <div className="text-sm">
+                            {formatDistanceToNow(job.nextRunAt, { addSuffix: true })}
+                          </div>
+                          <div className="text-muted-foreground text-xs">
+                            {format(job.nextRunAt, 'MMM d, HH:mm')}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-sm">Never</div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -143,7 +172,19 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
+                        <EditJobSheet
+                          job={job}
+                          trigger={
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                          }
+                        />
+
+                        <DropdownMenuItem
+                          onClick={() => handleEnableOrDisableJob(job.id, !job.enabled)}
+                        >
                           {job.enabled ? (
                             <>
                               <Pause className="mr-2 h-4 w-4" />
@@ -156,14 +197,28 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                             </>
                           )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        {/* TODO: Implement "Run Now" functionality */}
+                        <DropdownMenuItem onClick={() => handleRunJobNow(job.id)}>
                           <Play className="mr-2 h-4 w-4" />
                           Run Now
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
+
+                        <ConfirmationDialog
+                          title="Delete Job"
+                          type="destructive"
+                          description="Are you sure you want to delete this job? This action cannot be undone."
+                          onConfirm={() => handleDeleteJob(job.id)}
+                          isLoading={deletingJobId === job.id}
+                          trigger={
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          }
+                        />
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -175,4 +230,34 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
       </CardContent>
     </Card>
   );
+}
+
+function parseCronExpression(cron: string): string {
+  const parts = cron.split(' ');
+
+  if (parts.length !== 5) {
+    return cron;
+  }
+
+  switch (cron) {
+    case '0 2 * * *':
+      return 'Daily at 2:00 AM';
+    case '0 9 * * 1':
+      return 'Weekly on Monday at 9:00 AM';
+    case '*/5 * * * *':
+      return 'Every 5 minutes';
+    case '0 0 1 * *':
+      return 'Monthly on the 1st at midnight';
+    default:
+      return cron;
+  }
+}
+
+function methodToClassName(method: HttpMethod) {
+  const httpMethodColors: Record<HttpMethod, string> = {
+    GET: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    POST: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+  };
+
+  return httpMethodColors[method];
 }

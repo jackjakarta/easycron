@@ -1,0 +1,27 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login",
+      "description": "Sign in to your account",
+      "form": {
+        "email": {
+          "label": "Email address",
+          "placeholder": "m@example.com",
+          "error": "Please enter a valid email address"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "********",
+          "error": "Please enter your password"
+        },
+        "buttons": {
+          "submit": "Login",
+          "forgot-password": "Forgot password?",
+          "no-account": "No account?",
+          "register": "Register",
+          "login-with": "Continue with"
+        }
+      }
+    }
+  }
+}

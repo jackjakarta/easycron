@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto';
 import { executeHttp } from '@/core/http';
 import { db } from '@/db';
 import { executionTable, jobTable, secretTable } from '@/db/schema';
-import { connection, RUN_QUEUE_NAME, RunJobPayload } from '@/queue/queue';
+import { connection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
 import { Job, Worker } from 'bullmq';
 import { eq } from 'drizzle-orm';
 
@@ -17,19 +17,16 @@ async function fetchHmacSecret(keyId: string | null): Promise<string | null> {
   if (!keyId) return null;
   const [row] = await db.select().from(secretTable).where(eq(secretTable.id, keyId));
   if (!row) return null;
-  // decrypt your secret here if stored encrypted
+
+  // TODO: decrypt secret here if encrypted
   return row.value;
 }
 
 async function runOnce(bull: Job<RunJobPayload>) {
   const runId = randomUUID();
-
-  // Load the job fresh
   const [jobRow] = await db.select().from(jobTable).where(eq(jobTable.id, bull.data.jobId));
 
-  if (!jobRow) return; // deleted
-
-  // If disabled after scheduling—skip
+  if (jobRow === undefined) return;
   if (!jobRow.enabled) return;
 
   const scheduledFor = new Date(bull.data.scheduledForISO);
@@ -136,8 +133,7 @@ function sleep(ms: number) {
 }
 
 async function main() {
-  console.log('Worker starting…');
-
+  console.info('Worker starting…');
   const concurrency = WORKER_CONCURRENCY;
 
   const worker = new Worker<RunJobPayload>(RUN_QUEUE_NAME, async (bullJob) => runOnce(bullJob), {
@@ -148,21 +144,21 @@ async function main() {
   });
 
   worker.on('active', (job) => {
-    console.log('active', job.id);
+    console.info('active', job.id);
   });
   worker.on('completed', (job) => {
-    console.log('completed', job.id);
+    console.info('completed', job.id);
   });
   worker.on('failed', (job, err) => {
     console.error('worker failed', job?.id, err);
   });
 
-  const shutdown = async () => {
-    console.log('Worker shutting down…');
+  async function shutdown() {
+    console.info('Worker shutting down…');
     await worker.close();
     await connection.quit();
     process.exit(0);
-  };
+  }
 
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
