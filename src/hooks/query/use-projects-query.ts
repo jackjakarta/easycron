@@ -1,11 +1,11 @@
-import { type ProjectWithJobs } from '@/db/functions/project';
+import { type ProjectModel } from '@/db/schema';
 import { betterFetch } from '@better-fetch/fetch';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
 export function useProjectsQuery(
-  options?: Omit<UseQueryOptions<ProjectWithJobs[]>, 'queryKey' | 'queryFn'>,
+  options?: Omit<UseQueryOptions<ProjectModel[]>, 'queryKey' | 'queryFn'>,
 ) {
-  return useQuery<ProjectWithJobs[]>({
+  return useQuery<ProjectModel[]>({
     queryKey: ['projects'],
     queryFn: fetchProjects,
     ...options,
@@ -13,7 +13,7 @@ export function useProjectsQuery(
 }
 
 async function fetchProjects() {
-  const { data: projects, error } = await betterFetch<ProjectWithJobs[]>('/api/projects', {
+  const { data: projects, error } = await betterFetch<ProjectModel[]>('/api/projects', {
     cache: 'no-store',
   });
 

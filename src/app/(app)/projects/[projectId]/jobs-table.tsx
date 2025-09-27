@@ -40,7 +40,10 @@ const httpMethodColors: Record<HttpMethod, string> = {
 
 function parseCronExpression(cron: string): string {
   const parts = cron.split(' ');
-  if (parts.length !== 5) return cron;
+
+  if (parts.length !== 5) {
+    return cron;
+  }
 
   // const [minute, hour, day, month, dayOfWeek] = parts;
 

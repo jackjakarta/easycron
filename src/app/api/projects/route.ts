@@ -1,11 +1,11 @@
 import { getUser } from '@/auth/utils';
-import { dbGetProjectsAndJobsByUserId } from '@/db/functions/project';
+import { dbGetProjects } from '@/db/functions/project';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
     const user = await getUser();
-    const projects = await dbGetProjectsAndJobsByUserId({ userId: user.id });
+    const projects = await dbGetProjects({ userId: user.id });
 
     return NextResponse.json(projects, { status: 200 });
   } catch (error) {
