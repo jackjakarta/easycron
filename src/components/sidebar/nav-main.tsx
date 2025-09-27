@@ -12,15 +12,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import {
-  BookOpen,
-  Bot,
-  ChevronRight,
-  LifeBuoy,
-  Send,
-  Settings2,
-  SquareTerminal,
-} from 'lucide-react';
+import { ChevronRight, LifeBuoy, Send, SquareTerminal } from 'lucide-react';
 import Link from 'next/link';
 
 const items = {

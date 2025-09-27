@@ -42,7 +42,7 @@ function parseCronExpression(cron: string): string {
   const parts = cron.split(' ');
   if (parts.length !== 5) return cron;
 
-  const [minute, hour, day, month, dayOfWeek] = parts;
+  // const [minute, hour, day, month, dayOfWeek] = parts;
 
   if (cron === '0 2 * * *') return 'Daily at 2:00 AM';
   if (cron === '0 9 * * 1') return 'Weekly on Monday at 9:00 AM';
