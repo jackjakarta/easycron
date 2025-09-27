@@ -1,5 +1,5 @@
 {
-  "id": "83e8e855-41ef-4d20-9bc4-678d79f1b0c5",
+  "id": "e4f8c1ce-61ae-44ba-9588-45c15a143585",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -154,7 +154,7 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "execution_status",
           "primaryKey": false,
           "notNull": true
         },
@@ -254,12 +254,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -304,7 +298,7 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true,
-          "default": "'[]'"
+          "default": "'[]'::jsonb"
         },
         "body": {
           "name": "body",
@@ -372,6 +366,18 @@
           "notNull": true,
           "default": 0
         },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -388,8 +394,8 @@
         }
       },
       "indexes": {
-        "jobs_project_id_idx": {
-          "name": "jobs_project_id_idx",
+        "jobs_project_id_user_id_next_run_at_idx": {
+          "name": "jobs_project_id_user_id_next_run_at_idx",
           "columns": [
             {
               "expression": "next_run_at",
@@ -399,6 +405,33 @@
             },
             {
               "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "jobs_project_id_user_id_idx": {
+          "name": "jobs_project_id_user_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -417,6 +450,16 @@
           "tableTo": "project",
           "schemaTo": "app",
           "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "job_user_id_user_entity_id_fk": {
+          "name": "job_user_id_user_entity_id_fk",
+          "tableFrom": "job",
+          "tableTo": "user_entity",
+          "schemaTo": "app",
+          "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -830,6 +873,11 @@
     }
   },
   "enums": {
+    "app.execution_status": {
+      "name": "execution_status",
+      "schema": "app",
+      "values": ["succeeded", "failed", "timed_out", "skipped"]
+    },
     "app.http_method": {
       "name": "http_method",
       "schema": "app",

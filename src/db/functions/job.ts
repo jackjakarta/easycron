@@ -1,22 +1,55 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { db } from '..';
-import { executionTable, jobTable, type UpdateJobModel } from '../schema';
+import { executionTable, jobTable, type JobModel, type UpdateJobModel } from '../schema';
 
-export async function dbUpdateJob({ jobId, data }: { jobId: string; data: UpdateJobModel }) {
+export async function dbGetJobById({
+  jobId,
+  userId,
+}: {
+  jobId: string;
+  userId: string;
+}): Promise<JobModel | undefined> {
+  const [job] = await db
+    .select()
+    .from(jobTable)
+    .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)));
+
+  return job;
+}
+
+export async function dbUpdateJob({
+  jobId,
+  userId,
+  data,
+}: {
+  jobId: string;
+  userId: string;
+  data: UpdateJobModel;
+}): Promise<JobModel | undefined> {
   const [updatedJob] = await db
     .update(jobTable)
     .set(data)
-    .where(eq(jobTable.id, jobId))
+    .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)))
     .returning();
 
   return updatedJob;
 }
 
-export async function dbDeleteJob({ jobId }: { jobId: string }) {
+export async function dbDeleteJob({
+  jobId,
+  userId,
+}: {
+  jobId: string;
+  userId: string;
+}): Promise<JobModel | undefined> {
   const deleted = await db.transaction(async (tx) => {
     await tx.delete(executionTable).where(eq(executionTable.jobId, jobId));
-    const [deleted] = await tx.delete(jobTable).where(eq(jobTable.id, jobId)).returning();
+
+    const [deleted] = await tx
+      .delete(jobTable)
+      .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)))
+      .returning();
 
     return deleted;
   });

@@ -2,12 +2,11 @@ import { randomUUID } from 'crypto';
 
 import { executeHttp } from '@/core/http';
 import { db } from '@/db';
-import { executionTable, jobTable, secretTable } from '@/db/schema';
+import { dbUpdateJob } from '@/db/functions/job';
+import { executionTable, jobTable, secretTable, type ExecutionStatus } from '@/db/schema';
 import { connection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
 import { Job, Worker } from 'bullmq';
 import { eq } from 'drizzle-orm';
-
-type Status = 'succeeded' | 'failed' | 'timed_out';
 
 const RUN_DEFAULT_TIMEOUT_MS = 3214;
 const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
@@ -43,7 +42,7 @@ async function runOnce(bull: Job<RunJobPayload>) {
 
   let attempt = 0;
   let lastError: any = null;
-  let finalStatus: Status = 'failed';
+  let finalStatus: ExecutionStatus = 'failed';
   let httpStatus: number | null = null;
   let latencyMs: number | null = null;
   let responsePreview = '';
@@ -119,10 +118,14 @@ async function runOnce(bull: Job<RunJobPayload>) {
   const consecutiveFailures =
     finalStatus === 'succeeded' ? 0 : (jobRow.consecutiveFailures ?? 0) + 1;
 
-  await db
-    .update(jobTable)
-    .set({ consecutiveFailures, lastRunAt: finishedAt, updatedAt: finishedAt })
-    .where(eq(jobTable.id, jobRow.id));
+  await dbUpdateJob({
+    jobId: jobRow.id,
+    userId: jobRow.userId,
+    data: {
+      consecutiveFailures,
+      lastRunAt: finishedAt,
+    },
+  });
 
   // Optional: emit alert when threshold reached (N consecutive failures).
   // (Do in a separate "alerter" job or here inline if N is small.)
@@ -146,9 +149,11 @@ async function main() {
   worker.on('active', (job) => {
     console.info('active', job.id);
   });
+
   worker.on('completed', (job) => {
     console.info('completed', job.id);
   });
+
   worker.on('failed', (job, err) => {
     console.error('worker failed', job?.id, err);
   });

@@ -3,6 +3,7 @@ import { createClient } from 'redis';
 
 const client = createClient({ url: env.redisUrl });
 let connected = false;
+
 export async function redis() {
   if (!connected) {
     await client.connect();

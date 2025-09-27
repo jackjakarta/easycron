@@ -1,15 +1,16 @@
 import crypto from 'crypto';
 
+import { JobRequestHeaders } from '@/db/schema';
 import { request } from 'undici';
 
 export type OutboundRequest = {
   method: string;
   url: string;
-  headers: Array<{ k: string; v: string }>;
+  headers: JobRequestHeaders[];
   body?: string | null;
   timeoutMs: number;
   runId: string; // UUID for idempotency header
-  hmacSecret?: string | null; // optional
+  hmacSecret?: string | null;
 };
 
 export type OutboundResponse = {
@@ -24,9 +25,11 @@ const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 
 export async function executeHttp(req: OutboundRequest): Promise<OutboundResponse> {
   const start = Date.now();
-
   const headers: Record<string, string> = {};
-  for (const { k, v } of req.headers ?? []) headers[k] = v;
+
+  for (const { k, v } of req.headers ?? []) {
+    if (k && v) headers[k] = v;
+  }
 
   headers['X-Easycron-Run-Id'] = req.runId;
 
@@ -35,6 +38,7 @@ export async function executeHttp(req: OutboundRequest): Promise<OutboundRespons
       .createHmac('sha256', req.hmacSecret)
       .update(req.body ?? '')
       .digest('hex');
+
     headers['X-Easycron-Signature'] = `sha256=${sig}`;
   }
 

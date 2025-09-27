@@ -5,18 +5,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { LifeBuoy, Send } from 'lucide-react';
+
+import GithubIcon from '../icons/github';
 
 const items = [
   {
-    title: 'Support',
-    url: '#',
-    icon: LifeBuoy,
-  },
-  {
-    title: 'Feedback',
-    url: '#',
-    icon: Send,
+    title: 'Github',
+    url: 'https://github.com/jackjakarta/easycron',
+    icon: GithubIcon,
   },
 ];
 
