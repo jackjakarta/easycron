@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Trash2 } from 'lucide-react';
+import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
@@ -82,7 +82,14 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
             <Clock className="h-5 w-5" />
             Scheduled Jobs ({cronJobs.length})
           </div>
-          <CreateJobDialog trigger={<Button>Create Job</Button>} />
+          <CreateJobDialog
+            trigger={
+              <Button>
+                Create Job
+                <Plus className="size-4" />
+              </Button>
+            }
+          />
         </CardTitle>
       </CardHeader>
       <CardContent>

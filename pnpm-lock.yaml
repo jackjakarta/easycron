@@ -135,8 +135,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1
       '@jackjakarta/prettier-config':
-        specifier: 0.2.7
-        version: 0.2.7(prettier@3.6.2)
+        specifier: 0.2.8
+        version: 0.2.8(prettier@3.6.2)
       '@react-email/preview-server':
         specifier: 4.2.11
         version: 4.2.11(postcss@8.5.6)
@@ -1827,10 +1827,10 @@ packages:
       }
     engines: { node: '>=12' }
 
-  '@jackjakarta/prettier-config@0.2.7':
+  '@jackjakarta/prettier-config@0.2.8':
     resolution:
       {
-        integrity: sha512-R+KxyT7q5YovHa3Pw3OCU2pA7IPFlvfUmQJWSziH+xKtIgUc/8lBlrnPtm+G7NoLLDdCXG4xNYOoBh3DVswU4w==,
+        integrity: sha512-XqLpPF/Ery2YuIl8Pp8Un1/S+sf9E5LcD48PA6UV50ZP8pATPM9XvifaqxZ4IrvTUVJIWQnj6rgmt2w1nMF53Q==,
       }
     engines: { node: '>=18', pnpm: '>=8' }
     peerDependencies:
@@ -9901,7 +9901,7 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
-  '@jackjakarta/prettier-config@0.2.7(prettier@3.6.2)':
+  '@jackjakarta/prettier-config@0.2.8(prettier@3.6.2)':
     dependencies:
       '@ianvs/prettier-plugin-sort-imports': 4.4.2(prettier@3.6.2)
       prettier: 3.6.2

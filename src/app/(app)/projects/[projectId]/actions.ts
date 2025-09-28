@@ -4,6 +4,8 @@ import { getUser } from '@/auth/utils';
 import { dbDeleteJob, dbGetJobById, dbUpdateJob } from '@/db/functions/job';
 import { getRunQueue } from '@/queue/queue';
 
+import { type EditJobFormData } from './schemas';
+
 export async function runJobNowAction({ jobId }: { jobId: string }) {
   const user = await getUser();
   const job = await dbGetJobById({ jobId, userId: user.id });
@@ -54,6 +56,17 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
   }
 
   return deletedJob;
+}
+
+export async function updateJobAction({ jobId, data }: { jobId: string; data: EditJobFormData }) {
+  const user = await getUser();
+  const updatedJob = await dbUpdateJob({ jobId, userId: user.id, data });
+
+  if (updatedJob === undefined) {
+    throw new Error('Failed to update job');
+  }
+
+  return updatedJob;
 }
 
 function occurrenceJobId(jobId: string, scheduledISO: string) {
