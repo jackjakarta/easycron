@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/auth/types';
 import {
   boolean,
   index,
@@ -58,7 +59,7 @@ export const accountTable = appSchema.table('account', {
     .notNull()
     .references(() => userTable.id),
   accountId: text('account_id').notNull(),
-  providerId: text('provider_id').notNull(),
+  providerId: text('provider_id').$type<AuthProvider>().notNull(),
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),

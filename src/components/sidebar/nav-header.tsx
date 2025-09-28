@@ -1,7 +1,7 @@
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
 
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger } from '../ui/sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
 
 export default function NavHeader() {
   return (
@@ -18,7 +18,6 @@ export default function NavHeader() {
             </div>
           </Link>
         </SidebarMenuButton>
-        <SidebarTrigger />
       </SidebarMenuItem>
     </SidebarMenu>
   );

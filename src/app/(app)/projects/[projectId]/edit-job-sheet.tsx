@@ -72,8 +72,6 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
       body,
     };
 
-    console.debug({ cleanedData });
-
     try {
       await updateJobAction({ jobId: job.id, data: cleanedData });
       toast.success('Job updated successfully');

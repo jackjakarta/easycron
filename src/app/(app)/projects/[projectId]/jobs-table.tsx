@@ -35,7 +35,6 @@ type CronJobsTableProps = {
 
 export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
   const router = useRouter();
-
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
   async function handleEnableOrDisableJob(jobId: string, enabled: boolean) {
@@ -225,9 +224,9 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                           trigger={
                             <DropdownMenuItem
                               onSelect={(e) => e.preventDefault()}
-                              className="text-destructive"
+                              className="text-destructive focus:text-destructive"
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 className="text-destructive mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
                           }
@@ -253,6 +252,12 @@ function parseCronExpression(cron: string): string {
   }
 
   switch (cron) {
+    case '* * * * *':
+      return 'Every minute';
+    case '*/10 * * * *':
+      return 'Every 10 minutes';
+    case '0 * * * *':
+      return 'Hourly at minute 0';
     case '0 2 * * *':
       return 'Daily at 2:00 AM';
     case '0 9 * * 1':

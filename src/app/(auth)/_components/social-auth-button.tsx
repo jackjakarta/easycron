@@ -19,9 +19,7 @@ export default function SocialAuthButton({ provider, onError, ...props }: Social
     const { error } = await authClient.signIn.social({ provider });
 
     if (error !== null) {
-      console.error({ error });
       onError?.();
-
       return;
     }
 
@@ -36,12 +34,12 @@ export default function SocialAuthButton({ provider, onError, ...props }: Social
   );
 }
 
-function getIconByLoginProvider(provider: SocialProvider) {
+function getIconByLoginProvider(provider: SocialProvider, className: string = 'size-4') {
   switch (provider) {
     case 'google':
-      return <GoogleIcon className="size-4" />;
+      return <GoogleIcon className={className} />;
     case 'github':
-      return <GithubIcon className="size-4" />;
+      return <GithubIcon className={className} />;
     default:
       return null;
   }
