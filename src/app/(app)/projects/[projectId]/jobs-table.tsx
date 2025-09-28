@@ -74,13 +74,16 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
     }
   }
 
+  const sortedJobs = cronJobs.sort((a, b) => Number(b.enabled) - Number(a.enabled));
+  const enabledJobs = sortedJobs.filter((job) => job.enabled);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Scheduled Jobs ({cronJobs.length})
+            Enabled Jobs ({enabledJobs.length})
           </div>
           <CreateJobDialog
             trigger={
@@ -205,11 +208,13 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                             </>
                           )}
                         </DropdownMenuItem>
-                        {/* TODO: Implement "Run Now" functionality */}
-                        <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
-                          <Play className="mr-2 h-4 w-4" />
-                          Run Now
-                        </DropdownMenuItem>
+
+                        {job.enabled && (
+                          <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
+                            <Play className="mr-2 h-4 w-4" />
+                            Run Now
+                          </DropdownMenuItem>
+                        )}
 
                         <ConfirmationDialog
                           title="Delete Job"
@@ -219,8 +224,8 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                           isLoading={deletingJobId === job.id}
                           trigger={
                             <DropdownMenuItem
-                              className="text-destructive"
                               onSelect={(e) => e.preventDefault()}
+                              className="text-destructive"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete

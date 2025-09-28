@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const editJobFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be at most 100 characters'),
   url: z.string().url('Invalid URL').max(2000, 'URL must be at most 2000 characters'),
-  method: z.enum(['GET', 'POST']).optional(),
+  httpMethod: z.enum(['GET', 'POST']).optional(),
   cronExpression: z
     .string()
     .min(1, 'Cron expression is required')

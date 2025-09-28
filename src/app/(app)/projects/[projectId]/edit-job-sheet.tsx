@@ -50,7 +50,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
     defaultValues: {
       name: job.name,
       url: job.url,
-      method: job.httpMethod,
+      httpMethod: job.httpMethod,
       cronExpression: job.scheduleCron,
       timezone: job.timezone,
       headers: job.headers,
@@ -71,6 +71,8 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
       ...data,
       body,
     };
+
+    console.debug({ cleanedData });
 
     try {
       await updateJobAction({ jobId: job.id, data: cleanedData });
@@ -118,13 +120,13 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="method">HTTP Method</Label>
+              <Label htmlFor="httpMethod">HTTP Method</Label>
               <Controller
-                name="method"
+                name="httpMethod"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className={errors.method ? 'border-red-500' : ''}>
+                    <SelectTrigger className={errors.httpMethod ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
@@ -134,7 +136,9 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                   </Select>
                 )}
               />
-              {errors.method && <p className="text-sm text-red-500">{errors.method.message}</p>}
+              {errors.httpMethod && (
+                <p className="text-sm text-red-500">{errors.httpMethod.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
