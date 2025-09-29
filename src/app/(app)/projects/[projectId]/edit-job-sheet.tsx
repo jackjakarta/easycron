@@ -30,7 +30,7 @@ import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { updateJobAction } from './actions';
-import { editJobFormSchema, type EditJobFormData } from './schemas';
+import { jobFormSchema, type JobFormData } from './schemas';
 
 type EditJobDialogProps = {
   job: JobModel;
@@ -45,8 +45,8 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
     control,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<EditJobFormData>({
-    resolver: zodResolver(editJobFormSchema),
+  } = useForm<JobFormData>({
+    resolver: zodResolver(jobFormSchema),
     defaultValues: {
       name: job.name,
       url: job.url,
@@ -63,7 +63,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
     name: 'headers',
   });
 
-  async function onSubmit(data: EditJobFormData) {
+  async function onSubmit(data: JobFormData) {
     const { body: _body } = data;
     const body = _body?.trim().length === 0 ? null : _body;
 

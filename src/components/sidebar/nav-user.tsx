@@ -17,8 +17,14 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { type UserModel } from '@/db/schema';
-import { BadgeCheck, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+
+const MENU_ITEMS = [
+  { label: 'Account', icon: BadgeCheck, href: '/settings/account' },
+  { label: 'Billing', icon: CreditCard, href: '/settings/billing' },
+  { label: 'Developers', icon: Code, href: '/developers' },
+];
 
 export default function NavUser({ user }: { user: UserModel }) {
   const { isMobile } = useSidebar();
@@ -70,18 +76,14 @@ export default function NavUser({ user }: { user: UserModel }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/account">
-                  <BadgeCheck />
-                  Account
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings/billing">
-                  <CreditCard />
-                  Billing
-                </Link>
-              </DropdownMenuItem>
+              {MENU_ITEMS.map((item) => (
+                <DropdownMenuItem asChild key={item.href}>
+                  <Link href={item.href}>
+                    <item.icon />
+                    {item.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

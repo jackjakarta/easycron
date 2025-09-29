@@ -52,7 +52,7 @@ export default async function Page(context: PageContext) {
         </Breadcrumb>
       </Header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <CronJobsTable cronJobs={project.jobs} />
+        <CronJobsTable cronJobs={project.jobs} projectId={project.id} />
       </div>
     </>
   );

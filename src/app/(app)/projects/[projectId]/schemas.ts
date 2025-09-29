@@ -1,20 +1,18 @@
 import { z } from 'zod';
 
-export const editJobFormSchema = z.object({
+export const jobFormSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name must be at most 100 characters'),
-  url: z.string().url('Invalid URL').max(2000, 'URL must be at most 2000 characters'),
-  httpMethod: z.enum(['GET', 'POST']).optional(),
-  cronExpression: z
+  url: z.url('Invalid URL').max(2000, 'URL must be at most 2000 characters'),
+  httpMethod: z.enum(['GET', 'POST']),
+  scheduleCron: z
     .string()
     .min(1, 'Cron expression is required')
-    .max(100, 'Cron expression must be at most 100 characters')
-    .optional(),
+    .max(100, 'Cron expression must be at most 100 characters'),
   timezone: z
     .string()
     .min(1, 'Timezone is required')
-    .max(100, 'Timezone must be at most 100 characters')
-    .optional(),
-  body: z.string().max(5000, 'Body must be at most 5000 characters').optional().nullable(),
+    .max(100, 'Timezone must be at most 100 characters'),
+  body: z.string().max(5000, 'Body must be at most 5000 characters').nullable(),
   headers: z.array(
     z.object({
       k: z
@@ -26,4 +24,4 @@ export const editJobFormSchema = z.object({
   ),
 });
 
-export type EditJobFormData = z.infer<typeof editJobFormSchema>;
+export type JobFormData = z.infer<typeof jobFormSchema>;

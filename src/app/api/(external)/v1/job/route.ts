@@ -1,9 +1,8 @@
+import { verifyApiKey } from '@/app/api/utils';
 import { dbInsertJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
-import { verifyApiKey } from '../../utils';
 
 const requestBodySchema = z
   .object({
@@ -19,6 +18,7 @@ const requestBodySchema = z
       .min(1, 'Timezone is required')
       .max(100, 'Timezone must be at most 100 characters'),
     body: z.string().max(5000, 'Body must be at most 5000 characters').optional(),
+    enabled: z.boolean().optional(),
     projectId: z.uuid(),
     headers: z.array(
       z.object({
@@ -85,7 +85,6 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       projectId: project.id,
       nextRunAt: new Date(),
-      enabled: false,
     });
 
     return NextResponse.json({ success: true, data: job }, { status: 201 });

@@ -1,10 +1,10 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { dbDeleteJob, dbGetJobById, dbUpdateJob } from '@/db/functions/job';
+import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
 import { getRunQueue } from '@/queue/queue';
 
-import { type EditJobFormData } from './schemas';
+import { type JobFormData } from './schemas';
 
 export async function runJobNowAction({ jobId }: { jobId: string }) {
   const user = await getUser();
@@ -28,6 +28,28 @@ export async function runJobNowAction({ jobId }: { jobId: string }) {
   });
 
   return;
+}
+
+export async function createJobAction({
+  data,
+  projectId,
+}: {
+  data: JobFormData;
+  projectId: string;
+}) {
+  const user = await getUser();
+  const newJob = await dbInsertJob({
+    ...data,
+    projectId,
+    userId: user.id,
+    nextRunAt: new Date(),
+  });
+
+  if (newJob === undefined) {
+    throw new Error('Failed to create job');
+  }
+
+  return newJob;
 }
 
 export async function enableOrDisableJobAction({
@@ -58,7 +80,7 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
   return deletedJob;
 }
 
-export async function updateJobAction({ jobId, data }: { jobId: string; data: EditJobFormData }) {
+export async function updateJobAction({ jobId, data }: { jobId: string; data: JobFormData }) {
   const user = await getUser();
   const updatedJob = await dbUpdateJob({ jobId, userId: user.id, data });
 

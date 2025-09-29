@@ -31,9 +31,10 @@ import EditJobSheet from './edit-job-sheet';
 
 type CronJobsTableProps = {
   cronJobs: JobModel[];
+  projectId: string;
 };
 
-export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
+export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
   const router = useRouter();
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
@@ -85,6 +86,7 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
             Enabled Jobs ({enabledJobs.length})
           </div>
           <CreateJobDialog
+            projectId={projectId}
             trigger={
               <Button>
                 Create Job

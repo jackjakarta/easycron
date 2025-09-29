@@ -23,7 +23,7 @@ export async function dbGetFinishedExecutionsByJobId({
     const executions = await tx
       .select()
       .from(executionTable)
-      .where(and(eq(executionTable.jobId, jobId), isNotNull(executionTable.finishedAt)))
+      .where(and(eq(executionTable.jobId, job.id), isNotNull(executionTable.finishedAt)))
       .orderBy(desc(executionTable.finishedAt));
 
     return executions;

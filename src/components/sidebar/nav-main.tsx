@@ -1,6 +1,5 @@
 'use client';
 
-import CreateJobDialog from '@/app/(app)/projects/[projectId]/create-job-dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
@@ -25,16 +24,6 @@ export default function NavMain() {
     <SidebarGroup>
       <SidebarMenu>
         <SidebarMenuItem>
-          <CreateJobDialog
-            trigger={
-              <SidebarMenuButton tooltip="New Job" className="cursor-pointer">
-                <Plus />
-                <span>New Job</span>
-              </SidebarMenuButton>
-            }
-          />
-        </SidebarMenuItem>
-        <SidebarMenuItem>
           <SidebarMenuButton tooltip="New Job" className="cursor-pointer">
             <FolderPlus />
             <span>New Project</span>
@@ -44,9 +33,11 @@ export default function NavMain() {
         <SidebarGroupLabel className="mt-2">Latest</SidebarGroupLabel>
         <Collapsible key="projects" defaultOpen={true} asChild>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Projects">
-              <Clock />
-              <span>Projects</span>
+            <SidebarMenuButton asChild tooltip="Projects">
+              <Link href="/projects">
+                <Clock />
+                <span>Projects</span>
+              </Link>
             </SidebarMenuButton>
 
             {isLoading &&

@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -10,12 +11,67 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/utils/tailwind';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+
+import { createJobAction } from './actions';
+import { jobFormSchema, type JobFormData } from './schemas';
 
 type CreateJobDialogProps = {
   trigger: React.ReactNode;
+  projectId: string;
 };
 
-export default function CreateJobDialog({ trigger }: CreateJobDialogProps) {
+export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogProps) {
+  const router = useRouter();
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<JobFormData>({
+    resolver: zodResolver(jobFormSchema),
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'headers',
+  });
+
+  async function onSubmit(data: JobFormData) {
+    const { body: _body } = data;
+    const body = _body?.trim().length === 0 ? null : _body;
+
+    const cleanedData = {
+      ...data,
+      body,
+    };
+
+    try {
+      await createJobAction({ data: cleanedData, projectId });
+      toast.success('Job created successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Failed to update job:', error);
+      toast.error('Failed to update job');
+    }
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -24,10 +80,165 @@ export default function CreateJobDialog({ trigger }: CreateJobDialogProps) {
           <DialogTitle>Create Job</DialogTitle>
           <DialogDescription>Create a new job with the details below.</DialogDescription>
         </DialogHeader>
-        CONTENT HERE
-        <DialogFooter>
-          <DialogClose>Cancel</DialogClose>
-        </DialogFooter>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
+          <div className="space-y-6 px-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Job Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter job name"
+                {...register('name')}
+                className={cn(errors.name && 'border-red-500')}
+              />
+              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="url">URL</Label>
+              <Input
+                id="url"
+                type="url"
+                placeholder="https://example.com/api/endpoint"
+                {...register('url')}
+                className={cn(errors.url && 'border-red-500')}
+              />
+              {errors.url && <p className="text-sm text-red-500">{errors.url.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="httpMethod">HTTP Method</Label>
+              <Controller
+                name="httpMethod"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger className={errors.httpMethod ? 'border-red-500' : ''}>
+                      <SelectValue placeholder="Select HTTP method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GET">GET</SelectItem>
+                      <SelectItem value="POST">POST</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.httpMethod && (
+                <p className="text-sm text-red-500">{errors.httpMethod.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="scheduleCron">Cron Expression</Label>
+              <Input
+                id="scheduleCron"
+                placeholder="0 0 * * *"
+                {...register('scheduleCron')}
+                className={cn(errors.scheduleCron && 'border-red-500')}
+              />
+              {errors.scheduleCron && (
+                <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Example: "0 0 * * *" runs daily at midnight
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Timezone</Label>
+              <Input
+                id="timezone"
+                placeholder="UTC"
+                {...register('timezone')}
+                className={cn(errors.timezone && 'border-red-500')}
+              />
+              {errors.timezone && <p className="text-sm text-red-500">{errors.timezone.message}</p>}
+              <p className="text-muted-foreground text-xs">
+                Example: UTC, America/New_York, Europe/London
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Request Headers (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ k: '', v: '' })}
+                  className="h-8 px-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Header
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center space-x-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Header name (e.g., Content-Type)"
+                        {...register(`headers.${index}.k`)}
+                        className={cn(errors.headers?.[index]?.k && 'border-red-500')}
+                      />
+                      {errors.headers?.[index]?.k && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.headers[index]?.k?.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Header value (e.g., application/json)"
+                        {...register(`headers.${index}.v`)}
+                        className={cn(errors.headers?.[index]?.v && 'border-red-500')}
+                      />
+                      {errors.headers?.[index]?.v && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.headers[index]?.v?.message}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="h-9 w-9 flex-shrink-0 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {fields.length === 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    No headers added. Click "Add Header" to include custom request headers.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="body">Request Body (Optional)</Label>
+              <Textarea
+                id="body"
+                placeholder="JSON payload for POST/PUT requests"
+                rows={4}
+                {...register('body')}
+                className={cn(errors.body && 'border-red-500')}
+              />
+              {errors.body && <p className="text-sm text-red-500">{errors.body.message}</p>}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save changes'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
