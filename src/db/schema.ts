@@ -279,7 +279,7 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
     .notNull()
