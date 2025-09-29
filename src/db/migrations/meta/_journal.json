@@ -15,6 +15,13 @@
       "when": 1759108137204,
       "tag": "0001_sudden_pyro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759182734831,
+      "tag": "0002_curved_yellow_claw",
+      "breakpoints": true
     }
   ]
 }
