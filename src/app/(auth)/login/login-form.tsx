@@ -1,12 +1,19 @@
 'use client';
 
 import { authClient } from '@/auth/client';
+import { socialProviderSchema } from '@/auth/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+
+import SocialAuthButton from '../_components/social-auth-button';
 
 const loginFormSchema = z.object({
   email: z.email('Invalid email address'),
@@ -17,6 +24,7 @@ type LoginFormData = z.infer<typeof loginFormSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+  const [socialError, setSocialError] = React.useState<string | null>(null);
 
   const {
     register,
@@ -52,7 +60,7 @@ export default function LoginForm() {
         },
         onError(context) {
           console.error('Login error:', context.error);
-          setError('root', { type: 'server', message: context.error.message });
+          setError('root', { type: 'manual', message: context.error.message });
         },
       },
     );
@@ -60,52 +68,93 @@ export default function LoginForm() {
 
   const emailValue = watch('email');
   const passwordValue = watch('password');
-  const buttonDisabled = isSubmitting || isSubmitSuccessful || !emailValue || !passwordValue;
+  const buttonDisabled =
+    isSubmitting || isSubmitSuccessful || emailValue.length === 0 || passwordValue.length === 0;
 
   return (
-    <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-gray-700">
-            Email address
-          </label>
-          <input
-            id="email"
-            type="text"
-            {...register('email')}
-            placeholder="m@example.com"
-            className="w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="mb-1 block text-gray-700">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            {...register('password')}
-            placeholder="********"
-            className="w-full rounded-lg border px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-          {errors.password && <div>{errors.password.message}</div>}
-          {errors.root && <div>{errors.root.message}</div>}
-        </div>
+    <div className="flex flex-col gap-6">
+      <Card className="z-10 overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col items-center text-center">
+                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <p className="text-muted-foreground text-balance">Login to your easyCron account</p>
+              </div>
+              <div className="grid gap-3">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" placeholder="m@example.com" {...register('email')} />
+                {errors.email && (
+                  <span className="text-destructive text-sm">{errors.email.message}</span>
+                )}
+              </div>
+              <div className="grid gap-3">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <Link href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
+                    Forgot your password?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="********"
+                  {...register('password')}
+                />
+                {errors.root && (
+                  <span className="text-destructive text-sm">{errors.root.message}</span>
+                )}
+              </div>
+              <Button type="submit" disabled={buttonDisabled} className="w-full">
+                {isSubmitting || isSubmitSuccessful ? 'Logging in...' : 'Login'}
+              </Button>
+              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                <span className="bg-card text-muted-foreground relative z-10 px-2">
+                  Or continue with
+                </span>
+              </div>
 
-        <button
-          type="submit"
-          disabled={buttonDisabled}
-          className="w-full rounded-lg bg-blue-600 py-2 font-semibold text-white transition hover:bg-blue-700"
-        >
-          {isSubmitting || isSubmitSuccessful ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
-      <p className="mt-4 text-center text-sm text-gray-600">
-        No account ?{' '}
-        <Link href="/register" className="text-blue-600 hover:underline">
-          Register
-        </Link>
-      </p>
-    </>
+              <div className="flex flex-col gap-3">
+                {socialError !== null && (
+                  <div className="text-destructive bg-destructive/40 mb-4 rounded-lg px-4 py-2">
+                    {socialError}
+                  </div>
+                )}
+
+                {socialProviderSchema.options.map((provider) => (
+                  <SocialAuthButton
+                    key={provider}
+                    provider={provider}
+                    variant="outline"
+                    disabled={isSubmitting || isSubmitSuccessful}
+                    onError={() =>
+                      setSocialError('An error occurred during social login. Please try again.')
+                    }
+                  />
+                ))}
+              </div>
+
+              <div className="text-center text-sm">
+                Don&apos;t have an account?{' '}
+                <Link href="/register" className="underline underline-offset-4">
+                  Sign up
+                </Link>
+              </div>
+            </div>
+          </form>
+          <div className="bg-muted relative hidden md:block">
+            <img
+              src="https://teatrepcqcukbabkenqc.supabase.co/storage/v1/object/public/assets/ChatGPT%20Image%20Aug%2017,%202025,%2008_25_25%20PM.png"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+            />
+          </div>
+        </CardContent>
+      </Card>
+      <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
+        By clicking continue, you agree to our <Link href="#">Terms of Service</Link> and{' '}
+        <Link href="#">Privacy Policy</Link>.
+      </div>
+    </div>
   );
 }

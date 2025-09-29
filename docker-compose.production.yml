@@ -1,0 +1,68 @@
+services:
+  traefik:
+    image: traefik:v2.9
+    command:
+      - --api.insecure=false
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=al.termure@gmail.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    networks: [edge]
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-lets-encrypt:/letsencrypt
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  web:
+    image: jackjakarta/easycron:${TAG_VERSION}
+    networks: [edge]
+    deploy:
+      replicas: 3
+      placement:
+        preferences:
+          - spread: node.hostname
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 20s
+        max_failure_ratio: 0.2
+      rollback_config:
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=easycron_edge
+        - traefik.http.routers.easycron.rule=Host(`easycron.xyz`)
+        - traefik.http.routers.easycron.entrypoints=websecure
+        - traefik.http.routers.easycron.tls=true
+        - traefik.http.routers.easycron.tls.certresolver=myresolver
+        - traefik.http.services.easycron.loadbalancer.server.port=3000
+
+networks:
+  edge:
+    driver: overlay
+
+volumes:
+  traefik-lets-encrypt:

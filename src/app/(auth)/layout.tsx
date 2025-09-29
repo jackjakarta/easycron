@@ -1,11 +1,8 @@
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Auth Route</h1>
-        <p className="text-gray-500">Part of auth routes</p>
-        {children}
-      </div>
+    <div className="bg-muted relative flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+      <div className="bg-background absolute inset-0 z-0" />
+      <div className="w-full max-w-sm md:max-w-3xl">{children}</div>
     </div>
   );
 }

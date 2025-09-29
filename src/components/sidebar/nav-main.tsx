@@ -3,6 +3,7 @@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -13,7 +14,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useProjectsQuery } from '@/hooks/query/use-projects-query';
-import { ChevronRight, Clock } from 'lucide-react';
+import { ChevronRight, Clock, FolderPlus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NavMain() {
@@ -21,14 +22,24 @@ export default function NavMain() {
 
   return (
     <SidebarGroup>
-      {/* <SidebarGroupLabel>App</SidebarGroupLabel> */}
       <SidebarMenu>
-        <Collapsible key={'projects'} asChild defaultOpen={true}>
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip="New Job" className="cursor-pointer">
+            <FolderPlus />
+            <span>New Project</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+
+        <SidebarGroupLabel className="mt-2">Latest</SidebarGroupLabel>
+        <Collapsible key="projects" defaultOpen={true} asChild>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Projects">
-              <Clock />
-              <span>Projects</span>
+            <SidebarMenuButton asChild tooltip="Projects">
+              <Link href="/projects">
+                <Clock />
+                <span>Projects</span>
+              </Link>
             </SidebarMenuButton>
+
             {isLoading &&
               Array.from({ length: 8 }).map((_, index) => <SidebarMenuSkeleton key={index} />)}
 

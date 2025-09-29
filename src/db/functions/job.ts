@@ -1,7 +1,13 @@
 import { and, eq } from 'drizzle-orm';
 
 import { db } from '..';
-import { executionTable, jobTable, type JobModel, type UpdateJobModel } from '../schema';
+import {
+  executionTable,
+  InsertJobModel,
+  jobTable,
+  type JobModel,
+  type UpdateJobModel,
+} from '../schema';
 
 export async function dbGetJobById({
   jobId,
@@ -55,4 +61,10 @@ export async function dbDeleteJob({
   });
 
   return deleted;
+}
+
+export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | undefined> {
+  const [insertedJob] = await db.insert(jobTable).values(data).returning();
+
+  return insertedJob;
 }

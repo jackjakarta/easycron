@@ -6,7 +6,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '../ui/sidebar';
 export default function NavHeader() {
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem className="flex items-center justify-between">
         <SidebarMenuButton size="lg" asChild>
           <Link href="/dashboard">
             <div className="bg-background text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">

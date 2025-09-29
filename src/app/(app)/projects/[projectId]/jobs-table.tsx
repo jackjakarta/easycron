@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Trash2 } from 'lucide-react';
+import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
@@ -31,11 +31,11 @@ import EditJobSheet from './edit-job-sheet';
 
 type CronJobsTableProps = {
   cronJobs: JobModel[];
+  projectId: string;
 };
 
-export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
+export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
   const router = useRouter();
-
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
   async function handleEnableOrDisableJob(jobId: string, enabled: boolean) {
@@ -74,15 +74,26 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
     }
   }
 
+  const sortedJobs = cronJobs.sort((a, b) => Number(b.enabled) - Number(a.enabled));
+  const enabledJobs = sortedJobs.filter((job) => job.enabled);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Scheduled Jobs ({cronJobs.length})
+            Enabled Jobs ({enabledJobs.length})
           </div>
-          <CreateJobDialog trigger={<Button>Create Job</Button>} />
+          <CreateJobDialog
+            projectId={projectId}
+            trigger={
+              <Button>
+                Create Job
+                <Plus className="size-4" />
+              </Button>
+            }
+          />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -198,11 +209,13 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                             </>
                           )}
                         </DropdownMenuItem>
-                        {/* TODO: Implement "Run Now" functionality */}
-                        <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
-                          <Play className="mr-2 h-4 w-4" />
-                          Run Now
-                        </DropdownMenuItem>
+
+                        {job.enabled && (
+                          <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
+                            <Play className="mr-2 h-4 w-4" />
+                            Run Now
+                          </DropdownMenuItem>
+                        )}
 
                         <ConfirmationDialog
                           title="Delete Job"
@@ -212,10 +225,10 @@ export function CronJobsTable({ cronJobs }: CronJobsTableProps) {
                           isLoading={deletingJobId === job.id}
                           trigger={
                             <DropdownMenuItem
-                              className="text-destructive"
                               onSelect={(e) => e.preventDefault()}
+                              className="text-destructive focus:text-destructive"
                             >
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash2 className="text-destructive mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
                           }
@@ -241,6 +254,12 @@ function parseCronExpression(cron: string): string {
   }
 
   switch (cron) {
+    case '* * * * *':
+      return 'Every minute';
+    case '*/10 * * * *':
+      return 'Every 10 minutes';
+    case '0 * * * *':
+      return 'Hourly at minute 0';
     case '0 2 * * *':
       return 'Daily at 2:00 AM';
     case '0 9 * * 1':

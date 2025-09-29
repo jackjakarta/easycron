@@ -23,27 +23,14 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { type JobModel } from '@/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Plus, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { z } from 'zod';
 
-const editJobSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100, 'Name must be at most 100 characters'),
-  url: z.string().url('Invalid URL').max(2000, 'URL must be at most 2000 characters'),
-  method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']),
-  cronExpression: z
-    .string()
-    .min(1, 'Cron expression is required')
-    .max(100, 'Cron expression must be at most 100 characters'),
-  timezone: z
-    .string()
-    .min(1, 'Timezone is required')
-    .max(100, 'Timezone must be at most 100 characters'),
-  body: z.string().max(5000, 'Body must be at most 5000 characters').optional(),
-});
-
-type EditJobFormData = z.infer<typeof editJobSchema>;
+import { updateJobAction } from './actions';
+import { jobFormSchema, type JobFormData } from './schemas';
 
 type EditJobDialogProps = {
   job: JobModel;
@@ -51,27 +38,44 @@ type EditJobDialogProps = {
 };
 
 export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
+  const router = useRouter();
+
   const {
     register,
     control,
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
-  } = useForm<EditJobFormData>({
-    resolver: zodResolver(editJobSchema),
+  } = useForm<JobFormData>({
+    resolver: zodResolver(jobFormSchema),
     defaultValues: {
       name: job.name,
       url: job.url,
-      method: job.httpMethod,
-      cronExpression: job.scheduleCron,
+      httpMethod: job.httpMethod,
+      scheduleCron: job.scheduleCron,
       timezone: job.timezone,
-      body: job.body || '',
+      headers: job.headers,
+      body: job.body ?? '',
     },
   });
 
-  async function onSubmit(data: EditJobFormData) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'headers',
+  });
+
+  async function onSubmit(data: JobFormData) {
+    const { body: _body } = data;
+    const body = _body?.trim().length === 0 ? null : _body;
+
+    const cleanedData = {
+      ...data,
+      body,
+    };
+
     try {
-      console.debug({ data });
+      await updateJobAction({ jobId: job.id, data: cleanedData });
       toast.success('Job updated successfully');
+      router.refresh();
     } catch (error) {
       console.error('Failed to update job:', error);
       toast.error('Failed to update job');
@@ -81,7 +85,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent>
+      <SheetContent className="overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Edit job</SheetTitle>
           <SheetDescription>
@@ -114,13 +118,13 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="method">HTTP Method</Label>
+              <Label htmlFor="httpMethod">HTTP Method</Label>
               <Controller
-                name="method"
+                name="httpMethod"
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className={errors.method ? 'border-red-500' : ''}>
+                    <SelectTrigger className={errors.httpMethod ? 'border-red-500' : ''}>
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
@@ -130,19 +134,21 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                   </Select>
                 )}
               />
-              {errors.method && <p className="text-sm text-red-500">{errors.method.message}</p>}
+              {errors.httpMethod && (
+                <p className="text-sm text-red-500">{errors.httpMethod.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="cronExpression">Cron Expression</Label>
               <Input
-                id="cronExpression"
+                id="scheduleCron"
                 placeholder="0 0 * * *"
-                {...register('cronExpression')}
-                className={errors.cronExpression ? 'border-red-500' : ''}
+                {...register('scheduleCron')}
+                className={errors.scheduleCron ? 'border-red-500' : ''}
               />
-              {errors.cronExpression && (
-                <p className="text-sm text-red-500">{errors.cronExpression.message}</p>
+              {errors.scheduleCron && (
+                <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
               )}
               <p className="text-muted-foreground text-xs">
                 Example: "0 0 * * *" runs daily at midnight
@@ -161,6 +167,66 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
               <p className="text-muted-foreground text-xs">
                 Example: UTC, America/New_York, Europe/London
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Request Headers (Optional)</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => append({ k: '', v: '' })}
+                  className="h-8 px-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Header
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex items-center space-x-2">
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Header name (e.g., Content-Type)"
+                        {...register(`headers.${index}.k`)}
+                        className={errors.headers?.[index]?.k ? 'border-red-500' : ''}
+                      />
+                      {errors.headers?.[index]?.k && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.headers[index]?.k?.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        placeholder="Header value (e.g., application/json)"
+                        {...register(`headers.${index}.v`)}
+                        className={errors.headers?.[index]?.v ? 'border-red-500' : ''}
+                      />
+                      {errors.headers?.[index]?.v && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.headers[index]?.v?.message}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="h-9 w-9 flex-shrink-0 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {fields.length === 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    No headers added. Click "Add Header" to include custom request headers.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">

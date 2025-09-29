@@ -1,10 +1,28 @@
+import Header from '@/components/common/header';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
+
 import ProjectsDisplay from './projects-display';
 
 export default function Page() {
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">Projects</h1>
-      <ProjectsDisplay />
-    </div>
+    <>
+      <Header>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Projects</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Header>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <ProjectsDisplay />
+      </div>
+    </>
   );
 }
