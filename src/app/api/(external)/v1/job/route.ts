@@ -38,19 +38,28 @@ export async function POST(req: NextRequest) {
     const parsedApiKey = z.string().safeParse(maybeApiKey);
 
     if (!parsedApiKey.success) {
-      return NextResponse.json({ error: 'Api key is required' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, errors: ['Api key is missing or not of type string'] },
+        { status: 401 },
+      );
     }
 
-    const result = await verifyApiKey({ key: parsedApiKey.data });
+    const apiKeyResult = await verifyApiKey({ key: parsedApiKey.data });
 
-    if (result.code === 401) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+    if (apiKeyResult.code === 401) {
+      return NextResponse.json(
+        { success: false, errors: [{ message: 'Invalid API key' }] },
+        { status: 401 },
+      );
     }
 
-    const { user } = result;
+    const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, errors: [{ message: 'User not found' }] },
+        { status: 404 },
+      );
     }
 
     const json = await req.json();
@@ -58,13 +67,16 @@ export async function POST(req: NextRequest) {
 
     if (!body.success) {
       console.error('Validation errors:', body.error.issues);
-      return NextResponse.json({ error: body.error.issues }, { status: 400 });
+      return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
     const project = await dbGetProjectById({ projectId: body.data.projectId, userId: user.id });
 
     if (project === undefined) {
-      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, errors: [{ message: 'Project not found or access denied' }] },
+        { status: 404 },
+      );
     }
 
     const parsedData = body.data;
@@ -73,11 +85,15 @@ export async function POST(req: NextRequest) {
       userId: user.id,
       projectId: project.id,
       nextRunAt: new Date(),
+      enabled: false,
     });
 
-    return NextResponse.json({ job }, { status: 201 });
+    return NextResponse.json({ success: true, data: job }, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/(external)/v1/job:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error({ error });
+    return NextResponse.json(
+      { success: false, errors: [{ message: 'Internal Server Error' }] },
+      { status: 500 },
+    );
   }
 }

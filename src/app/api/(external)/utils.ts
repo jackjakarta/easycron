@@ -1,14 +1,11 @@
 import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { dbGetUserById } from '@/db/functions/user';
-import { type UserModel } from '@/db/schema';
-import { unauthorized } from 'next/navigation';
-import { NextResponse } from 'next/server';
 
-export async function verifyApiKeyOrGetUser({ key }: { key: string | null }): Promise<UserModel> {
+export async function verifyApiKeyOrGetUser({ key }: { key: string | null }) {
   if (key === null) {
     const user = await getUser();
-    return user;
+    return { success: true, user, code: 200 };
   }
 
   const { error, key: verifiedApiKey } = await auth.api.verifyApiKey({
@@ -16,17 +13,14 @@ export async function verifyApiKeyOrGetUser({ key }: { key: string | null }): Pr
   });
 
   if (error !== null || verifiedApiKey === null) {
-    return unauthorized();
+    console.error('API Key verification error:', error);
+    return { success: false, error: error?.message, code: 401 };
   }
 
   const _user = { id: verifiedApiKey.userId };
   const user = await dbGetUserById({ userId: _user.id });
 
-  if (user === undefined) {
-    return unauthorized();
-  }
-
-  return user;
+  return { success: true, user, code: 200 };
 }
 
 export async function verifyApiKey({ key }: { key: string }) {
