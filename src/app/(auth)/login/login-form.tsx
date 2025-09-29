@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
@@ -24,6 +25,10 @@ type LoginFormData = z.infer<typeof loginFormSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
+
+  const t = useTranslations('auth.login');
+  const tCommon = useTranslations('common');
+
   const [socialError, setSocialError] = React.useState<string | null>(null);
 
   const {
@@ -68,8 +73,12 @@ export default function LoginForm() {
 
   const emailValue = watch('email');
   const passwordValue = watch('password');
+
   const buttonDisabled =
-    isSubmitting || isSubmitSuccessful || emailValue.length === 0 || passwordValue.length === 0;
+    isSubmitting ||
+    isSubmitSuccessful ||
+    emailValue.trim().length === 0 ||
+    passwordValue.trim().length === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -78,39 +87,43 @@ export default function LoginForm() {
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">Login to your easyCron account</p>
+                <h1 className="text-2xl font-bold">{t('title')}</h1>
+                <p className="text-muted-foreground text-balance">{t('description')}</p>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" placeholder="m@example.com" {...register('email')} />
+                <Label htmlFor="email">{t('form.email.label')}</Label>
+                <Input
+                  id="email"
+                  {...register('email')}
+                  placeholder={t('form.email.placeholder')}
+                />
                 {errors.email && (
                   <span className="text-destructive text-sm">{errors.email.message}</span>
                 )}
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('form.password.label')}</Label>
                   <Link href="#" className="ml-auto text-sm underline-offset-2 hover:underline">
-                    Forgot your password?
+                    {t('form.buttons.forgot-password')}
                   </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="********"
                   {...register('password')}
+                  placeholder={t('form.password.placeholder')}
                 />
                 {errors.root && (
                   <span className="text-destructive text-sm">{errors.root.message}</span>
                 )}
               </div>
               <Button type="submit" disabled={buttonDisabled} className="w-full">
-                {isSubmitting || isSubmitSuccessful ? 'Logging in...' : 'Login'}
+                {isSubmitting || isSubmitSuccessful ? 'Logging in...' : t('form.buttons.submit')}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
-                  Or continue with
+                  {tCommon('or')} {tCommon('continue')} {tCommon('with')}
                 </span>
               </div>
 
@@ -135,9 +148,9 @@ export default function LoginForm() {
               </div>
 
               <div className="text-center text-sm">
-                Don&apos;t have an account?{' '}
+                {t('form.buttons.no-account')}{' '}
                 <Link href="/register" className="underline underline-offset-4">
-                  Sign up
+                  {t('form.buttons.register')}
                 </Link>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { type SocialProvider } from '@/auth/types';
 import GithubIcon from '@/components/icons/github';
 import GoogleIcon from '@/components/icons/google';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
 type SocialLoginButtonProps = {
@@ -14,6 +15,7 @@ type SocialLoginButtonProps = {
 
 export default function SocialAuthButton({ provider, onError, ...props }: SocialLoginButtonProps) {
   const router = useRouter();
+  const t = useTranslations('auth.login.form.buttons');
 
   async function handleSocialLogin() {
     const { error } = await authClient.signIn.social({ provider });
@@ -29,7 +31,7 @@ export default function SocialAuthButton({ provider, onError, ...props }: Social
   return (
     <Button type="button" onClick={handleSocialLogin} {...props}>
       {getIconByLoginProvider(provider)}
-      Login with {getLoginProviderName(provider)}
+      {t('login-with')} {getLoginProviderName(provider)}
     </Button>
   );
 }

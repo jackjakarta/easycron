@@ -13,9 +13,15 @@ const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 const WORKER_CONCURRENCY = 20;
 
 async function fetchHmacSecret(keyId: string | null): Promise<string | null> {
-  if (!keyId) return null;
+  if (keyId === null) {
+    return null;
+  }
+
   const [row] = await db.select().from(secretTable).where(eq(secretTable.id, keyId));
-  if (!row) return null;
+
+  if (row === undefined) {
+    return null;
+  }
 
   // TODO: decrypt secret here if encrypted
   return row.value;
