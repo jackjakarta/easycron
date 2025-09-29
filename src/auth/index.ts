@@ -1,6 +1,7 @@
 import { db } from '@/db';
 import {
   accountTable,
+  apiKeyTable,
   sessionTable,
   twoFactorTable,
   userTable,
@@ -11,7 +12,7 @@ import { env } from '@/env';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
-import { haveIBeenPwned, twoFactor } from 'better-auth/plugins';
+import { apiKey, haveIBeenPwned, twoFactor } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   emailAndPassword: {
@@ -51,10 +52,11 @@ export const auth = betterAuth({
   },
   appName: 'easyCron',
   plugins: [
+    apiKey({ apiKeyHeaders: 'x-api-key' }),
+    twoFactor(),
     haveIBeenPwned({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',
     }),
-    twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
   database: drizzleAdapter(db, {
@@ -65,6 +67,7 @@ export const auth = betterAuth({
       account: accountTable,
       verification: verificationTable,
       twoFactor: twoFactorTable,
+      apikey: apiKeyTable,
     },
   }),
   user: {

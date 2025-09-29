@@ -111,6 +111,38 @@ export type TwoFactorModel = typeof twoFactorTable.$inferSelect;
 export type InsertTwoFactorModel = typeof twoFactorTable.$inferInsert;
 export type UpdateTwoFactorModel = UpdateDbRow<TwoFactorModel>;
 
+export const apiKeyTable = appSchema.table('api_key', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name'),
+  start: text('start'),
+  prefix: text('prefix'),
+  key: text('key').notNull().unique(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  refillInterval: integer('refill_interval'),
+  refillAmount: integer('refill_amount'),
+  lastRefillAt: timestamp('last_refill_at', { withTimezone: true }),
+  enabled: boolean('enabled').default(true).notNull(),
+  rateLimitEnabled: boolean('rate_limit_enabled').default(false).notNull(),
+  rateLimitTimeWindow: integer('rate_limit_time_window'),
+  rateLimitMax: integer('rate_limit_max'),
+  requestCount: integer('request_count').default(0).notNull(),
+  remaining: integer('remaining'),
+  lastRequest: timestamp('last_request', { withTimezone: true }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  permissions: text('permissions'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type InsertApiKeyModel = typeof apiKeyTable.$inferInsert;
+export type ApiKeyModel = typeof apiKeyTable.$inferSelect;
+
 export const projectTable = appSchema.table('project', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id')
