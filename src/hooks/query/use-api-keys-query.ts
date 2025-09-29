@@ -1,14 +1,14 @@
 import { type ApiKeyModel } from '@/db/schema';
 import { betterFetch } from '@better-fetch/fetch';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-export function useApiKeysQuery(
-  options?: Omit<UseQueryOptions<ApiKeyModel[]>, 'queryKey' | 'queryFn'>,
-) {
+import { type QueryOptions } from './types';
+
+export function useApiKeysQuery(options?: QueryOptions<ApiKeyModel[]>) {
   return useQuery<ApiKeyModel[]>({
+    ...options,
     queryKey: ['api-keys'],
     queryFn: fetchApiKeys,
-    ...options,
   });
 }
 
@@ -22,5 +22,5 @@ async function fetchApiKeys() {
     throw new Error(`Failed to fetch API keys: ${error.message}`);
   }
 
-  return Array.isArray(apiKeys) ? apiKeys : [];
+  return apiKeys;
 }

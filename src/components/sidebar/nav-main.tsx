@@ -31,7 +31,7 @@ export default function NavMain() {
         </SidebarMenuItem>
 
         <SidebarGroupLabel className="mt-2">Latest</SidebarGroupLabel>
-        <Collapsible key="projects" defaultOpen={true} asChild>
+        <Collapsible asChild key="projects" defaultOpen={true}>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Projects">
               <Link href="/projects">

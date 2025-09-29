@@ -1,14 +1,14 @@
 import { type ProjectModel } from '@/db/schema';
 import { betterFetch } from '@better-fetch/fetch';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
-export function useProjectsQuery(
-  options?: Omit<UseQueryOptions<ProjectModel[]>, 'queryKey' | 'queryFn'>,
-) {
+import { type QueryOptions } from './types';
+
+export function useProjectsQuery(options?: QueryOptions<ProjectModel[]>) {
   return useQuery<ProjectModel[]>({
+    ...options,
     queryKey: ['projects'],
     queryFn: fetchProjects,
-    ...options,
   });
 }
 
@@ -22,5 +22,5 @@ async function fetchProjects() {
     throw new Error(`Failed to fetch projects: ${error.message}`);
   }
 
-  return Array.isArray(projects) ? projects : [];
+  return projects;
 }
