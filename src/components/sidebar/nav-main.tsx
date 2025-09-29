@@ -14,7 +14,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useProjectsQuery } from '@/hooks/query/use-projects-query';
-import { ChevronRight, Clock, FolderPlus, Plus } from 'lucide-react';
+import { ChevronRight, Clock, FolderPlus } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NavMain() {

@@ -51,7 +51,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
       name: job.name,
       url: job.url,
       httpMethod: job.httpMethod,
-      cronExpression: job.scheduleCron,
+      scheduleCron: job.scheduleCron,
       timezone: job.timezone,
       headers: job.headers,
       body: job.body ?? '',
@@ -142,13 +142,13 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
             <div className="space-y-2">
               <Label htmlFor="cronExpression">Cron Expression</Label>
               <Input
-                id="cronExpression"
+                id="scheduleCron"
                 placeholder="0 0 * * *"
-                {...register('cronExpression')}
-                className={errors.cronExpression ? 'border-red-500' : ''}
+                {...register('scheduleCron')}
+                className={errors.scheduleCron ? 'border-red-500' : ''}
               />
-              {errors.cronExpression && (
-                <p className="text-sm text-red-500">{errors.cronExpression.message}</p>
+              {errors.scheduleCron && (
+                <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
               )}
               <p className="text-muted-foreground text-xs">
                 Example: "0 0 * * *" runs daily at midnight
