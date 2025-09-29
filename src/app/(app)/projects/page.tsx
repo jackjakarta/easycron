@@ -2,10 +2,8 @@ import Header from '@/components/common/header';
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 
 import ProjectsDisplay from './projects-display';

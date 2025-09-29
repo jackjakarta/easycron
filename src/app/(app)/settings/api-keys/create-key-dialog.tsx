@@ -18,7 +18,6 @@ import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { Clipboard, Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -35,7 +34,6 @@ type CreateKeyDialogProps = {
 };
 
 export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -86,6 +84,7 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
       navigator.clipboard.writeText(text);
       toast.success('API key copied to clipboard');
     } catch (error) {
+      console.error('Failed to copy API key:', error);
       toast.error('Failed to copy API key');
     }
   }

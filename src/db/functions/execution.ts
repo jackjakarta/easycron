@@ -1,4 +1,4 @@
-import { and, desc, eq, is, isNotNull } from 'drizzle-orm';
+import { and, desc, eq, isNotNull } from 'drizzle-orm';
 
 import { db } from '..';
 import { executionTable, jobTable, type ExecutionModel } from '../schema';
