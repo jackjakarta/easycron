@@ -20,16 +20,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useApiKeysQuery } from '@/hooks/query/use-api-keys-query';
-import { formatDateToDayMonthYear as formatDate } from '@/utils/date';
+import { formatDateToDayMonthYearTime } from '@/utils/date';
+import { cn } from '@/utils/tailwind';
+import { useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import React from 'react';
+import { toast } from 'sonner';
 
+import { updateApiKeyEnabledAction } from './actions';
 import ApiKeysTableRowSkeleton from './api-keys-table-row-skeleton';
 import CreateKeyDialog from './create-key-dialog';
 
 export default function ApiKeysTable() {
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
-  const [searchQuery, setSearchQuery] = useState('');
+  const queryClient = useQueryClient();
+
+  const [selectedKeys, setSelectedKeys] = React.useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = React.useState('');
 
   const { data: apiKeys = [], isLoading, isError } = useApiKeysQuery();
 
@@ -38,6 +44,17 @@ export default function ApiKeysTable() {
       key.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       key.start?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  async function handleEnableOrDisableKey(keyId: string, enabled: boolean) {
+    try {
+      await updateApiKeyEnabledAction({ apiKeyId: keyId, enabled });
+      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      toast.success(`API key ${enabled ? 'enabled' : 'disabled'} successfully`);
+    } catch (error) {
+      console.error('Failed to update API key status:', error);
+      toast.error('Failed to update API key status');
+    }
+  }
 
   function handleSelectAll(checked: boolean) {
     if (checked) {
@@ -49,11 +66,13 @@ export default function ApiKeysTable() {
 
   function handleSelectKey(keyId: string, checked: boolean) {
     const newSelected = new Set(selectedKeys);
+
     if (checked) {
       newSelected.add(keyId);
     } else {
       newSelected.delete(keyId);
     }
+
     setSelectedKeys(newSelected);
   }
 
@@ -153,7 +172,7 @@ export default function ApiKeysTable() {
                       />
                     </TableCell>
                     <TableCell className="font-medium">
-                      {apiKey.name || <span className="text-muted-foreground italic">Unnamed</span>}
+                      {apiKey.name ?? <span className="text-muted-foreground italic">Unnamed</span>}
                     </TableCell>
                     <TableCell>
                       <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
@@ -162,17 +181,19 @@ export default function ApiKeysTable() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={apiKey.enabled ? 'default' : 'secondary'}
-                        className={apiKey.enabled ? 'bg-success text-success-foreground' : ''}
+                        variant="outline"
+                        className={cn(apiKey.enabled && 'bg-muted-foreground text-background')}
                       >
                         {apiKey.enabled ? 'Active' : 'Disabled'}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {formatNumber(apiKey.requestCount)}
+                      {String(apiKey.requestCount)}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {apiKey.lastRequest !== null ? formatDate(apiKey.lastRequest) : 'Never'}
+                      {apiKey.lastRequest !== null
+                        ? formatDateToDayMonthYearTime(apiKey.lastRequest)
+                        : 'Never'}
                     </TableCell>
                     <TableCell className="text-sm">
                       {apiKey.expiresAt ? (
@@ -185,14 +206,14 @@ export default function ApiKeysTable() {
                                 : 'text-muted-foreground'
                           }
                         >
-                          {formatDate(apiKey.expiresAt)}
+                          {formatDateToDayMonthYearTime(apiKey.expiresAt)}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">Never</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
-                      {formatDate(apiKey.createdAt)}
+                      {formatDateToDayMonthYearTime(apiKey.createdAt)}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -203,11 +224,10 @@ export default function ApiKeysTable() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="gap-2">
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="gap-2">
+                          <DropdownMenuItem
+                            className="gap-2"
+                            onSelect={() => handleEnableOrDisableKey(apiKey.id, !apiKey.enabled)}
+                          >
                             {apiKey.enabled ? (
                               <>
                                 <EyeOff className="h-4 w-4" />
@@ -220,8 +240,8 @@ export default function ApiKeysTable() {
                               </>
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive gap-2">
-                            <Trash2 className="h-4 w-4" />
+                          <DropdownMenuItem className="text-destructive focus:text-destructive gap-2">
+                            <Trash2 className="text-destructive h-4 w-4" />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -237,6 +257,6 @@ export default function ApiKeysTable() {
   );
 }
 
-function formatNumber(num: number) {
-  return new Intl.NumberFormat('en-US').format(num);
-}
+// function formatNumber(num: number) {
+//   return new Intl.NumberFormat('en-US').format(num);
+// }

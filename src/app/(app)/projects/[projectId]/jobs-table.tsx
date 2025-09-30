@@ -85,15 +85,18 @@ export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
             <Clock className="h-5 w-5" />
             Enabled Jobs ({enabledJobs.length})
           </div>
-          <CreateJobDialog
-            projectId={projectId}
-            trigger={
-              <Button>
-                Create Job
-                <Plus className="size-4" />
-              </Button>
-            }
-          />
+
+          {cronJobs.length > 0 && (
+            <CreateJobDialog
+              projectId={projectId}
+              trigger={
+                <Button>
+                  Create Job
+                  <Plus className="size-4" />
+                </Button>
+              }
+            />
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -112,132 +115,155 @@ export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cronJobs.map((job) => (
-                <TableRow key={job.id}>
-                  <TableCell className="font-medium">{job.name}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={job.enabled ? 'default' : 'secondary'}
-                      className={
-                        job.enabled
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                      }
-                    >
-                      {job.enabled ? 'Enabled' : 'Disabled'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-mono text-sm">{job.scheduleCron}</div>
-                      <div className="text-muted-foreground text-xs">
-                        {parseCronExpression(job.scheduleCron)}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={methodToClassName(job.httpMethod)}>
-                      {job.httpMethod}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Globe className="text-muted-foreground h-3 w-3" />
-                      <span className="text-sm">{job.timezone}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {job.lastRunAt ? (
+              {cronJobs.length > 0 ? (
+                cronJobs.map((job) => (
+                  <TableRow key={job.id}>
+                    <TableCell className="font-medium">{job.name}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={job.enabled ? 'default' : 'secondary'}
+                        className={
+                          job.enabled
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                        }
+                      >
+                        {job.enabled ? 'Enabled' : 'Disabled'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
                       <div className="space-y-1">
-                        <div className="text-sm">
-                          {formatDistanceToNow(job.lastRunAt, { addSuffix: true })}
-                        </div>
+                        <div className="font-mono text-sm">{job.scheduleCron}</div>
                         <div className="text-muted-foreground text-xs">
-                          {format(job.lastRunAt, 'MMM d, HH:mm')}
+                          {parseCronExpression(job.scheduleCron)}
                         </div>
                       </div>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">Never</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      {job.enabled ? (
-                        <>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={methodToClassName(job.httpMethod)}>
+                        {job.httpMethod}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Globe className="text-muted-foreground h-3 w-3" />
+                        <span className="text-sm">{job.timezone}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {job.lastRunAt ? (
+                        <div className="space-y-1">
                           <div className="text-sm">
-                            {formatDistanceToNow(job.nextRunAt, { addSuffix: true })}
+                            {formatDistanceToNow(job.lastRunAt, { addSuffix: true })}
                           </div>
                           <div className="text-muted-foreground text-xs">
-                            {format(job.nextRunAt, 'MMM d, HH:mm')}
+                            {format(job.lastRunAt, 'MMM d, HH:mm')}
                           </div>
-                        </>
+                        </div>
                       ) : (
-                        <div className="text-sm">Never</div>
+                        <span className="text-muted-foreground text-sm">Never</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        {job.enabled ? (
+                          <>
+                            <div className="text-sm">
+                              {formatDistanceToNow(job.nextRunAt, { addSuffix: true })}
+                            </div>
+                            <div className="text-muted-foreground text-xs">
+                              {format(job.nextRunAt, 'MMM d, HH:mm')}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-sm">Never</div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <EditJobSheet
+                            job={job}
+                            trigger={
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                <Pencil className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                            }
+                          />
+
+                          <DropdownMenuItem
+                            onSelect={() => handleEnableOrDisableJob(job.id, !job.enabled)}
+                          >
+                            {job.enabled ? (
+                              <>
+                                <Pause className="mr-2 h-4 w-4" />
+                                Disable
+                              </>
+                            ) : (
+                              <>
+                                <Play className="mr-2 h-4 w-4" />
+                                Enable
+                              </>
+                            )}
+                          </DropdownMenuItem>
+
+                          {job.enabled && (
+                            <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
+                              <Play className="mr-2 h-4 w-4" />
+                              Run Now
+                            </DropdownMenuItem>
+                          )}
+
+                          <ConfirmationDialog
+                            title="Delete Job"
+                            type="destructive"
+                            description="Are you sure you want to delete this job? This action cannot be undone."
+                            onConfirm={() => handleDeleteJob(job.id)}
+                            isLoading={deletingJobId === job.id}
+                            trigger={
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="text-destructive mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            }
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-32 py-8">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <Clock className="text-muted-foreground mb-4 h-12 w-12" />
+                      <h3 className="text-lg font-semibold">No jobs yet</h3>
+                      <p className="text-muted-foreground mb-4 text-sm">
+                        Get started by creating your first cron job.
+                      </p>
+                      <CreateJobDialog
+                        projectId={projectId}
+                        trigger={
+                          <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Create Job
+                          </Button>
+                        }
+                      />
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <EditJobSheet
-                          job={job}
-                          trigger={
-                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                          }
-                        />
-
-                        <DropdownMenuItem
-                          onSelect={() => handleEnableOrDisableJob(job.id, !job.enabled)}
-                        >
-                          {job.enabled ? (
-                            <>
-                              <Pause className="mr-2 h-4 w-4" />
-                              Disable
-                            </>
-                          ) : (
-                            <>
-                              <Play className="mr-2 h-4 w-4" />
-                              Enable
-                            </>
-                          )}
-                        </DropdownMenuItem>
-
-                        {job.enabled && (
-                          <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
-                            <Play className="mr-2 h-4 w-4" />
-                            Run Now
-                          </DropdownMenuItem>
-                        )}
-
-                        <ConfirmationDialog
-                          title="Delete Job"
-                          type="destructive"
-                          description="Are you sure you want to delete this job? This action cannot be undone."
-                          onConfirm={() => handleDeleteJob(job.id)}
-                          isLoading={deletingJobId === job.id}
-                          trigger={
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="text-destructive mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          }
-                        />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </div>

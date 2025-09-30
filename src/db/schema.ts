@@ -142,6 +142,7 @@ export const apiKeyTable = appSchema.table('api_key', {
 
 export type ApiKeyModel = typeof apiKeyTable.$inferSelect;
 export type InsertApiKeyModel = typeof apiKeyTable.$inferInsert;
+export type UpdateApiKeyModel = UpdateDbRow<ApiKeyModel>;
 
 export const projectTable = appSchema.table('project', {
   id: uuid('id').defaultRandom().primaryKey(),
