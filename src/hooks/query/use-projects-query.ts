@@ -22,5 +22,5 @@ async function fetchProjects() {
     throw new Error(`Failed to fetch projects: ${error.message}`);
   }
 
-  return projects;
+  return Array.isArray(projects) ? projects : [];
 }

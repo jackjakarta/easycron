@@ -22,5 +22,5 @@ async function fetchApiKeys() {
     throw new Error(`Failed to fetch API keys: ${error.message}`);
   }
 
-  return apiKeys;
+  return Array.isArray(apiKeys) ? apiKeys : [];
 }
