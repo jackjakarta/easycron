@@ -5,7 +5,7 @@ services:
     env_file:
       - .env.compose
     ports:
-      - '3000:3000' # app listens on 3000 in the container
+      - '3000:3000'
     restart: on-failure
 
   worker:
