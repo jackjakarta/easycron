@@ -25,6 +25,7 @@ import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -38,12 +39,14 @@ type CreateJobDialogProps = {
 
 export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogProps) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const {
     register,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
   });
@@ -64,6 +67,10 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
 
     try {
       await createJobAction({ data: cleanedData, projectId });
+
+      setIsOpen(false);
+      reset();
+
       toast.success('Job created successfully');
       router.refresh();
     } catch (error) {
@@ -73,7 +80,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
   }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
