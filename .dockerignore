@@ -9,3 +9,6 @@ next-env.d.ts
 .vscode
 .env.op
 .DS_Store
+docker-compose.local.yml
+docker-compose.yml
+.env.compose
