@@ -1,5 +1,4 @@
 import { dbGetUserByEmail } from '@/db/functions/user';
-import { render } from '@react-email/components';
 
 import ForgotPasswordTemplate from './emails/forgot-password';
 import InformationTemplate from './emails/information';
@@ -9,6 +8,7 @@ import {
   type InformationEmailMetadata,
   type MailTemplateResponse,
 } from './types';
+import { renderEmailTemplate } from './utils';
 
 export async function createUserActionMailTemplate({
   email,
@@ -26,12 +26,9 @@ export async function createUserActionMailTemplate({
 
   switch (action) {
     case 'verify-email': {
-      const [html, text] = await Promise.all([
-        render(<VerifyEmailTemplate actionUrl={actionUrl} userEmail={email} />),
-        render(<VerifyEmailTemplate actionUrl={actionUrl} userEmail={email} />, {
-          plainText: true,
-        }),
-      ]);
+      const { html, text } = await renderEmailTemplate(
+        <VerifyEmailTemplate actionUrl={actionUrl} userEmail={email} />,
+      );
 
       return {
         success: true,
@@ -42,12 +39,9 @@ export async function createUserActionMailTemplate({
     }
 
     case 'reset-password': {
-      const [html, text] = await Promise.all([
-        render(<ForgotPasswordTemplate actionUrl={actionUrl} userEmail={email} />),
-        render(<ForgotPasswordTemplate actionUrl={actionUrl} userEmail={email} />, {
-          plainText: true,
-        }),
-      ]);
+      const { html, text } = await renderEmailTemplate(
+        <ForgotPasswordTemplate actionUrl={actionUrl} userEmail={email} />,
+      );
 
       return {
         success: true,
@@ -88,12 +82,9 @@ export async function createInformationMailTemplate(information: InformationEmai
 }
 
 async function renderInformationTemplate(header: string, content: string) {
-  const [html, text] = await Promise.all([
-    render(<InformationTemplate header={header} content={content} />),
-    render(<InformationTemplate header={header} content={content} />, {
-      plainText: true,
-    }),
-  ]);
+  const { html, text } = await renderEmailTemplate(
+    <InformationTemplate header={header} content={content} />,
+  );
 
   return {
     success: true,

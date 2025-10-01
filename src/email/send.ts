@@ -31,14 +31,6 @@ export async function sendUserActionEmail({
 
   const { subject, mailTemplate, textPart } = result;
 
-  if (mailTemplate === undefined) {
-    console.warn(`Could not generate mail template for action '${action}' and email: '${to}'`);
-    return {
-      success: false,
-      error: 'For more information look inside the logs',
-    };
-  }
-
   try {
     if (IS_DEV_MODE) {
       const testEmailResult = await sendTestEmail({
@@ -49,7 +41,6 @@ export async function sendUserActionEmail({
       });
 
       console.info('Email successfully sent:', testEmailResult);
-
       return { success: true };
     }
 
@@ -60,7 +51,13 @@ export async function sendUserActionEmail({
       text: textPart,
     });
 
-    console.info('Email successfully sent:', request.body);
+    if (request.response.status !== 200) {
+      console.error('Email send returned the following error:', request.response.statusText);
+      return {
+        success: false,
+        error: `Email send returned the following error: ${request.response.statusText}`,
+      };
+    }
 
     return { success: true };
   } catch (e: unknown) {
@@ -88,8 +85,8 @@ export async function sendUserActionInformationEmail({
 }) {
   const result = await createInformationMailTemplate(information);
 
-  if (result === undefined) {
-    console.warn(
+  if (result === undefined || !result.success) {
+    console.error(
       `Could not generate mail template for information '${information.type}' and email: '${to}'`,
     );
 
