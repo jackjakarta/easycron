@@ -49,49 +49,48 @@ jobs:
           docker build -t ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} . && \
           docker push ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 15
-  #   environment: production
-  #   needs: build
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    needs: build
 
-  #   steps:
-  #     - name: Set up Docker image tags
-  #       id: vars
-  #       run: |
-  #         echo "TAG_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+    steps:
+      - name: Set up Docker image tags
+        id: vars
+        run: |
+          echo "TAG_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
 
-  #     - name: Load 1password secrets
-  #       uses: 1password/load-secrets-action@v1
-  #       with:
-  #         export-env: true
-  #       env:
-  #         OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-  #         REMOTE_HOST: 'op://easycron-app/github-secrets/REMOTE_HOST'
-  #         REMOTE_USER: 'op://easycron-app/github-secrets/REMOTE_USER'
-  #         DOCKER_USERNAME: 'op://easycron-app/github-secrets/DOCKER_USERNAME'
-  #         DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
-  #         SSH_PRIVATE_KEY: 'op://easycron-app/github-secrets/SSH_PRIVATE_KEY'
+      - name: Load 1password secrets
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          REMOTE_HOST: 'op://easycron-app/github-secrets/REMOTE_HOST'
+          REMOTE_USER: 'op://easycron-app/github-secrets/REMOTE_USER'
+          DOCKER_USERNAME: 'op://easycron-app/github-secrets/DOCKER_USERNAME'
+          DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
+          SSH_PRIVATE_KEY: 'op://easycron-app/github-secrets/SSH_PRIVATE_KEY'
 
-  #     - name: Deploy to remote server
-  #       uses: appleboy/ssh-action@v0.1.6
-  #       with:
-  #         host: ${{ env.REMOTE_HOST }}
-  #         username: ${{ env.REMOTE_USER }}
-  #         key: ${{ env.SSH_PRIVATE_KEY }}
-  #         script: |
-  #           cd /home/jack/easycron
-  #           git pull
+      - name: Deploy to remote server
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.REMOTE_HOST }}
+          username: ${{ env.REMOTE_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/jack/easycron
+            git pull
 
-  #           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-  #           echo "${{ env.DOCKER_PASSWORD }}" | docker login -u "${{ env.DOCKER_USERNAME }}" --password-stdin
+            export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+            echo "${{ env.DOCKER_PASSWORD }}" | docker login -u "${{ env.DOCKER_USERNAME }}" --password-stdin
 
-  #           ENVIRONMENT=production op inject -f -i .env.op -o .env
-  #           echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
+            ENVIRONMENT=production op inject -f -i .env.op -o .env
+            echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
 
-  #           echo "${{ env.DOCKER_PASSWORD }}" | docker login -u "${{ env.DOCKER_USERNAME }}" --password-stdin
-  #           docker pull ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
+            docker pull ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
 
-  #           export $(grep -v '^#' .env | xargs) && \
-  #           envsubst < docker-compose.production.yml | docker stack deploy --with-registry-auth -c - easycron && \
-  #           docker system prune -f
+            export $(grep -v '^#' .env | xargs) && \
+            envsubst < docker-compose.production.yml | docker stack deploy --with-registry-auth -c - easycron && \
+            docker system prune -f
