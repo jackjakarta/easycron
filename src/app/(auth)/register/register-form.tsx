@@ -34,6 +34,7 @@ export default function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
     setError,
+    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
   });
@@ -61,7 +62,14 @@ export default function RegisterForm() {
     router.replace('/login');
   }
 
-  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
+  const emailValue = watch('email');
+  const passwordValue = watch('password');
+
+  const submitButtonDisabled =
+    isSubmitting ||
+    isSubmitSuccessful ||
+    emailValue.trim().length === 0 ||
+    passwordValue.trim().length === 0;
 
   return (
     <div className="flex flex-col gap-6">

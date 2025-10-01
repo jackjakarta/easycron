@@ -1,8 +1,8 @@
 {
   "auth": {
     "login": {
-      "title": "Login",
-      "description": "Sign in to your account",
+      "title": "Welcome back",
+      "description": "Login to your easyCron account",
       "form": {
         "email": {
           "label": "Email address",
@@ -23,5 +23,19 @@
         }
       }
     }
+  },
+  "common": {
+    "or": "or",
+    "and": "and",
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "continue": "Continue",
+    "with": "with",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading..."
   }
 }

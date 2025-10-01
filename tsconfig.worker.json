@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist/worker",
+    "module": "commonjs",
+    "target": "ES2020",
+    "noEmit": false,
+    "isolatedModules": false
+  },
+  "include": ["worker/**/*"]
+}

@@ -1,3 +1,4 @@
+import { render } from '@react-email/components';
 import nodemailer from 'nodemailer';
 
 import { mailjet } from './client';
@@ -14,7 +15,7 @@ export async function mailjetSendEmail({
   html: string;
   text?: string;
 }) {
-  return await mailjet.post('send', { version: 'v3.1' }).request({
+  const mailjetResult = await mailjet.post('send', { version: 'v3.1' }).request({
     Messages: [
       {
         From: {
@@ -32,6 +33,8 @@ export async function mailjetSendEmail({
       },
     ],
   });
+
+  return mailjetResult;
 }
 
 export async function sendTestEmail({
@@ -74,4 +77,10 @@ export async function sendTestEmail({
       error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
+}
+
+export async function renderEmailTemplate(template: React.JSX.Element) {
+  const [html, text] = await Promise.all([render(template), render(template, { plainText: true })]);
+
+  return { html, text };
 }

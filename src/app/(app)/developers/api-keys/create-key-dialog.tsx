@@ -54,28 +54,23 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
     },
   });
 
-  function refreshKeys() {
-    queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-  }
-
-  async function onSubmit(formData: NameFormData) {
-    const { name: _name } = formData;
+  async function onSubmit(apiKeyFormData: NameFormData) {
+    const { name: _name } = apiKeyFormData;
     const name = _name.trim();
 
     const { error, data } = await authClient.apiKey.create({
       name,
-      expiresIn: 60 * 60 * 24 * 7,
-      prefix: 'sk-',
+      prefix: 'ec-',
     });
 
     if (error !== null) {
       setError('root', { type: 'manual', message: 'The API key could not be created.' });
-      toast.error(`Error creating API key: ${error.message}`);
+      toast.error('Error creating API key');
       return;
     }
 
     setRawKey(data.key);
-    refreshKeys();
+    queryClient.invalidateQueries({ queryKey: ['api-keys'] });
     toast.success('API key created successfully!');
   }
 
@@ -89,8 +84,8 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
     }
   }
 
-  function handleDialogClose() {
-    setIsOpen(false);
+  function handleDialogClose({ withClose = false }: { withClose?: boolean } = {}) {
+    if (withClose) setIsOpen(false);
     setRawKey(null);
     setShowKey(false);
     reset();
@@ -99,7 +94,13 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
   const nameValue = watch('name');
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleDialogClose();
+        setIsOpen(isOpen);
+      }}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         {rawKey === null ? (
@@ -179,7 +180,7 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleDialogClose}>Done</Button>
+              <Button onClick={() => handleDialogClose({ withClose: true })}>Done</Button>
             </DialogFooter>
           </>
         )}

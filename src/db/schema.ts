@@ -1,4 +1,4 @@
-import { AuthProvider } from '@/auth/types';
+import { type AuthProvider } from '@/auth/types';
 import {
   boolean,
   index,
@@ -142,6 +142,7 @@ export const apiKeyTable = appSchema.table('api_key', {
 
 export type ApiKeyModel = typeof apiKeyTable.$inferSelect;
 export type InsertApiKeyModel = typeof apiKeyTable.$inferInsert;
+export type UpdateApiKeyModel = UpdateDbRow<ApiKeyModel>;
 
 export const projectTable = appSchema.table('project', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -268,3 +269,24 @@ export const secretTable = appSchema.table('secret', {
 export type SecretModel = typeof secretTable.$inferSelect;
 export type InsertSecretModel = typeof secretTable.$inferInsert;
 export type UpdateSecretModel = UpdateDbRow<SecretModel>;
+
+export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  url: text('url').notNull(),
+  secret: text('secret').notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
+  consecutiveFailures: integer('consecutive_failures').default(0).notNull(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type WebhookEndpointModel = typeof webhookEndpointTable.$inferSelect;
+export type InsertWebhookEndpointModel = typeof webhookEndpointTable.$inferInsert;
+export type UpdateWebhookEndpointModel = UpdateDbRow<WebhookEndpointModel>;

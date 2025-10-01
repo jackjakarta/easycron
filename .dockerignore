@@ -1,8 +1,14 @@
 node_modules
 dist
 build
+tsconfig.tsbuildinfo
+next-env.d.ts
 .next
 .github
 .git
 .vscode
 .env.op
+.DS_Store
+docker-compose.local.yml
+docker-compose.yml
+.env.compose

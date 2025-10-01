@@ -18,6 +18,31 @@ CREATE TABLE "app"."account" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "app"."api_key" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" text,
+	"start" text,
+	"prefix" text,
+	"key" text NOT NULL,
+	"user_id" uuid NOT NULL,
+	"refill_interval" integer,
+	"refill_amount" integer,
+	"last_refill_at" timestamp with time zone,
+	"enabled" boolean DEFAULT true NOT NULL,
+	"rate_limit_enabled" boolean DEFAULT false NOT NULL,
+	"rate_limit_time_window" integer,
+	"rate_limit_max" integer,
+	"request_count" integer DEFAULT 0 NOT NULL,
+	"remaining" integer,
+	"last_request" timestamp with time zone,
+	"expires_at" timestamp with time zone,
+	"permissions" text,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "api_key_key_unique" UNIQUE("key")
+);
+--> statement-breakpoint
 CREATE TABLE "app"."execution" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"job_id" uuid NOT NULL,
@@ -121,7 +146,20 @@ CREATE TABLE "app"."verification" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "app"."webhook_endpoint" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"url" text NOT NULL,
+	"secret" text NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"last_failure_at" timestamp with time zone,
+	"consecutive_failures" integer DEFAULT 0 NOT NULL,
+	"user_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 ALTER TABLE "app"."account" ADD CONSTRAINT "account_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."api_key" ADD CONSTRAINT "api_key_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."execution" ADD CONSTRAINT "execution_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "app"."job"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."job" ADD CONSTRAINT "job_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."job" ADD CONSTRAINT "job_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -129,6 +167,7 @@ ALTER TABLE "app"."project" ADD CONSTRAINT "project_user_id_user_entity_id_fk" F
 ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."session" ADD CONSTRAINT "session_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."two_factor" ADD CONSTRAINT "two_factor_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."webhook_endpoint" ADD CONSTRAINT "webhook_endpoint_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "exec_job_started_idx" ON "app"."execution" USING btree ("started_at","job_id");--> statement-breakpoint
 CREATE INDEX "jobs_project_id_user_id_next_run_at_idx" ON "app"."job" USING btree ("next_run_at","project_id","user_id");--> statement-breakpoint
 CREATE INDEX "jobs_project_id_user_id_idx" ON "app"."job" USING btree ("project_id","user_id");

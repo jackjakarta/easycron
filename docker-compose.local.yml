@@ -1,0 +1,37 @@
+services:
+  web:
+    image: easycron-services:latest
+    command: ['node', 'server.js']
+    env_file:
+      - .env.compose
+    ports:
+      - '3000:3000' # app listens on 3000 in the container
+    restart: on-failure
+
+  worker:
+    image: easycron-services:latest
+    command: ['node', 'dist/worker/index.js']
+    env_file:
+      - .env.compose
+    restart: on-failure
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  scheduler:
+    image: easycron-services:latest
+    command: ['node', 'dist/scheduler/index.js']
+    env_file:
+      - .env.compose
+    restart: on-failure
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+networks:
+  default:
+    driver: bridge
