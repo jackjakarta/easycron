@@ -9,7 +9,7 @@
     "build:worker": "tsup worker/index.ts --config tsup.worker.config.ts --tsconfig tsconfig.worker.json",
     "checks": "chmod +x $(git rev-parse --show-toplevel)/scripts/checks.sh && $(git rev-parse --show-toplevel)/scripts/checks.sh",
     "db:generate": "drizzle-kit generate --config=./src/db/drizzle.config.ts",
-    "db:migrate": "ENVIRONMENT=production op run --env-file=\".env.op\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
+    "db:migrate": "ENVIRONMENT=development op run --env-file=\".env.op\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:studio": "ENVIRONMENT=development op run --env-file=\".env.op\" -- drizzle-kit studio --config=src/db/drizzle.config.ts",
     "dev": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- next dev",
     "dev:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx scheduler/index.ts",
@@ -23,7 +23,6 @@
     "start": "next start",
     "start:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- node dist/scheduler/index.js",
     "start:worker": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- node dist/worker/index.js",
-    "start:worker:prod": "node dist/worker/index.js",
     "test": "vitest --run",
     "types": "tsc --noEmit"
   },
