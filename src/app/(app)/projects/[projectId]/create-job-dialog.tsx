@@ -67,7 +67,6 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
 
     try {
       await createJobAction({ data: cleanedData, projectId });
-
       setIsOpen(false);
       reset();
 
