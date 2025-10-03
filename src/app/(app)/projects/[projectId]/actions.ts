@@ -1,13 +1,7 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import {
-  dbDeleteJob,
-  dbGetJobById,
-  dbInsertJob,
-  dbUpdateJob,
-  dbUpdateProjects,
-} from '@/db/functions/job';
+import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
 import { dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
@@ -126,16 +120,6 @@ export async function createProjectSecretAction({ projectId }: { projectId: stri
 
   if (newSecret === undefined) {
     throw new Error('Failed to create secret');
-  }
-
-  const updatedRows = await dbUpdateProjects({
-    projectId: project.id,
-    userId: user.id,
-    data: { hmacSigningKeyId: newSecret.id },
-  });
-
-  if (updatedRows.length === 0) {
-    throw new Error('Failed to update jobs with new secret');
   }
 
   return { ...newSecret, rawSecret };

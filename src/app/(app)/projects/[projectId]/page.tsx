@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { dbGetProjectById } from '@/db/functions/project';
+import { dbGetSecretByProjectId } from '@/db/functions/secret';
 import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
@@ -36,6 +37,8 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
 
+  const secret = await dbGetSecretByProjectId({ projectId: project.id, userId: user.id });
+
   return (
     <>
       <Header>
@@ -55,7 +58,7 @@ export default async function Page(context: PageContext) {
         <CronJobsTable
           cronJobs={project.jobs}
           projectId={project.id}
-          secretEnabled={project.jobs[0]?.hmacSigningKeyId !== null}
+          secretEnabled={secret !== undefined}
         />
       </div>
     </>

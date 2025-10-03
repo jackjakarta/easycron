@@ -3,7 +3,13 @@ import { randomUUID } from 'crypto';
 import { executeHttp } from '@/core/http';
 import { db } from '@/db';
 import { dbUpdateJob } from '@/db/functions/job';
-import { executionTable, jobTable, secretTable, type ExecutionStatus } from '@/db/schema';
+import {
+  executionTable,
+  jobTable,
+  projectTable,
+  secretTable,
+  type ExecutionStatus,
+} from '@/db/schema';
 import { connection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
 import { decryptSecret } from '@/utils/crypto';
 import { Job, Worker } from 'bullmq';
@@ -13,12 +19,15 @@ const RUN_DEFAULT_TIMEOUT_MS = 3214;
 const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 const WORKER_CONCURRENCY = 20;
 
-async function getHmacSecret({ keyId }: { keyId: string | null }): Promise<string | null> {
-  if (keyId === null) {
+async function getHmacSecret({ projectId }: { projectId: string | null }): Promise<string | null> {
+  if (projectId === null) {
     return null;
   }
 
-  const [secretRow] = await db.select().from(secretTable).where(eq(secretTable.id, keyId));
+  const [secretRow] = await db
+    .select()
+    .from(secretTable)
+    .where(eq(secretTable.projectId, projectId));
 
   if (secretRow === undefined) {
     return null;
@@ -37,15 +46,15 @@ async function runOnce(bull: Job<RunJobPayload>) {
   if (jobRow === undefined) return;
   if (!jobRow.enabled) return;
 
-  const scheduledFor = new Date(bull.data.scheduledForISO);
-
   const execId = randomUUID();
+  const scheduledFor = new Date(bull.data.scheduledForISO);
   const startedAt = new Date();
 
   // Optional: enforce quotas/plan here; if exceeded, record skipped
   // if (await quotaExceeded(jobRow.projectId)) { ... }
 
-  const hmacSecret = await getHmacSecret({ keyId: jobRow.hmacSigningKeyId });
+  const projectId = jobRow.projectId;
+  const hmacSecret = await getHmacSecret({ projectId });
 
   let attempt = 0;
   let lastError: any = null;

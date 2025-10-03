@@ -188,7 +188,6 @@ export const jobTable = appSchema.table(
     backoffInitialMs: integer('backoff_initial_ms').notNull().default(5000),
     backoffFactor: real('backoff_factor').notNull().default(2.0),
     jitterMs: integer('jitter_ms').notNull().default(500),
-    hmacSigningKeyId: uuid('hmac_signing_key_id').references(() => secretTable.id),
     lastRunAt: timestamp('last_run_at', { withTimezone: true }),
     nextRunAt: timestamp('next_run_at', { withTimezone: true }).notNull(),
     consecutiveFailures: integer('consecutive_failures').notNull().default(0),
