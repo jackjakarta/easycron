@@ -28,13 +28,15 @@ import { toast } from 'sonner';
 import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from './actions';
 import CreateJobDialog from './create-job-dialog';
 import EditJobSheet from './edit-job-sheet';
+import SecretDialog from './secret-dialog';
 
 type CronJobsTableProps = {
   cronJobs: JobModel[];
   projectId: string;
+  secretEnabled: boolean;
 };
 
-export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
+export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTableProps) {
   const router = useRouter();
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
@@ -87,15 +89,27 @@ export function CronJobsTable({ cronJobs, projectId }: CronJobsTableProps) {
           </div>
 
           {cronJobs.length > 0 && (
-            <CreateJobDialog
-              projectId={projectId}
-              trigger={
-                <Button>
-                  Create Job
-                  <Plus className="size-4" />
-                </Button>
-              }
-            />
+            <div className="flex flex-wrap items-center gap-1">
+              <SecretDialog
+                projectId={projectId}
+                regenerate={secretEnabled}
+                trigger={
+                  <Button variant="outline" className="mr-2">
+                    HMAC Secret
+                  </Button>
+                }
+              />
+
+              <CreateJobDialog
+                projectId={projectId}
+                trigger={
+                  <Button>
+                    Create Job
+                    <Plus className="size-4" />
+                  </Button>
+                }
+              />
+            </div>
           )}
         </CardTitle>
       </CardHeader>

@@ -1,7 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+import { verifyWebhookSignature } from '../utils';
+
+const secret = 'my-secret-value';
+
+const responseSchema = z.object({
+  ok: z.string().min(1),
+});
 
 export async function POST(req: NextRequest) {
-  const json = await req.json();
-  console.log('Received JSON:', json);
-  return NextResponse.json({ received: true });
+  const signature = req.headers.get('x-easycron-signature');
+
+  if (signature === null) {
+    console.error({ success: false, error: 'Missing signature' });
+    return NextResponse.json({ success: false, error: 'Missing signature' }, { status: 400 });
+  }
+
+  const payload = await req.text();
+  const isValid = verifyWebhookSignature({ payload, signature, secret });
+
+  if (!isValid) {
+    console.error({ success: isValid, error: 'Invalid signature' });
+    return NextResponse.json({ success: isValid, error: 'Invalid signature' }, { status: 400 });
+  }
+
+  const json = JSON.parse(payload);
+  const parsed = responseSchema.safeParse(json);
+
+  if (!parsed.success) {
+    console.error({ success: false, error: parsed.error.issues });
+    return NextResponse.json({ success: false, error: parsed.error.issues }, { status: 400 });
+  }
+
+  console.debug({ success: isValid, data: parsed.data });
+
+  return NextResponse.json({ success: isValid, data: parsed.data }, { status: 200 });
 }

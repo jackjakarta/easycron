@@ -1,0 +1,1 @@
+ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_project_id_unique" UNIQUE("project_id");

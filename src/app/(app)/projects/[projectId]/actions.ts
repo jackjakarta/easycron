@@ -1,8 +1,18 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
+import {
+  dbDeleteJob,
+  dbGetJobById,
+  dbInsertJob,
+  dbUpdateJob,
+  dbUpdateProjects,
+} from '@/db/functions/job';
+import { dbGetProjectById } from '@/db/functions/project';
+import { dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
+import { encryptSecret } from '@/utils/crypto';
+import { createHmacSigningKey } from '@/utils/hmac';
 
 import { type JobFormData } from './schemas';
 
@@ -94,4 +104,39 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
 function occurrenceJobId(jobId: string, scheduledISO: string) {
   const safeISO = scheduledISO.replace(/[:.]/g, '');
   return `run-${jobId}-${safeISO}`;
+}
+
+export async function createProjectSecretAction({ projectId }: { projectId: string }) {
+  const user = await getUser();
+  const project = await dbGetProjectById({ projectId, userId: user.id });
+
+  if (project === undefined) {
+    throw new Error('Unauthorized');
+  }
+
+  const rawSecret = createHmacSigningKey();
+  const encryptedSecret = encryptSecret(rawSecret);
+
+  const newSecret = await dbUpsertSecret({
+    name: 'HMAC Signing Key',
+    value: encryptedSecret,
+    projectId: project.id,
+    userId: user.id,
+  });
+
+  if (newSecret === undefined) {
+    throw new Error('Failed to create secret');
+  }
+
+  const updatedRows = await dbUpdateProjects({
+    projectId: project.id,
+    userId: user.id,
+    data: { hmacSigningKeyId: newSecret.id },
+  });
+
+  if (updatedRows.length === 0) {
+    throw new Error('Failed to update jobs with new secret');
+  }
+
+  return { ...newSecret, rawSecret };
 }
