@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '..';
 import { secretTable } from '../schema';
 
-export async function decryptOrEncryptAllSecrets({ skip = true }) {
+async function decryptOrEncryptAllSecrets({ skip = true }) {
   if (skip) {
     console.info('Skipping processing all secrets');
     return;
@@ -33,7 +33,7 @@ export async function decryptOrEncryptAllSecrets({ skip = true }) {
   );
 }
 
-decryptOrEncryptAllSecrets({ skip: true })
+decryptOrEncryptAllSecrets({ skip: false })
   .then(() => {
     console.info(`Done processing all secrets`);
     process.exit(0);

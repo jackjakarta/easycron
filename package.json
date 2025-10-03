@@ -19,6 +19,7 @@
     "fetch:env": "ENVIRONMENT=development op inject -i .env.op -o .env",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "generate:encryption-key": "chmod +x $(git rev-parse --show-toplevel)/scripts/generate-encryption-key.sh && $(git rev-parse --show-toplevel)/scripts/generate-encryption-key.sh",
     "lint": "next lint",
     "pipeline": "chmod +x $(git rev-parse --show-toplevel)/scripts/pipeline.sh && $(git rev-parse --show-toplevel)/scripts/pipeline.sh",
     "start": "next start",
