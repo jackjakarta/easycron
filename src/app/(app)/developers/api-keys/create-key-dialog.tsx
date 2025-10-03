@@ -140,7 +140,8 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
             <DialogHeader>
               <DialogTitle>API Key Created</DialogTitle>
               <DialogDescription>
-                Your API key has been created successfully. Copy it now as it won't be shown again.
+                Your API key has been created successfully. It will only be shown this one time.
+                Make sure to copy it and store it securely.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -174,8 +175,8 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
               </div>
               <div className="bg-muted rounded-md p-3">
                 <p className="text-muted-foreground text-sm">
-                  <span className="font-semibold">Important:</span> This is the only time you'll see
-                  this key. Make sure to copy it and store it securely.
+                  <span className="font-semibold">Important:</span> This is the only time you will
+                  see this key. Make sure to copy it and store it securely.
                 </p>
               </div>
             </div>

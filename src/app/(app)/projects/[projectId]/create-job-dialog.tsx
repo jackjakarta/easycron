@@ -145,7 +145,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
               )}
               <p className="text-muted-foreground text-xs">
-                Example: "0 0 * * *" runs daily at midnight
+                {`Example: "0 0 * * *" runs daily at midnight`}
               </p>
             </div>
 
@@ -217,7 +217,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 ))}
                 {fields.length === 0 && (
                   <p className="text-muted-foreground text-sm">
-                    No headers added. Click "Add Header" to include custom request headers.
+                    {`No headers added. Click "Add Header" to include custom request headers.`}
                   </p>
                 )}
               </div>

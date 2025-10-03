@@ -14,8 +14,8 @@ export default function NotFound() {
         <Alert className="border-2">
           <AlertTitle className="text-lg">404</AlertTitle>
           <AlertDescription>
-            We couldn't find the page you were looking for. The page might have been moved, deleted,
-            or never existed.
+            We could not find the page you were looking for. The page might have been moved,
+            deleted, or never existed.
           </AlertDescription>
         </Alert>
         <p className="text-muted-foreground">Check the URL or navigate back to the homepage.</p>
