@@ -68,21 +68,3 @@ export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | unde
 
   return insertedJob;
 }
-
-export async function dbUpdateProjects({
-  projectId,
-  userId,
-  data,
-}: {
-  projectId: string;
-  userId: string;
-  data: UpdateJobModel;
-}): Promise<JobModel[]> {
-  const updated = await db
-    .update(jobTable)
-    .set(data)
-    .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)))
-    .returning();
-
-  return updated;
-}
