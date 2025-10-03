@@ -12,8 +12,9 @@ export async function redis() {
   return client;
 }
 
-/** Try to acquire a short-lived lock. Returns true if acquired. */
 export async function tryLock(key: string, ttlMs: number): Promise<boolean> {
-  const r = await (await redis()).set(key, '1', { NX: true, PX: ttlMs });
+  const redisClient = await redis();
+  const r = await redisClient.set(key, '1', { NX: true, PX: ttlMs });
+
   return r === 'OK';
 }

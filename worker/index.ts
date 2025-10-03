@@ -5,6 +5,7 @@ import { db } from '@/db';
 import { dbUpdateJob } from '@/db/functions/job';
 import { executionTable, jobTable, secretTable, type ExecutionStatus } from '@/db/schema';
 import { connection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
+import { decryptSecret } from '@/utils/crypto';
 import { Job, Worker } from 'bullmq';
 import { eq } from 'drizzle-orm';
 
@@ -12,19 +13,21 @@ const RUN_DEFAULT_TIMEOUT_MS = 3214;
 const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 const WORKER_CONCURRENCY = 20;
 
-async function fetchHmacSecret(keyId: string | null): Promise<string | null> {
+async function getHmacSecret({ keyId }: { keyId: string | null }): Promise<string | null> {
   if (keyId === null) {
     return null;
   }
 
-  const [row] = await db.select().from(secretTable).where(eq(secretTable.id, keyId));
+  const [secretRow] = await db.select().from(secretTable).where(eq(secretTable.id, keyId));
 
-  if (row === undefined) {
+  if (secretRow === undefined) {
     return null;
   }
 
-  // TODO: decrypt secret here if encrypted
-  return row.value;
+  const encrypted = secretRow.value;
+  const decrypted = decryptSecret(encrypted);
+
+  return decrypted;
 }
 
 async function runOnce(bull: Job<RunJobPayload>) {
@@ -36,15 +39,13 @@ async function runOnce(bull: Job<RunJobPayload>) {
 
   const scheduledFor = new Date(bull.data.scheduledForISO);
 
-  // Prepare execution record (attempt=1 initially)
   const execId = randomUUID();
   const startedAt = new Date();
 
   // Optional: enforce quotas/plan here; if exceeded, record skipped
   // if (await quotaExceeded(jobRow.projectId)) { ... }
 
-  // Resolve HMAC secret if configured
-  const hmacSecret = await fetchHmacSecret(jobRow.hmacSigningKeyId);
+  const hmacSecret = await getHmacSecret({ keyId: jobRow.hmacSigningKeyId });
 
   let attempt = 0;
   let lastError: any = null;
@@ -77,7 +78,6 @@ async function runOnce(bull: Job<RunJobPayload>) {
       responsePreview = res.responsePreview;
       responseSize = res.responseSize;
 
-      // consider 2xx and 3xx as success
       if (res.statusCode >= 200 && res.statusCode < 400) {
         finalStatus = 'succeeded';
         lastError = null;
@@ -91,7 +91,6 @@ async function runOnce(bull: Job<RunJobPayload>) {
     }
 
     if (attempt < maxAttempts) {
-      // backoff with jitter
       const base = jobRow.backoffInitialMs;
       const factor = jobRow.backoffFactor;
       const jitter = Math.floor(Math.random() * (jobRow.jitterMs ?? 0));
@@ -120,7 +119,6 @@ async function runOnce(bull: Job<RunJobPayload>) {
     responsePreview,
   });
 
-  // Update job failure streak
   const consecutiveFailures =
     finalStatus === 'succeeded' ? 0 : (jobRow.consecutiveFailures ?? 0) + 1;
 
@@ -148,8 +146,6 @@ async function main() {
   const worker = new Worker<RunJobPayload>(RUN_QUEUE_NAME, async (bullJob) => runOnce(bullJob), {
     connection,
     concurrency,
-    // Important: disable internal attempts; we implement attempts inside runOnce()
-    // If you prefer Bull attempts, set attempts here and simplify runOnce.
   });
 
   worker.on('active', (job) => {

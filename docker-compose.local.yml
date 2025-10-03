@@ -1,19 +1,29 @@
 services:
   web:
     image: easycron-services:latest
+    container_name: web
+    networks:
+      - local_network
+    depends_on:
+      - redis
     command: ['node', 'server.js']
     env_file:
       - .env.compose
     ports:
       - '3000:3000'
-    restart: on-failure
+    restart: unless-stopped
 
   worker:
     image: easycron-services:latest
     command: ['node', 'dist/worker/index.js']
+    container_name: worker
+    networks:
+      - local_network
+    depends_on:
+      - redis
     env_file:
       - .env.compose
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ['CMD', 'node', '-e', 'process.exit(0)']
       interval: 30s
@@ -23,9 +33,14 @@ services:
   scheduler:
     image: easycron-services:latest
     command: ['node', 'dist/scheduler/index.js']
+    container_name: scheduler
+    networks:
+      - local_network
+    depends_on:
+      - redis
     env_file:
       - .env.compose
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ['CMD', 'node', '-e', 'process.exit(0)']
       interval: 30s
@@ -35,6 +50,8 @@ services:
   redis:
     image: redis:7.2-alpine
     container_name: redis
+    networks:
+      - local_network
     env_file:
       - .env.compose
     restart: unless-stopped
@@ -43,7 +60,7 @@ services:
       - redis_data_local:/data
 
 networks:
-  default:
+  local_network:
     driver: bridge
 
 volumes:

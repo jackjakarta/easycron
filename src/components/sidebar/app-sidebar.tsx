@@ -15,7 +15,7 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
 
 export default function AppSidebar({ user, ...props }: AppSidebarProps) {
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
         <NavHeader />
       </SidebarHeader>

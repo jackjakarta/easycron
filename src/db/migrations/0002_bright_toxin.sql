@@ -1,0 +1,1 @@
+ALTER TABLE "app"."job" ADD CONSTRAINT "job_hmac_signing_key_id_secret_id_fk" FOREIGN KEY ("hmac_signing_key_id") REFERENCES "app"."secret"("id") ON DELETE no action ON UPDATE no action;
