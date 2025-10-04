@@ -1,2 +1,0 @@
-ALTER TABLE "app"."secret" ADD COLUMN "user_id" uuid NOT NULL;--> statement-breakpoint
-ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;

@@ -1,6 +1,6 @@
 services:
   web:
-    image: easycron-services:latest
+    image: easycron-local:latest
     container_name: web
     networks:
       - local_network
@@ -14,7 +14,7 @@ services:
     restart: unless-stopped
 
   worker:
-    image: easycron-services:latest
+    image: easycron-local:latest
     command: ['node', 'dist/worker/index.js']
     container_name: worker
     networks:
@@ -31,7 +31,7 @@ services:
       retries: 3
 
   scheduler:
-    image: easycron-services:latest
+    image: easycron-local:latest
     command: ['node', 'dist/scheduler/index.js']
     container_name: scheduler
     networks:

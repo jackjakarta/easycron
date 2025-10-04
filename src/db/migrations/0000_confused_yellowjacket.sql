@@ -24,7 +24,6 @@ CREATE TABLE "app"."api_key" (
 	"start" text,
 	"prefix" text,
 	"key" text NOT NULL,
-	"user_id" uuid NOT NULL,
 	"refill_interval" integer,
 	"refill_amount" integer,
 	"last_refill_at" timestamp with time zone,
@@ -38,6 +37,7 @@ CREATE TABLE "app"."api_key" (
 	"expires_at" timestamp with time zone,
 	"permissions" text,
 	"metadata" jsonb,
+	"user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "api_key_key_unique" UNIQUE("key")
@@ -75,7 +75,6 @@ CREATE TABLE "app"."job" (
 	"backoff_initial_ms" integer DEFAULT 5000 NOT NULL,
 	"backoff_factor" real DEFAULT 2 NOT NULL,
 	"jitter_ms" integer DEFAULT 500 NOT NULL,
-	"hmac_signing_key_id" uuid,
 	"last_run_at" timestamp with time zone,
 	"next_run_at" timestamp with time zone NOT NULL,
 	"consecutive_failures" integer DEFAULT 0 NOT NULL,
@@ -96,11 +95,13 @@ CREATE TABLE "app"."project" (
 --> statement-breakpoint
 CREATE TABLE "app"."secret" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"project_id" uuid NOT NULL,
 	"name" text NOT NULL,
 	"value" text NOT NULL,
+	"project_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "secret_project_id_unique" UNIQUE("project_id")
 );
 --> statement-breakpoint
 CREATE TABLE "app"."session" (
@@ -149,10 +150,10 @@ CREATE TABLE "app"."verification" (
 CREATE TABLE "app"."webhook_endpoint" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"url" text NOT NULL,
-	"secret" text NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
-	"last_failure_at" timestamp with time zone,
 	"consecutive_failures" integer DEFAULT 0 NOT NULL,
+	"last_failure_at" timestamp with time zone,
+	"project_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
@@ -165,8 +166,10 @@ ALTER TABLE "app"."job" ADD CONSTRAINT "job_project_id_project_id_fk" FOREIGN KE
 ALTER TABLE "app"."job" ADD CONSTRAINT "job_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."project" ADD CONSTRAINT "project_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."secret" ADD CONSTRAINT "secret_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."session" ADD CONSTRAINT "session_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."two_factor" ADD CONSTRAINT "two_factor_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."webhook_endpoint" ADD CONSTRAINT "webhook_endpoint_project_id_project_id_fk" FOREIGN KEY ("project_id") REFERENCES "app"."project"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "app"."webhook_endpoint" ADD CONSTRAINT "webhook_endpoint_user_id_user_entity_id_fk" FOREIGN KEY ("user_id") REFERENCES "app"."user_entity"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "exec_job_started_idx" ON "app"."execution" USING btree ("started_at","job_id");--> statement-breakpoint
 CREATE INDEX "jobs_project_id_user_id_next_run_at_idx" ON "app"."job" USING btree ("next_run_at","project_id","user_id");--> statement-breakpoint
