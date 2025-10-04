@@ -1,0 +1,67 @@
+import { getUser } from '@/auth/utils';
+import Header from '@/components/common/header';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { dbGetFinishedExecutionsByJobId } from '@/db/functions/execution';
+import { dbGetJobById } from '@/db/functions/job';
+import { getAsyncPageContext, PageContext } from '@/utils/context';
+import { notFound } from 'next/navigation';
+import { z } from 'zod';
+
+import ExecutionsTable from './executions-table';
+
+const pageContextSchema = z.object({
+  params: z.object({
+    projectId: z.uuid(),
+    jobId: z.uuid(),
+  }),
+});
+
+export default async function Page(context: PageContext) {
+  const [user, pageContext] = await Promise.all([getUser(), getAsyncPageContext(context)]);
+  const parsed = pageContextSchema.safeParse(pageContext);
+
+  if (!parsed.success) {
+    return notFound();
+  }
+
+  const { jobId, projectId } = parsed.data.params;
+  const job = await dbGetJobById({ jobId, userId: user.id });
+
+  if (job === undefined) {
+    return notFound();
+  }
+
+  const jobExecutions = await dbGetFinishedExecutionsByJobId({ jobId: job.id });
+
+  return (
+    <>
+      <Header>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href={`/projects/${projectId}`}>Jobs</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{job.name}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </Header>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <ExecutionsTable executions={jobExecutions} jobId={job.id} jobName={job.name} />
+      </div>
+    </>
+  );
+}

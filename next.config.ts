@@ -9,10 +9,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    useCache: true,
-    authInterrupts: true,
-  },
 };
 
 const withNextIntl = createNextIntlPlugin();
