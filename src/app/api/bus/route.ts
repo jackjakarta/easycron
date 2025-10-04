@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { verifyWebhookSignature } from '../utils';
+import { verifyRequestSignature } from '../utils';
 
-const secret = 'my-secret-value';
+const secret = 'whsec_VUZPMFh2R8jSjB6cCCgmW1eHDOQtj06qt8majCugLO';
 
 const responseSchema = z.object({
   ok: z.string().min(1),
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
 
   const payload = await req.text();
-  const isValid = verifyWebhookSignature({ payload, signature, secret });
+  const isValid = verifyRequestSignature({ payload, signature, secret });
 
   if (!isValid) {
     console.error({ success: isValid, error: 'Invalid signature' });
