@@ -19,8 +19,7 @@ export function Hero() {
             <span className="text-muted-foreground">Stay in control.</span>
           </h1>
           <p className="text-muted-foreground max-w-xl text-lg leading-relaxed">
-            Your team's toolkit to automate workflows and monitor cron jobs in real-time. Securely
-            schedule, deploy, and scale automated tasks with confidence.
+            {`Your team's toolkit to automate workflows and monitor cron jobs in real-time. Securely schedule, deploy, and scale automated tasks with confidence.`}
           </p>
           <div className="flex flex-wrap gap-4">
             <Button
