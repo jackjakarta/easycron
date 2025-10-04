@@ -44,15 +44,7 @@ export async function verifyApiKey({ key }: { key: string }) {
   }
 }
 
-/**
- * Verify a header signature using HMAC SHA256
- *
- * @param payload - Raw request body (as string, not parsed JSON!)
- * @param signature - The signature header from the webhook (e.g. "x-signature")
- * @param secret - Your signing secret
- * @returns true if signature is valid, false otherwise
- */
-export function verifyWebhookSignature({
+export function verifyRequestSignature({
   payload,
   signature,
   secret,

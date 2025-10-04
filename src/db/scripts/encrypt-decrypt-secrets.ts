@@ -33,7 +33,7 @@ async function decryptOrEncryptAllSecrets({ skip = true }) {
   );
 }
 
-decryptOrEncryptAllSecrets({ skip: false })
+decryptOrEncryptAllSecrets({ skip: true })
   .then(() => {
     console.info(`Done processing all secrets`);
     process.exit(0);

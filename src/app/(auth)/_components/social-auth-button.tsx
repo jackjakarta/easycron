@@ -6,7 +6,6 @@ import GithubIcon from '@/components/icons/github';
 import GoogleIcon from '@/components/icons/google';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 
 type SocialLoginButtonProps = {
   provider: SocialProvider;
@@ -14,18 +13,15 @@ type SocialLoginButtonProps = {
 } & Omit<React.ComponentProps<typeof Button>, 'type' | 'onClick'>;
 
 export default function SocialAuthButton({ provider, onError, ...props }: SocialLoginButtonProps) {
-  const router = useRouter();
   const t = useTranslations('auth.login.form.buttons');
 
   async function handleSocialLogin() {
-    const { error } = await authClient.signIn.social({ provider });
+    const { error } = await authClient.signIn.social({ provider, callbackURL: '/dashboard' });
 
     if (error !== null) {
       onError?.();
       return;
     }
-
-    router.replace('/');
   }
 
   return (
