@@ -113,13 +113,13 @@ export default function ProjectsDisplay() {
   );
 }
 
-const formatDate = (date: Date) => {
+function formatDate(date: Date) {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(date));
-};
+}
 
 const getTimeAgo = (date: Date) => {
   const now = new Date();
