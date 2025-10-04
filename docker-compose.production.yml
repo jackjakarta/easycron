@@ -43,7 +43,7 @@ services:
         preferences:
           - spread: node.hostname
         constraints:
-          - node.hostname != easycron-redis
+          - node.hostname != easycron-swarm-redis
       update_config:
         order: start-first
         parallelism: 1
@@ -76,7 +76,7 @@ services:
         preferences:
           - spread: node.hostname
         constraints:
-          - node.hostname != easycron-redis
+          - node.hostname != easycron-swarm-redis
       update_config:
         order: stop-first
         parallelism: 1
@@ -142,7 +142,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == easycron-redis
+          - node.hostname == easycron-swarm-redis
       restart_policy:
         condition: on-failure
       labels:
