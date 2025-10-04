@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { verifyRequestSignature } from '../utils';
 
-const secret = 'whsec_VUZPMFh2R8jSjB6cCCgmW1eHDOQtj06qt8majCugLO';
+const secret = 'mock-secret-for-test-endpoint';
 
 const responseSchema = z.object({
   ok: z.string().min(1),

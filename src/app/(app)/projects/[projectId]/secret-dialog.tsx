@@ -82,7 +82,7 @@ export default function SecretDialog({ trigger, projectId, regenerate }: SecretD
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button onClick={handleCreateSecret}>Create</Button>
+              <Button onClick={handleCreateSecret}>{regenerate ? 'Regenerate' : 'Create'}</Button>
             </DialogFooter>
           </>
         ) : (

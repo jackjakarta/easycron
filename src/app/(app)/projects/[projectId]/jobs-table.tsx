@@ -95,7 +95,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                 regenerate={secretEnabled}
                 trigger={
                   <Button variant="outline" className="mr-2">
-                    HMAC Secret
+                    Signing Secret
                   </Button>
                 }
               />
