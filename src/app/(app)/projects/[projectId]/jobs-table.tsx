@@ -20,7 +20,17 @@ import {
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Clock, Globe, MoreHorizontal, Pause, Pencil, Play, Plus, Trash2 } from 'lucide-react';
+import {
+  Clock,
+  Globe,
+  MoreHorizontal,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
+  RefreshCcw,
+  Trash2,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
@@ -198,7 +208,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -206,7 +216,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                             job={job}
                             trigger={
                               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Pencil className="mr-2 h-4 w-4" />
+                                <Pencil className="mr-2 size-4" />
                                 Edit
                               </DropdownMenuItem>
                             }
@@ -217,12 +227,12 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                           >
                             {job.enabled ? (
                               <>
-                                <Pause className="mr-2 h-4 w-4" />
+                                <Pause className="mr-2 size-4" />
                                 Disable
                               </>
                             ) : (
                               <>
-                                <Play className="mr-2 h-4 w-4" />
+                                <Play className="mr-2 size-4" />
                                 Enable
                               </>
                             )}
@@ -230,10 +240,17 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
 
                           {job.enabled && (
                             <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
-                              <Play className="mr-2 h-4 w-4" />
+                              <Play className="mr-2 size-4" />
                               Run Now
                             </DropdownMenuItem>
                           )}
+
+                          <DropdownMenuItem
+                            onSelect={() => router.push(`/projects/${projectId}/job/${job.id}`)}
+                          >
+                            <RefreshCcw className="mr-2 size-4" />
+                            Executions
+                          </DropdownMenuItem>
 
                           <ConfirmationDialog
                             title="Delete Job"
@@ -246,7 +263,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                                 onSelect={(e) => e.preventDefault()}
                                 className="text-destructive focus:text-destructive"
                               >
-                                <Trash2 className="text-destructive mr-2 h-4 w-4" />
+                                <Trash2 className="text-destructive mr-2 size-4" />
                                 Delete
                               </DropdownMenuItem>
                             }
@@ -269,7 +286,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                         projectId={projectId}
                         trigger={
                           <Button>
-                            <Plus className="mr-2 h-4 w-4" />
+                            <Plus className="mr-2 size-4" />
                             Create Job
                           </Button>
                         }
