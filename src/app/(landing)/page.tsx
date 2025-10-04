@@ -1,4 +1,5 @@
 import { CTA } from './cta';
+import { DeveloperAPI } from './developer-api';
 import { Features } from './features';
 import { Header } from './header';
 import { Hero } from './hero';
@@ -11,6 +12,7 @@ export default function Page() {
       <Hero />
       <Stats />
       <Features />
+      <DeveloperAPI />
       <CTA />
     </main>
   );
