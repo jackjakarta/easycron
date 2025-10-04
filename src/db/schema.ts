@@ -117,9 +117,6 @@ export const apiKeyTable = appSchema.table('api_key', {
   start: text('start'),
   prefix: text('prefix'),
   key: text('key').notNull().unique(),
-  userId: uuid('user_id')
-    .references(() => userTable.id)
-    .notNull(),
   refillInterval: integer('refill_interval'),
   refillAmount: integer('refill_amount'),
   lastRefillAt: timestamp('last_refill_at', { withTimezone: true }),
@@ -133,6 +130,9 @@ export const apiKeyTable = appSchema.table('api_key', {
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   permissions: text('permissions'),
   metadata: jsonb('metadata'),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -276,10 +276,12 @@ export type UpdateSecretModel = UpdateDbRow<SecretModel>;
 export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
   id: uuid('id').defaultRandom().primaryKey(),
   url: text('url').notNull(),
-  secret: text('secret').notNull(),
   isActive: boolean('is_active').default(true).notNull(),
-  lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
   consecutiveFailures: integer('consecutive_failures').default(0).notNull(),
+  lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
+  projectId: uuid('project_id')
+    .references(() => projectTable.id)
+    .notNull(),
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),

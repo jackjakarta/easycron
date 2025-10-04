@@ -8,7 +8,7 @@ export async function dbGetUserApiKeys({ userId }: { userId: string }): Promise<
     .select()
     .from(apiKeyTable)
     .where(eq(apiKeyTable.userId, userId))
-    .orderBy(desc(apiKeyTable.updatedAt));
+    .orderBy(desc(apiKeyTable.enabled), desc(apiKeyTable.updatedAt));
 
   return keys;
 }

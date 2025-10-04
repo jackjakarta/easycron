@@ -1,5 +1,5 @@
 {
-  "id": "7afbab27-e8ff-40c7-89e7-3d1f960f3108",
+  "id": "604432d1-7471-4fe9-8ef5-0d3f2d8eb948",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -144,12 +144,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "refill_interval": {
           "name": "refill_interval",
           "type": "integer",
@@ -230,6 +224,12 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -503,12 +503,6 @@
           "notNull": true,
           "default": 500
         },
-        "hmac_signing_key_id": {
-          "name": "hmac_signing_key_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "last_run_at": {
           "name": "last_run_at",
           "type": "timestamp with time zone",
@@ -707,12 +701,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "project_id": {
-          "name": "project_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -722,6 +710,18 @@
         "value": {
           "name": "value",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -751,10 +751,26 @@
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "secret_user_id_user_entity_id_fk": {
+          "name": "secret_user_id_user_entity_id_fk",
+          "tableFrom": "secret",
+          "tableTo": "user_entity",
+          "schemaTo": "app",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "secret_project_id_unique": {
+          "name": "secret_project_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["project_id"]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1050,12 +1066,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "secret": {
-          "name": "secret",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "is_active": {
           "name": "is_active",
           "type": "boolean",
@@ -1063,18 +1073,24 @@
           "notNull": true,
           "default": true
         },
-        "last_failure_at": {
-          "name": "last_failure_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
         "consecutive_failures": {
           "name": "consecutive_failures",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "last_failure_at": {
+          "name": "last_failure_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -1099,6 +1115,16 @@
       },
       "indexes": {},
       "foreignKeys": {
+        "webhook_endpoint_project_id_project_id_fk": {
+          "name": "webhook_endpoint_project_id_project_id_fk",
+          "tableFrom": "webhook_endpoint",
+          "tableTo": "project",
+          "schemaTo": "app",
+          "columnsFrom": ["project_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
         "webhook_endpoint_user_id_user_entity_id_fk": {
           "name": "webhook_endpoint_user_id_user_entity_id_fk",
           "tableFrom": "webhook_endpoint",
