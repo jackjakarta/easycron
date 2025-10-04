@@ -26,6 +26,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-lets-encrypt:/letsencrypt
     deploy:
+      replicas: 1
       placement:
         constraints:
           - node.role == manager
@@ -38,7 +39,7 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 3
+      replicas: 4
       placement:
         preferences:
           - spread: node.hostname
@@ -71,7 +72,7 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 2
+      replicas: 3
       placement:
         preferences:
           - spread: node.hostname
@@ -105,10 +106,12 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
+        preferences:
+          - spread: node.hostname
         constraints:
-          - node.role == manager
+          - node.hostname != easycron-swarm-redis
       update_config:
         order: stop-first
         parallelism: 1

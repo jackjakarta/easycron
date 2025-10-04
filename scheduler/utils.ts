@@ -35,6 +35,7 @@ export async function tick() {
     // 1) enqueue with colon-free jobId
     const payload = { jobId: j.id, scheduledForISO: j.nextRunAt.toISOString() };
     const customId = occurrenceJobId(j.id, payload.scheduledForISO);
+
     await q.add('run', payload, {
       jobId: customId,
       removeOnComplete: 1000,
