@@ -1,5 +1,6 @@
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
+import PageContainer from '@/components/layout/page-container';
 
 import ProjectsDisplay from './projects-display';
 
@@ -7,11 +8,11 @@ export default function Page() {
   return (
     <>
       <Header>
-        <CustomBreadcrumbs current="Projects" trail={[]} />
+        <CustomBreadcrumbs current="Projects" />
       </Header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <PageContainer wide>
         <ProjectsDisplay />
-      </div>
+      </PageContainer>
     </>
   );
 }

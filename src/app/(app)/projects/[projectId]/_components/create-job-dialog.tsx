@@ -97,9 +97,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 id="name"
                 placeholder="Enter job name"
                 {...register('name')}
-                className={cn(errors.name && 'border-red-500')}
+                className={cn(errors.name && 'border-destructive')}
               />
-              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+              {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -109,9 +109,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 type="url"
                 placeholder="https://example.com/api/endpoint"
                 {...register('url')}
-                className={cn(errors.url && 'border-red-500')}
+                className={cn(errors.url && 'border-destructive')}
               />
-              {errors.url && <p className="text-sm text-red-500">{errors.url.message}</p>}
+              {errors.url && <p className="text-destructive text-sm">{errors.url.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -121,7 +121,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 control={control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className={errors.httpMethod ? 'border-red-500' : ''}>
+                    <SelectTrigger className={errors.httpMethod ? 'border-destructive' : ''}>
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
@@ -135,7 +135,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 )}
               />
               {errors.httpMethod && (
-                <p className="text-sm text-red-500">{errors.httpMethod.message}</p>
+                <p className="text-destructive text-sm">{errors.httpMethod.message}</p>
               )}
             </div>
 
@@ -155,10 +155,10 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 id="scheduleCron"
                 placeholder="0 0 * * *"
                 {...register('scheduleCron')}
-                className={cn(errors.scheduleCron && 'border-red-500')}
+                className={cn(errors.scheduleCron && 'border-destructive')}
               />
               {errors.scheduleCron && (
-                <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
+                <p className="text-destructive text-sm">{errors.scheduleCron.message}</p>
               )}
               <p className="text-muted-foreground text-xs">
                 {`Example: "0 0 * * *" runs daily at midnight`}
@@ -171,9 +171,11 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 id="timezone"
                 placeholder="UTC"
                 {...register('timezone')}
-                className={cn(errors.timezone && 'border-red-500')}
+                className={cn(errors.timezone && 'border-destructive')}
               />
-              {errors.timezone && <p className="text-sm text-red-500">{errors.timezone.message}</p>}
+              {errors.timezone && (
+                <p className="text-destructive text-sm">{errors.timezone.message}</p>
+              )}
               <p className="text-muted-foreground text-xs">
                 Example: UTC, America/New_York, Europe/London
               </p>
@@ -200,10 +202,10 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <Input
                         placeholder="Header name (e.g., Content-Type)"
                         {...register(`headers.${index}.k`)}
-                        className={cn(errors.headers?.[index]?.k && 'border-red-500')}
+                        className={cn(errors.headers?.[index]?.k && 'border-destructive')}
                       />
                       {errors.headers?.[index]?.k && (
-                        <p className="mt-1 text-sm text-red-500">
+                        <p className="text-destructive mt-1 text-sm">
                           {errors.headers[index]?.k?.message}
                         </p>
                       )}
@@ -212,10 +214,10 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <Input
                         placeholder="Header value (e.g., application/json)"
                         {...register(`headers.${index}.v`)}
-                        className={cn(errors.headers?.[index]?.v && 'border-red-500')}
+                        className={cn(errors.headers?.[index]?.v && 'border-destructive')}
                       />
                       {errors.headers?.[index]?.v && (
-                        <p className="mt-1 text-sm text-red-500">
+                        <p className="text-destructive mt-1 text-sm">
                           {errors.headers[index]?.v?.message}
                         </p>
                       )}
@@ -246,9 +248,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 placeholder="JSON payload for POST/PUT requests"
                 rows={4}
                 {...register('body')}
-                className={cn(errors.body && 'border-red-500')}
+                className={cn(errors.body && 'border-destructive')}
               />
-              {errors.body && <p className="text-sm text-red-500">{errors.body.message}</p>}
+              {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
             </div>
           </div>
 

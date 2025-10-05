@@ -15,21 +15,22 @@ type BreadcrumbTrail = {
 
 type CustomBreadcrumbProps = {
   current: string;
-  trail: BreadcrumbTrail[];
+  trail?: BreadcrumbTrail[];
 };
 
-export default function CustomBreadcrumbs({ trail, current }: CustomBreadcrumbProps) {
+export default function CustomBreadcrumbs({ current, trail = [] }: CustomBreadcrumbProps) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {trail.map((item) => (
-          <React.Fragment key={item.href}>
-            <BreadcrumbItem>
-              <BreadcrumbLink href={item.href}>{item.name}</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-          </React.Fragment>
-        ))}
+        {trail.length > 0 &&
+          trail.map((item) => (
+            <React.Fragment key={item.href}>
+              <BreadcrumbItem>
+                <BreadcrumbLink href={item.href}>{item.name}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+            </React.Fragment>
+          ))}
         <BreadcrumbItem>
           <BreadcrumbPage>{current}</BreadcrumbPage>
         </BreadcrumbItem>
