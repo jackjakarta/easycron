@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
-import { parseCronExpression } from '@/utils/cron';
+import { describeCronExpression } from '@/utils/cron';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Clock,
@@ -160,7 +160,7 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
                       <div className="space-y-1">
                         <div className="font-mono text-sm">{job.scheduleCron}</div>
                         <div className="text-muted-foreground text-xs">
-                          {parseCronExpression(job.scheduleCron)}
+                          {describeCronExpression(job.scheduleCron)}
                         </div>
                       </div>
                     </TableCell>
