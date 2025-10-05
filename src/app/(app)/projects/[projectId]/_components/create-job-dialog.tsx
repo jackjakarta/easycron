@@ -1,6 +1,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -10,18 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { httpMethodSchema, type JobModel } from '@/db/schema';
+import { httpMethodSchema } from '@/db/schema';
+import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -29,33 +30,28 @@ import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { updateJobAction } from './actions';
-import { jobFormSchema, type JobFormData } from './schemas';
+import { createJobAction } from '../actions';
+import { jobFormSchema, type JobFormData } from '../schemas';
+import GenerateCronExpression from './generate-cron-expression';
 
-type EditJobDialogProps = {
-  job: JobModel;
+type CreateJobDialogProps = {
   trigger: React.ReactNode;
+  projectId: string;
 };
 
-export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
+export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogProps) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isDirty },
+    formState: { errors, isSubmitting },
+    reset,
+    setValue,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
-    defaultValues: {
-      name: job.name,
-      url: job.url,
-      httpMethod: job.httpMethod,
-      scheduleCron: job.scheduleCron,
-      timezone: job.timezone,
-      headers: job.headers,
-      body: job.body ?? '',
-    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -73,8 +69,11 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
     };
 
     try {
-      await updateJobAction({ jobId: job.id, data: cleanedData });
-      toast.success('Job updated successfully');
+      await createJobAction({ data: cleanedData, projectId });
+      setIsOpen(false);
+      reset();
+
+      toast.success('Job created successfully');
       router.refresh();
     } catch (error) {
       console.error('Failed to update job:', error);
@@ -83,16 +82,14 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
   }
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent className="overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Edit job</SheetTitle>
-          <SheetDescription>
-            Make changes to your job here. Click save when you are done.
-          </SheetDescription>
-        </SheetHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Job</DialogTitle>
+          <DialogDescription>Create a new job with the details below.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
           <div className="space-y-6 px-4">
             <div className="space-y-2">
               <Label htmlFor="name">Job Name</Label>
@@ -100,7 +97,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                 id="name"
                 placeholder="Enter job name"
                 {...register('name')}
-                className={errors.name ? 'border-red-500' : ''}
+                className={cn(errors.name && 'border-red-500')}
               />
               {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
@@ -112,7 +109,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                 type="url"
                 placeholder="https://example.com/api/endpoint"
                 {...register('url')}
-                className={errors.url ? 'border-red-500' : ''}
+                className={cn(errors.url && 'border-red-500')}
               />
               {errors.url && <p className="text-sm text-red-500">{errors.url.message}</p>}
             </div>
@@ -143,12 +140,22 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cronExpression">Cron Expression</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="scheduleCron">Cron Expression</Label>
+                <GenerateCronExpression
+                  trigger={
+                    <Button variant="outline" type="button" size="sm">
+                      Natural Language
+                    </Button>
+                  }
+                  onFinish={(value) => setValue('scheduleCron', value)}
+                />
+              </div>
               <Input
                 id="scheduleCron"
                 placeholder="0 0 * * *"
                 {...register('scheduleCron')}
-                className={errors.scheduleCron ? 'border-red-500' : ''}
+                className={cn(errors.scheduleCron && 'border-red-500')}
               />
               {errors.scheduleCron && (
                 <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
@@ -164,7 +171,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                 id="timezone"
                 placeholder="UTC"
                 {...register('timezone')}
-                className={errors.timezone ? 'border-red-500' : ''}
+                className={cn(errors.timezone && 'border-red-500')}
               />
               {errors.timezone && <p className="text-sm text-red-500">{errors.timezone.message}</p>}
               <p className="text-muted-foreground text-xs">
@@ -193,7 +200,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                       <Input
                         placeholder="Header name (e.g., Content-Type)"
                         {...register(`headers.${index}.k`)}
-                        className={errors.headers?.[index]?.k ? 'border-red-500' : ''}
+                        className={cn(errors.headers?.[index]?.k && 'border-red-500')}
                       />
                       {errors.headers?.[index]?.k && (
                         <p className="mt-1 text-sm text-red-500">
@@ -205,7 +212,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                       <Input
                         placeholder="Header value (e.g., application/json)"
                         {...register(`headers.${index}.v`)}
-                        className={errors.headers?.[index]?.v ? 'border-red-500' : ''}
+                        className={cn(errors.headers?.[index]?.v && 'border-red-500')}
                       />
                       {errors.headers?.[index]?.v && (
                         <p className="mt-1 text-sm text-red-500">
@@ -239,22 +246,22 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                 placeholder="JSON payload for POST/PUT requests"
                 rows={4}
                 {...register('body')}
-                className={errors.body ? 'border-red-500' : ''}
+                className={cn(errors.body && 'border-red-500')}
               />
               {errors.body && <p className="text-sm text-red-500">{errors.body.message}</p>}
             </div>
           </div>
 
-          <SheetFooter>
-            <SheetClose asChild>
+          <DialogFooter>
+            <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
-            </SheetClose>
-            <Button type="submit" disabled={isSubmitting || !isDirty}>
+            </DialogClose>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save changes'}
             </Button>
-          </SheetFooter>
+          </DialogFooter>
         </form>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

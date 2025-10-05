@@ -5,6 +5,7 @@ import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functi
 import { dbGetProjectById } from '@/db/functions/project';
 import { dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
+import { generateCronExpression } from '@/utils/ai';
 import { encryptSecret } from '@/utils/crypto';
 import { createHmacSigningKey } from '@/utils/hmac';
 
@@ -123,4 +124,11 @@ export async function createProjectSecretAction({ projectId }: { projectId: stri
   }
 
   return { ...newSecret, rawSecret };
+}
+
+export async function generateCronExpressionAction({ prompt }: { prompt: string }) {
+  await getUser();
+  const { cronExpression } = await generateCronExpression(prompt);
+
+  return cronExpression;
 }

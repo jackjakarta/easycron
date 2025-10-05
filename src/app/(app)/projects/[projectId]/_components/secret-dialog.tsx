@@ -17,7 +17,7 @@ import { Clipboard, Eye, EyeOff } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { createProjectSecretAction } from './actions';
+import { createProjectSecretAction } from '../actions';
 
 type SecretDialogProps = {
   trigger: React.ReactNode;

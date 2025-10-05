@@ -65,10 +65,3 @@ export function decryptSecret(encryptedData: string): string {
 
   return decrypted;
 }
-
-// const secret = 'my-secret-value';
-// console.debug({
-//   plain: secret,
-//   encrypted: encryptSecret(secret),
-//   decrypted: decryptSecret(encryptSecret(secret)),
-// });

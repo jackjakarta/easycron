@@ -14,7 +14,7 @@ import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 
-import { CronJobsTable } from './jobs-table';
+import CronJobsTable from './_components/cron-jobs-table';
 
 const pageContextSchema = z.object({
   params: z.object({

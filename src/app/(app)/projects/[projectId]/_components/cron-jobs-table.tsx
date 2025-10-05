@@ -36,7 +36,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from './actions';
+import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from '../actions';
 import CreateJobDialog from './create-job-dialog';
 import EditJobSheet from './edit-job-sheet';
 import SecretDialog from './secret-dialog';
@@ -47,7 +47,7 @@ type CronJobsTableProps = {
   secretEnabled: boolean;
 };
 
-export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTableProps) {
+export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTableProps) {
   const router = useRouter();
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 

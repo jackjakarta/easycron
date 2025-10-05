@@ -11,6 +11,7 @@ const openai = createOpenAI({
 
 const cronExpressionSchema = z.object({
   cronExpression: validCronSchema,
+  // cronExpression: z.string(),
 });
 
 export async function generateCronExpression(task: string) {
