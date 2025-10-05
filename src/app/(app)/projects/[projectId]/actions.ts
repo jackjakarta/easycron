@@ -8,6 +8,7 @@ import { getRunQueue } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
 import { encryptSecret } from '@/utils/crypto';
 import { createHmacSigningKey } from '@/utils/hmac';
+import { occurrenceJobId } from '@/utils/job';
 
 import { type JobFormData } from './schemas';
 
@@ -94,11 +95,6 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
   }
 
   return updatedJob;
-}
-
-function occurrenceJobId(jobId: string, scheduledISO: string) {
-  const safeISO = scheduledISO.replace(/[:.]/g, '');
-  return `run-${jobId}-${safeISO}`;
 }
 
 export async function createProjectSecretAction({ projectId }: { projectId: string }) {

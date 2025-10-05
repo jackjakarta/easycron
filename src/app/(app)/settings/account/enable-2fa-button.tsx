@@ -2,6 +2,15 @@
 
 import { authClient } from '@/auth/client';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +29,7 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 type Verify2FAFormData = z.infer<typeof verify2FASchema>;
 
 export default function Enable2FAButton() {
+  const [isOpen, setIsOpen] = React.useState(false);
   const router = useRouter();
 
   const [totpURI, setTotpURI] = React.useState<string | null>(null);
@@ -77,8 +87,10 @@ export default function Enable2FAButton() {
       return;
     }
 
-    setTotpURI(data.totpURI);
-    setBackupCodes(data.backupCodes);
+    const { totpURI, backupCodes } = data;
+
+    setTotpURI(totpURI);
+    setBackupCodes(backupCodes);
   }
 
   async function downloadBackupCodes() {
@@ -98,58 +110,68 @@ export default function Enable2FAButton() {
   const passwordValue = watchPassword('password');
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      {totpURI === null ? (
-        <form
-          onSubmit={handlePasswordSubmit(onSubmitPassword)}
-          className="flex flex-col items-center justify-center gap-4"
-        >
-          <Label htmlFor="password">Enter your password:</Label>
-          <Input
-            {...registerPassword('password')}
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-          />
-          <Button
-            type="submit"
-            disabled={isPasswordSubmitting || passwordValue.trim().length === 0}
-          >
-            {isPasswordSubmitting ? 'Enabling...' : 'Enable 2FA'}
-          </Button>
-        </form>
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-4">
-          <p className="text-center">Scan this QR code with your authenticator app:</p>
-          <QRCode value={totpURI} />
-          <span>Secret: {extractOtpauthSecret(totpURI)}</span>
-          <span>Backup codes:</span>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="max-md:w-full">
+          Enable 2FA
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Two-Factor Authentication</DialogTitle>
+          <DialogDescription>Enable 2FA for your account.</DialogDescription>
+        </DialogHeader>
+        <>
+          {totpURI === null ? (
+            <form
+              onSubmit={handlePasswordSubmit(onSubmitPassword)}
+              className="flex flex-col items-center justify-center gap-4"
+            >
+              <div className="flex w-full flex-col gap-3">
+                <Label htmlFor="password">Your password:</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...registerPassword('password')}
+                  placeholder="*************"
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  disabled={isPasswordSubmitting || passwordValue.trim().length === 0}
+                >
+                  {isPasswordSubmitting ? 'Enabling...' : 'Enable 2FA'}
+                </Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="flex flex-col items-center justify-center gap-4">
+              <p className="text-center">Scan this QR code with your authenticator app:</p>
+              <QRCode value={totpURI} />
+              <span className="text-sm">Secret: {extractOtpauthSecret(totpURI)}</span>
 
-          {backupCodes !== null && backupCodes.length > 0 && (
-            <>
-              <ul>
-                {backupCodes.map((code) => (
-                  <li key={code}>{code}</li>
-                ))}
-              </ul>
+              {backupCodes !== null && backupCodes.length > 0 && (
+                <Button onClick={downloadBackupCodes}>Download Backup Codes</Button>
+              )}
 
-              <Button onClick={downloadBackupCodes}>Download Backup Codes</Button>
-            </>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col items-center justify-center gap-4"
+              >
+                <Label htmlFor="code">Enter 2FA Code:</Label>
+                <Input id="code" {...register('code')} placeholder="Enter 2FA code" />
+                <DialogFooter>
+                  <Button type="submit" disabled={isSubmitting || codeValue.trim().length === 0}>
+                    {isSubmitting ? 'Verifying...' : 'Verify 2FA Code'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </div>
           )}
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col items-center justify-center gap-4"
-          >
-            <Label htmlFor="code">Enter 2FA Code:</Label>
-            <Input {...register('code')} id="code" placeholder="Enter 2FA code" />
-            <Button type="submit" disabled={isSubmitting || codeValue.trim().length === 0}>
-              {isSubmitting ? 'Verifying...' : 'Verify 2FA Code'}
-            </Button>
-          </form>
-        </div>
-      )}
-    </div>
+        </>
+      </DialogContent>
+    </Dialog>
   );
 }
 

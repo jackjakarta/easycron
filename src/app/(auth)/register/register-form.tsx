@@ -34,7 +34,6 @@ export default function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
     setError,
-    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
   });
@@ -62,14 +61,9 @@ export default function RegisterForm() {
     router.replace('/login');
   }
 
-  const emailValue = watch('email');
-  const passwordValue = watch('password');
+  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
 
-  const submitButtonDisabled =
-    isSubmitting ||
-    isSubmitSuccessful ||
-    emailValue.trim().length === 0 ||
-    passwordValue.trim().length === 0;
+  const errorMessageClassName = 'text-destructive text-sm';
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,10 +78,14 @@ export default function RegisterForm() {
               <div className="grid gap-3">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" type="text" placeholder="John Doe" {...register('name')} />
+                {errors.name && <div className={errorMessageClassName}>{errors.name.message}</div>}
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" placeholder="m@example.com" {...register('email')} />
+                {errors.email && (
+                  <div className={errorMessageClassName}>{errors.email.message}</div>
+                )}
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="password">Password</Label>
@@ -97,8 +95,10 @@ export default function RegisterForm() {
                   placeholder="********"
                   {...register('password')}
                 />
-                {errors.password && <div>{errors.password.message}</div>}
-                {errors.root && <div>{errors.root.message}</div>}
+                {errors.password && (
+                  <div className={errorMessageClassName}>{errors.password.message}</div>
+                )}
+                {errors.root && <div className={errorMessageClassName}>{errors.root.message}</div>}
               </div>
               <Button type="submit" disabled={submitButtonDisabled} className="w-full">
                 Register
