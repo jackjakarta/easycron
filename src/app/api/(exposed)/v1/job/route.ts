@@ -2,27 +2,17 @@ import { verifyApiKey } from '@/app/api/utils';
 import { dbInsertJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 
 import { requestBodySchema } from './schemas';
 
 export async function POST(req: NextRequest) {
   try {
     const maybeApiKey = req.headers.get('x-api-key');
-    const parsedApiKey = z.string().safeParse(maybeApiKey);
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
 
-    if (!parsedApiKey.success) {
+    if (apiKeyResult.code >= 400 && apiKeyResult.code <= 499) {
       return NextResponse.json(
-        { success: false, errors: [{ message: 'Api key is missing or not of type string' }] },
-        { status: 401 },
-      );
-    }
-
-    const apiKeyResult = await verifyApiKey({ key: parsedApiKey.data });
-
-    if (apiKeyResult.code === 401) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'Invalid API key' }] },
+        { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
     }
@@ -44,7 +34,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
-    const project = await dbGetProjectById({ projectId: body.data.projectId, userId: user.id });
+    const { projectId } = body.data;
+    const project = await dbGetProjectById({ projectId, userId: user.id });
 
     if (project === undefined) {
       return NextResponse.json(

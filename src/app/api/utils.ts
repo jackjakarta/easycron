@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { dbGetUserById } from '@/db/functions/user';
+import { z } from 'zod';
 
 export async function verifyApiKeyOrGetUser({ key }: { key: string | null }) {
   if (key === null) {
@@ -25,10 +26,16 @@ export async function verifyApiKeyOrGetUser({ key }: { key: string | null }) {
   return { success: true, user, code: 200 };
 }
 
-export async function verifyApiKey({ key }: { key: string }) {
+export async function verifyApiKey({ key }: { key: string | null }) {
+  const parsedApiKey = z.string().nonempty().safeParse(key);
+
+  if (!parsedApiKey.success) {
+    return { success: false, error: parsedApiKey.error.issues, code: 400 };
+  }
+
   try {
     const { error, key: verifiedApiKey } = await auth.api.verifyApiKey({
-      body: { key },
+      body: { key: parsedApiKey.data },
     });
 
     if (error !== null || verifiedApiKey === null) {
