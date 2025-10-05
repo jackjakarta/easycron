@@ -1,16 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -20,8 +10,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/utils/tailwind';
+import { httpMethodSchema, type JobModel } from '@/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -29,15 +29,16 @@ import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-import { createJobAction } from './actions';
-import { jobFormSchema, type JobFormData } from './schemas';
+import { updateJobAction } from '../actions';
+import { jobFormSchema, type JobFormData } from '../schemas';
+import GenerateCronExpression from './generate-cron-expression';
 
-type CreateJobDialogProps = {
+type EditJobDialogProps = {
+  job: JobModel;
   trigger: React.ReactNode;
-  projectId: string;
 };
 
-export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogProps) {
+export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -45,10 +46,19 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
+    formState: { errors, isSubmitting, isDirty },
+    setValue,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
+    defaultValues: {
+      name: job.name,
+      url: job.url,
+      httpMethod: job.httpMethod,
+      scheduleCron: job.scheduleCron,
+      timezone: job.timezone,
+      headers: job.headers,
+      body: job.body ?? '',
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -66,11 +76,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     };
 
     try {
-      await createJobAction({ data: cleanedData, projectId });
+      await updateJobAction({ jobId: job.id, data: cleanedData });
       setIsOpen(false);
-      reset();
-
-      toast.success('Job created successfully');
+      toast.success('Job updated successfully');
       router.refresh();
     } catch (error) {
       console.error('Failed to update job:', error);
@@ -79,14 +87,16 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create Job</DialogTitle>
-          <DialogDescription>Create a new job with the details below.</DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetContent className="overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>Edit job</SheetTitle>
+          <SheetDescription>
+            Make changes to your job here. Click save when you are done.
+          </SheetDescription>
+        </SheetHeader>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-6 px-4">
             <div className="space-y-2">
               <Label htmlFor="name">Job Name</Label>
@@ -94,7 +104,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 id="name"
                 placeholder="Enter job name"
                 {...register('name')}
-                className={cn(errors.name && 'border-red-500')}
+                className={errors.name ? 'border-red-500' : ''}
               />
               {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
@@ -106,7 +116,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 type="url"
                 placeholder="https://example.com/api/endpoint"
                 {...register('url')}
-                className={cn(errors.url && 'border-red-500')}
+                className={errors.url ? 'border-red-500' : ''}
               />
               {errors.url && <p className="text-sm text-red-500">{errors.url.message}</p>}
             </div>
@@ -122,8 +132,11 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
+                      {httpMethodSchema.options.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
@@ -134,12 +147,22 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="scheduleCron">Cron Expression</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="scheduleCron">Cron Expression</Label>
+                <GenerateCronExpression
+                  trigger={
+                    <Button variant="outline" type="button" size="sm">
+                      Natural Language
+                    </Button>
+                  }
+                  onFinish={(value) => setValue('scheduleCron', value)}
+                />
+              </div>
               <Input
                 id="scheduleCron"
                 placeholder="0 0 * * *"
                 {...register('scheduleCron')}
-                className={cn(errors.scheduleCron && 'border-red-500')}
+                className={errors.scheduleCron ? 'border-red-500' : ''}
               />
               {errors.scheduleCron && (
                 <p className="text-sm text-red-500">{errors.scheduleCron.message}</p>
@@ -155,7 +178,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 id="timezone"
                 placeholder="UTC"
                 {...register('timezone')}
-                className={cn(errors.timezone && 'border-red-500')}
+                className={errors.timezone ? 'border-red-500' : ''}
               />
               {errors.timezone && <p className="text-sm text-red-500">{errors.timezone.message}</p>}
               <p className="text-muted-foreground text-xs">
@@ -184,7 +207,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <Input
                         placeholder="Header name (e.g., Content-Type)"
                         {...register(`headers.${index}.k`)}
-                        className={cn(errors.headers?.[index]?.k && 'border-red-500')}
+                        className={errors.headers?.[index]?.k ? 'border-red-500' : ''}
                       />
                       {errors.headers?.[index]?.k && (
                         <p className="mt-1 text-sm text-red-500">
@@ -196,7 +219,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <Input
                         placeholder="Header value (e.g., application/json)"
                         {...register(`headers.${index}.v`)}
-                        className={cn(errors.headers?.[index]?.v && 'border-red-500')}
+                        className={errors.headers?.[index]?.v ? 'border-red-500' : ''}
                       />
                       {errors.headers?.[index]?.v && (
                         <p className="mt-1 text-sm text-red-500">
@@ -230,22 +253,22 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 placeholder="JSON payload for POST/PUT requests"
                 rows={4}
                 {...register('body')}
-                className={cn(errors.body && 'border-red-500')}
+                className={errors.body ? 'border-red-500' : ''}
               />
               {errors.body && <p className="text-sm text-red-500">{errors.body.message}</p>}
             </div>
           </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
+          <SheetFooter>
+            <SheetClose asChild>
               <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button type="submit" disabled={isSubmitting}>
+            </SheetClose>
+            <Button type="submit" disabled={isSubmitting || !isDirty}>
               {isSubmitting ? 'Saving...' : 'Save changes'}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

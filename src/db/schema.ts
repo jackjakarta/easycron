@@ -162,7 +162,7 @@ export type ProjectModel = typeof projectTable.$inferSelect;
 export type InsertProjectModel = typeof projectTable.$inferInsert;
 export type UpdateProjectModel = UpdateDbRow<ProjectModel>;
 
-export const httpMethodSchema = z.enum(['GET', 'POST']);
+export const httpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE']);
 export const httpMethodPgEnum = appSchema.enum('http_method', httpMethodSchema.enum);
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 

@@ -17,7 +17,7 @@ import { Clipboard, Eye, EyeOff } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { createProjectSecretAction } from './actions';
+import { createProjectSecretAction } from '../actions';
 
 type SecretDialogProps = {
   trigger: React.ReactNode;
@@ -111,7 +111,7 @@ export default function SecretDialog({ trigger, projectId, regenerate }: SecretD
                     size="icon"
                     onClick={() => setShowSecret(!showSecret)}
                   >
-                    {showSecret ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showSecret ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </Button>
                   <Button
                     type="button"
@@ -119,7 +119,7 @@ export default function SecretDialog({ trigger, projectId, regenerate }: SecretD
                     size="icon"
                     onClick={() => handleCopyToClipboard(rawSecret)}
                   >
-                    <Clipboard className="h-4 w-4" />
+                    <Clipboard className="size-4" />
                   </Button>
                 </div>
               </div>

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsedApiKey.success) {
       return NextResponse.json(
-        { success: false, errors: ['Api key is missing or not of type string'] },
+        { success: false, errors: [{ message: 'Api key is missing or not of type string' }] },
         { status: 401 },
       );
     }

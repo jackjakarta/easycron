@@ -15,7 +15,7 @@ export const validCronSchema = z.string().refine(
   },
 );
 
-export function parseCronExpression(cron: string): string {
+export function describeCronExpression(cron: string): string {
   try {
     const parsedCron = cronstrue.toString(cron);
     return parsedCron;
