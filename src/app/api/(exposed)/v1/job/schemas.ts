@@ -1,3 +1,4 @@
+import { validCronSchema } from '@/utils/cron';
 import { z } from 'zod';
 
 export const requestBodySchema = z
@@ -5,10 +6,7 @@ export const requestBodySchema = z
     name: z.string().min(1, 'Name is required').max(100, 'Name must be at most 100 characters'),
     url: z.url('Invalid URL').max(2000, 'URL must be at most 2000 characters'),
     httpMethod: z.enum(['GET', 'POST']),
-    scheduleCron: z
-      .string()
-      .min(1, 'Cron expression is required')
-      .max(100, 'Cron expression must be at most 100 characters'),
+    scheduleCron: validCronSchema,
     timezone: z
       .string()
       .min(1, 'Timezone is required')
