@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { httpMethodSchema } from '@/db/schema';
 import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
@@ -122,8 +123,11 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
+                      {httpMethodSchema.options.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}

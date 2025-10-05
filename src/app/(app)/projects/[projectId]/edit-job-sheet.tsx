@@ -21,7 +21,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
-import { type JobModel } from '@/db/schema';
+import { httpMethodSchema, type JobModel } from '@/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -128,8 +128,11 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
                       <SelectValue placeholder="Select HTTP method" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GET">GET</SelectItem>
-                      <SelectItem value="POST">POST</SelectItem>
+                      {httpMethodSchema.options.map((method) => (
+                        <SelectItem key={method} value={method}>
+                          {method}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 )}
