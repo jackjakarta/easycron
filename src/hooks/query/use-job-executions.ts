@@ -4,7 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
 
-export function useJobExecutionsQuery(options: { jobId: string } & QueryOptions<ExecutionModel[]>) {
+type JobExecutionQueryOptions = QueryOptions<ExecutionModel[]> & { jobId: string };
+
+export function useJobExecutionsQuery(options: JobExecutionQueryOptions) {
   return useQuery<ExecutionModel[]>({
     ...options,
     queryKey: ['job-executions'],
