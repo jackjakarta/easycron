@@ -21,7 +21,7 @@ export async function getHmacSecret({
     return null;
   }
 
-  const encrypted = secretRow.value;
+  const { value: encrypted } = secretRow;
   const decrypted = decryptSecret(encrypted);
 
   return decrypted;

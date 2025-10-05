@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
+import { parseCronExpression } from '@/utils/cron';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Clock,
@@ -99,13 +100,13 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
           </div>
 
           {cronJobs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1">
+            <div className="flex flex-wrap items-center gap-2">
               <SecretDialog
                 projectId={projectId}
                 regenerate={secretEnabled}
                 trigger={
-                  <Button variant="outline" className="mr-2">
-                    Signing Secret
+                  <Button variant="outline">
+                    {secretEnabled ? 'Regenerate Secret' : 'Enable Signing'}
                   </Button>
                 }
               />
@@ -301,33 +302,6 @@ export function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTa
       </CardContent>
     </Card>
   );
-}
-
-function parseCronExpression(cron: string): string {
-  const parts = cron.split(' ');
-
-  if (parts.length !== 5) {
-    return cron;
-  }
-
-  switch (cron) {
-    case '* * * * *':
-      return 'Every minute';
-    case '*/10 * * * *':
-      return 'Every 10 minutes';
-    case '0 * * * *':
-      return 'Hourly at minute 0';
-    case '0 2 * * *':
-      return 'Daily at 2:00 AM';
-    case '0 9 * * 1':
-      return 'Weekly on Monday at 9:00 AM';
-    case '*/5 * * * *':
-      return 'Every 5 minutes';
-    case '0 0 1 * *':
-      return 'Monthly on the 1st at midnight';
-    default:
-      return cron;
-  }
 }
 
 function methodToClassName(method: HttpMethod) {
