@@ -1,3 +1,4 @@
+import { getUser } from '@/auth/utils';
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
 import { getTimeBasedGreeting } from '@/utils/greeting';
@@ -16,58 +17,6 @@ const dashboardData = {
     failedExecutions: 71,
     avgLatencyMs: 342,
   },
-  recentExecutions: [
-    {
-      id: '1',
-      jobName: 'Daily Backup',
-      projectName: 'Production API',
-      status: 'succeeded' as const,
-      startedAt: new Date(Date.now() - 1000 * 60 * 5),
-      finishedAt: new Date(Date.now() - 1000 * 60 * 4.5),
-      latencyMs: 145,
-      httpStatus: 200,
-    },
-    {
-      id: '2',
-      jobName: 'Send Notifications',
-      projectName: 'User Service',
-      status: 'succeeded' as const,
-      startedAt: new Date(Date.now() - 1000 * 60 * 12),
-      finishedAt: new Date(Date.now() - 1000 * 60 * 11.8),
-      latencyMs: 89,
-      httpStatus: 201,
-    },
-    {
-      id: '3',
-      jobName: 'Data Sync',
-      projectName: 'Analytics',
-      status: 'failed' as const,
-      startedAt: new Date(Date.now() - 1000 * 60 * 18),
-      finishedAt: new Date(Date.now() - 1000 * 60 * 17.5),
-      latencyMs: 3200,
-      httpStatus: 500,
-    },
-    {
-      id: '4',
-      jobName: 'Cache Cleanup',
-      projectName: 'Production API',
-      status: 'succeeded' as const,
-      startedAt: new Date(Date.now() - 1000 * 60 * 25),
-      finishedAt: new Date(Date.now() - 1000 * 60 * 24.9),
-      latencyMs: 234,
-      httpStatus: 200,
-    },
-    {
-      id: '5',
-      jobName: 'Report Generation',
-      projectName: 'Analytics',
-      status: 'timed_out' as const,
-      startedAt: new Date(Date.now() - 1000 * 60 * 35),
-      finishedAt: new Date(Date.now() - 1000 * 60 * 5),
-      latencyMs: 30000,
-      httpStatus: null,
-    },
-  ],
   jobs: [
     {
       id: '1',
@@ -117,17 +66,22 @@ const dashboardData = {
   ],
 };
 
-export default function Page() {
+export default async function Page() {
+  const user = await getUser();
+  const [firstName] = user.name.split(' ');
+
   return (
     <>
       <Header>
-        <CustomBreadcrumbs current="Dashboard" trail={[]} />
+        <CustomBreadcrumbs current="Dashboard" />
       </Header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <h1 className="text-xl font-medium">{getTimeBasedGreeting('Alex')}</h1>
+        <h1 className="text-xl font-medium selection:bg-red-500">
+          {getTimeBasedGreeting(firstName?.trim())}
+        </h1>
         <DashboardStats {...dashboardData.stats} />
         <div className="grid gap-4 md:grid-cols-2">
-          <RecentExecutions executions={dashboardData.recentExecutions} />
+          <RecentExecutions />
           <JobsOverview jobs={dashboardData.jobs} />
         </div>
       </div>

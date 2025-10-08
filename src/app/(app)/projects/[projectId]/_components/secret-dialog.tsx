@@ -17,7 +17,7 @@ import { Clipboard, Eye, EyeOff } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { createProjectSecretAction } from '../actions';
+import { createOrUpdateProjectSecretAction } from '../actions';
 
 type SecretDialogProps = {
   trigger: React.ReactNode;
@@ -48,7 +48,7 @@ export default function SecretDialog({ trigger, projectId, regenerate }: SecretD
 
   async function handleCreateSecret() {
     try {
-      const { rawSecret } = await createProjectSecretAction({ projectId });
+      const { rawSecret } = await createOrUpdateProjectSecretAction({ projectId });
       setRawSecret(rawSecret);
     } catch (error) {
       console.error('Failed to create secret:', error);

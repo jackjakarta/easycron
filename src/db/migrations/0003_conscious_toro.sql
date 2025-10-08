@@ -1,0 +1,1 @@
+ALTER TABLE "app"."user_entity" ADD COLUMN "customer_id" text;

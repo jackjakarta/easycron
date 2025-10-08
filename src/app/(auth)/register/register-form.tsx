@@ -1,6 +1,5 @@
 'use client';
 
-import { authClient } from '@/auth/client';
 import { socialProviderSchema } from '@/auth/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +14,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import SocialAuthButton from '../_components/social-auth-button';
+import { registerUserAction } from './actions';
 
 const registerFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -42,28 +42,20 @@ export default function RegisterForm() {
     const { email: _email, password, name } = data;
     const email = _email.trim().toLowerCase();
 
-    const { error } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    });
-
-    if (error !== null) {
+    try {
+      await registerUserAction({ name, email, password });
+      toast.success('Registration successful! Please check your email to verify your account.');
+      router.replace('/login');
+    } catch (error) {
       setError('root', {
         type: 'manual',
-        message: error.message || 'Registration failed. Please try again.',
+        message: 'Registration failed. Please try again.',
       });
-
-      return;
     }
-
-    toast.success('Registration successful! Please check your email to verify your account.');
-    router.replace('/login');
   }
 
-  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
-
   const errorMessageClassName = 'text-destructive text-sm';
+  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
 
   return (
     <div className="flex flex-col gap-6">

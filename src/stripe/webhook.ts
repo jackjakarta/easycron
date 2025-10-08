@@ -14,6 +14,7 @@ export async function stripeWebhooksConstructEvent({
   signature: string;
   stripeWebhookSecret: string;
 }) {
+  console.debug('stripeWebhooksConstructEvent', { eventText, signature, stripeWebhookSecret });
   return stripe.webhooks.constructEvent(eventText, signature, stripeWebhookSecret);
 }
 

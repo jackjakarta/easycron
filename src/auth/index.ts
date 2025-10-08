@@ -54,9 +54,9 @@ export const auth = betterAuth({
   plugins: [
     apiKey({ apiKeyHeaders: 'x-api-key' }),
     twoFactor(),
-    haveIBeenPwned({
-      customPasswordCompromisedMessage: 'Please choose a more secure password.',
-    }),
+    // haveIBeenPwned({
+    //   customPasswordCompromisedMessage: 'Please choose a more secure password.',
+    // }),
     nextCookies(), // this must be the last plugin in the array
   ],
   database: drizzleAdapter(db, {

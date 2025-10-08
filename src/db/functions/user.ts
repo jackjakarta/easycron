@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 
 import { db } from '..';
-import { userTable, type InsertUserModel, type UserModel } from '../schema';
+import { userTable, type InsertUserModel, type UpdateUserModel, type UserModel } from '../schema';
 
 export async function dbGetUserById({
   userId,
@@ -29,6 +29,18 @@ export async function dbCreateUser(data: InsertUserModel): Promise<UserModel | u
   return user;
 }
 
+export async function dbUpdateUser({
+  userId,
+  data,
+}: {
+  userId: string;
+  data: UpdateUserModel;
+}): Promise<UserModel | undefined> {
+  const [user] = await db.update(userTable).set(data).where(eq(userTable.id, userId)).returning();
+
+  return user;
+}
+
 export async function dbUpdateUserName({
   userId,
   name,
@@ -43,4 +55,17 @@ export async function dbUpdateUserName({
     .returning();
 
   return user;
+}
+
+export async function dbGetUserEmailByCustomerId({
+  customerId,
+}: {
+  customerId: string;
+}): Promise<{ email: string } | undefined> {
+  const [email] = await db
+    .select({ email: userTable.email })
+    .from(userTable)
+    .where(eq(userTable.customerId, customerId));
+
+  return email;
 }

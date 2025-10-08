@@ -15,6 +15,20 @@
       "when": 1759629164314,
       "tag": "0001_strange_paladin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1759880062838,
+      "tag": "0002_right_the_executioner",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1759880212934,
+      "tag": "0003_conscious_toro",
+      "breakpoints": true
     }
   ]
 }

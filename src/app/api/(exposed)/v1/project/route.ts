@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const maybeApiKey = req.headers.get('x-api-key');
     const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
 
-    if (apiKeyResult.code >= 400 && apiKeyResult.code <= 499) {
+    if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
       return NextResponse.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },

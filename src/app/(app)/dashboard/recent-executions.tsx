@@ -3,28 +3,17 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRecentJobExecutionsQuery } from '@/hooks/query/use-recent-executions';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Activity, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 type ExecutionStatus = 'succeeded' | 'failed' | 'timed_out' | 'skipped';
 
-type RecentExecution = {
-  id: string;
-  jobName: string;
-  projectName: string;
-  status: ExecutionStatus;
-  startedAt: Date;
-  finishedAt: Date | null;
-  latencyMs: number | null;
-  httpStatus: number | null;
-};
+export function RecentExecutions() {
+  const { data: executions = [], isLoading, isError } = useRecentJobExecutionsQuery();
+  console.debug(executions); // Debug log
 
-type RecentExecutionsProps = {
-  executions: RecentExecution[];
-};
-
-export function RecentExecutions({ executions }: RecentExecutionsProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -41,7 +30,35 @@ export function RecentExecutions({ executions }: RecentExecutionsProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {executions.length > 0 ? (
+          {isLoading && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Activity className="text-muted-foreground mb-4 h-12 w-12 animate-spin" />
+              <h3 className="text-lg font-semibold">Loading executions...</h3>
+            </div>
+          )}
+
+          {isError && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Activity className="text-muted-foreground mb-4 h-12 w-12" />
+              <h3 className="text-lg font-semibold">Failed to load executions</h3>
+              <p className="text-muted-foreground text-sm">
+                There was an error fetching the recent executions. Please try again later.
+              </p>
+            </div>
+          )}
+
+          {!isLoading && !isError && executions.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <Activity className="text-muted-foreground mb-4 h-12 w-12" />
+              <h3 className="text-lg font-semibold">No executions yet</h3>
+              <p className="text-muted-foreground text-sm">
+                Executions will appear here once jobs start running.
+              </p>
+            </div>
+          )}
+
+          {!isLoading &&
+            executions.length > 0 &&
             executions.map((execution) => (
               <div
                 key={execution.id}
@@ -56,9 +73,9 @@ export function RecentExecutions({ executions }: RecentExecutionsProps) {
                   </Badge>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{execution.jobName}</p>
+                      <p className="font-medium">{'job one'}</p>
                       <span className="text-muted-foreground text-xs">·</span>
-                      <p className="text-muted-foreground text-sm">{execution.projectName}</p>
+                      {/* <p className="text-muted-foreground text-sm">{execution.projectName}</p> */}
                     </div>
                     <p className="text-muted-foreground text-xs">
                       {formatDistanceToNow(execution.startedAt, { addSuffix: true })} ·{' '}
@@ -76,20 +93,11 @@ export function RecentExecutions({ executions }: RecentExecutionsProps) {
                     </Badge>
                   )}
                   {execution.latencyMs !== null && (
-                    <span className="text-muted-foreground">{execution.latencyMs}ms</span>
+                    <span className="text-muted-foreground">{execution.latencyMs} ms</span>
                   )}
                 </div>
               </div>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Activity className="text-muted-foreground mb-4 h-12 w-12" />
-              <h3 className="text-lg font-semibold">No executions yet</h3>
-              <p className="text-muted-foreground text-sm">
-                Executions will appear here once jobs start running.
-              </p>
-            </div>
-          )}
+            ))}
         </div>
       </CardContent>
     </Card>
@@ -107,14 +115,15 @@ function statusToClassName(status: ExecutionStatus): string {
   return statusColors[status];
 }
 
-function httpStatusToClassName(status: number): string {
-  if (status >= 200 && status < 300) {
+function httpStatusToClassName(statusCode: number): string {
+  console.log('HTTP Status Code:', statusCode); // Debug log
+  if (statusCode >= 200 && statusCode < 300) {
     return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-  } else if (status >= 300 && status < 400) {
+  } else if (statusCode >= 300 && statusCode < 400) {
     return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-  } else if (status >= 400 && status < 500) {
+  } else if (statusCode >= 400 && statusCode < 500) {
     return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-  } else if (status >= 500) {
+  } else if (statusCode >= 500) {
     return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
   }
   return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';

@@ -14,6 +14,8 @@ export const env = createEnv({
     mailjetApiSecret: z.string().min(1),
     secretEncryptionKey: z.string().min(1),
     openaiApiKey: z.string().min(1),
+    stripeSecretKey: z.string().min(1),
+    stripeWebhookSecret: z.string().min(1),
     devMode: z.enum(['true', 'false']).default('false'),
   },
   client: {},
@@ -29,6 +31,8 @@ export const env = createEnv({
     mailjetApiSecret: process.env.MAILJET_API_SECRET,
     secretEncryptionKey: process.env.SECRET_ENCRYPTION_KEY,
     openaiApiKey: process.env.OPENAI_API_KEY,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     devMode: process.env.DEV_MODE,
   },
 });

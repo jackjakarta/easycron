@@ -10,6 +10,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+import Stripe from 'stripe';
 import { z } from 'zod';
 
 import { type UpdateDbRow } from './types';
@@ -22,6 +23,7 @@ export const userTable = appSchema.table('user_entity', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
+  customerId: text('customer_id'),
   twoFactorEnabled: boolean('two_factor_enabled').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -295,3 +297,51 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
 export type WebhookEndpointModel = typeof webhookEndpointTable.$inferSelect;
 export type InsertWebhookEndpointModel = typeof webhookEndpointTable.$inferInsert;
 export type UpdateWebhookEndpointModel = UpdateDbRow<WebhookEndpointModel>;
+
+export const customerSubscriptionsStripeTable = appSchema.table('customer_subscriptions_stripe', {
+  customerId: text('customer_id').primaryKey(),
+  subscriptions: jsonb('subscriptions').$type<Stripe.Subscription[]>().notNull(),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type CustomerSubscriptionsStripeInsertModel =
+  typeof customerSubscriptionsStripeTable.$inferInsert;
+export type CustomerSubscriptionsStripeModel = typeof customerSubscriptionsStripeTable.$inferSelect;
+export type UpdateCustomerSubscriptionsStripeModel = Omit<
+  UpdateDbRow<CustomerSubscriptionsStripeModel>,
+  'customerId'
+>;
+
+export const subscriptionLimitsSchema = z.object({
+  tokenLimit: z.number().nullable(),
+  messagesLimit: z.number().nullable(),
+});
+
+export type SubscriptionLimits = z.infer<typeof subscriptionLimitsSchema>;
+
+export const subscriptionPlanIdSchema = z.enum(['free', 'premium']);
+export const subscriptionPlanIdPgEnum = appSchema.enum(
+  'subscription_id',
+  subscriptionPlanIdSchema.enum,
+);
+
+export const subscriptionPlanTable = appSchema.table('subscription_plan', {
+  id: subscriptionPlanIdPgEnum('id').primaryKey(),
+  name: text('name').notNull(),
+  price: integer('price').notNull(),
+  description: text('description').notNull(),
+  limits: jsonb('limits').$type<SubscriptionLimits>().notNull(),
+  createdAt: timestamp('created_at', { mode: 'date', withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type SubscriptionPlanModel = typeof subscriptionPlanTable.$inferSelect;
+export type InsertSubscriptionPlanModel = typeof subscriptionPlanTable.$inferInsert;
+export type UpdateSubscriptionPlanModel = UpdateDbRow<SubscriptionPlanModel>;
