@@ -13,7 +13,7 @@ import {
 import Stripe from 'stripe';
 import { z } from 'zod';
 
-import { type UpdateDbRow } from './types';
+import { type MetadataColumn, type UpdateDbRow } from './types';
 
 export const appSchema = pgSchema('app');
 
@@ -199,6 +199,7 @@ export const jobTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
@@ -245,6 +246,7 @@ export const executionTable = appSchema.table(
     responseTruncated: boolean('response_truncated').notNull().default(false),
     errorMessage: text('error_message'),
     responsePreview: text('response_preview'),
+    metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
   },
   (table) => [index('exec_job_started_idx').on(table.startedAt, table.jobId)],
 );

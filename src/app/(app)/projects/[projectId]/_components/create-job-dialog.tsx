@@ -50,6 +50,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     formState: { errors, isSubmitting },
     reset,
     setValue,
+    watch,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
   });
@@ -80,6 +81,8 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
       toast.error('Failed to update job');
     }
   }
+
+  const httpMethodValue = watch('httpMethod');
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -241,17 +244,19 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="body">Request Body (Optional)</Label>
-              <Textarea
-                id="body"
-                placeholder="JSON payload for POST/PUT requests"
-                rows={4}
-                {...register('body')}
-                className={cn(errors.body && 'border-destructive')}
-              />
-              {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
-            </div>
+            {(httpMethodValue === 'POST' || httpMethodValue === 'PUT') && (
+              <div className="space-y-2">
+                <Label htmlFor="body">Request Body (Optional)</Label>
+                <Textarea
+                  id="body"
+                  placeholder="JSON payload for POST/PUT requests"
+                  rows={4}
+                  {...register('body')}
+                  className={cn(errors.body && 'border-destructive')}
+                />
+                {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
