@@ -1,49 +1,44 @@
-import { stripe } from '@/stripe';
-import Stripe from 'stripe';
+import { auth } from '@/auth';
+import { headers } from 'next/headers';
 
-export type SubscriptionState = 'premium' | 'free' | 'trialing';
+export type SubscriptionLimits = {
+  features: {
+    analytics: boolean;
+  };
+  limits: {
+    jobsTotal: number;
+    executionsPerMonth: number;
+  };
+};
 
-export function getSubscriptionStateBySubscriptions({
-  subscriptions,
-  hasFreeTrial,
-}: {
-  subscriptions: Stripe.Subscription[];
-  hasFreeTrial: boolean;
-}): SubscriptionState {
-  if (hasFreeTrial) {
-    return 'premium';
+export async function getUserActiveSubscription({ userId }: { userId: string }) {
+  const subscriptions = await auth.api.listActiveSubscriptions({
+    query: {
+      referenceId: userId,
+    },
+    headers: await headers(),
+  });
+
+  const activeSubscription = subscriptions.find(
+    (sub) => sub.status === 'active' || sub.status === 'trialing',
+  );
+
+  const jobsTotalLimit = subscriptions?.[0]?.limits?.jobsTotal ?? 0;
+  const executionsPerMonthLimit = subscriptions?.[0]?.limits?.executionsPerMonth ?? 0;
+
+  if (activeSubscription === undefined) {
+    return undefined;
   }
 
-  const activeSubscription = subscriptions.find((s) => s.status === 'active');
+  const subscription: SubscriptionLimits = {
+    features: {
+      analytics: true,
+    },
+    limits: {
+      jobsTotal: jobsTotalLimit,
+      executionsPerMonth: executionsPerMonthLimit,
+    },
+  };
 
-  if (activeSubscription !== undefined) {
-    return 'premium';
-  }
-
-  const trialingSubscription = subscriptions.find((s) => s.status === 'trialing');
-
-  if (trialingSubscription !== undefined) {
-    return 'trialing';
-  }
-
-  return 'free';
-}
-
-export async function getStripeSubscriptionsByCustomerId({
-  customerId,
-}: {
-  customerId: string | null;
-}) {
-  if (customerId === null) return [];
-
-  try {
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-    });
-
-    return subscriptions.data;
-  } catch (error) {
-    console.error({ error });
-    return [];
-  }
+  return subscription;
 }
