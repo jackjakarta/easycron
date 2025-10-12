@@ -3,7 +3,7 @@
 import { getUser } from '@/auth/utils';
 import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
-import { dbDeleteSecret, dbGetSecretByProjectId, dbUpsertSecret } from '@/db/functions/secret';
+import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
 import { encryptSecret } from '@/utils/crypto';

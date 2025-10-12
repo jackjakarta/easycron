@@ -1,5 +1,3 @@
-import { dbGetSubscriptionPlanById } from '@/db/functions/subscription-plan';
-import { type SubscriptionPlanModel } from '@/db/schema';
 import { stripe } from '@/stripe';
 import Stripe from 'stripe';
 
@@ -47,19 +45,5 @@ export async function getStripeSubscriptionsByCustomerId({
   } catch (error) {
     console.error({ error });
     return [];
-  }
-}
-
-export async function getSubscriptionPlanBySubscriptionState(
-  subscriptionState: SubscriptionState,
-): Promise<SubscriptionPlanModel | undefined> {
-  switch (subscriptionState) {
-    case 'premium':
-    case 'trialing':
-      return await dbGetSubscriptionPlanById({ planId: 'premium' });
-
-    case 'free':
-    default:
-      return await dbGetSubscriptionPlanById({ planId: 'free' });
   }
 }

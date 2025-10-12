@@ -1,10 +1,13 @@
 import { auth } from '@/auth';
 import { dbGetUserById } from '@/db/functions/user';
-import { type UserModel } from '@/db/schema';
 import { headers } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
-import { getUserActiveSubscription } from './subscription';
+import { getUserActiveSubscription, type SubscriptionLimits } from './subscription';
+import { type UserAnd } from './types';
+
+type Subscription = { subscription?: SubscriptionLimits };
+export type UserAndContext = UserAnd<Subscription>;
 
 export async function getMaybeSession() {
   const session = await auth.api.getSession({
@@ -24,17 +27,7 @@ export async function getValidSession() {
   return session;
 }
 
-type UserAndSubscription = UserModel & {
-  subscription: {
-    isValid: boolean;
-    limits: {
-      jobsTotal: number;
-      executionsPerMonth: number;
-    };
-  };
-};
-
-export async function getUser(): Promise<UserAndSubscription> {
+export async function getUser(): Promise<UserAndContext> {
   const session = await getValidSession();
   const user = await dbGetUserById({ userId: session.user.id });
 

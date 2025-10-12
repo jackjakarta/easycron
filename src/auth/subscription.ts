@@ -2,6 +2,16 @@ import { headers } from 'next/headers';
 
 import { auth } from '.';
 
+export type SubscriptionLimits = {
+  features: {
+    analytics: boolean;
+  };
+  limits: {
+    jobsTotal: number;
+    executionsPerMonth: number;
+  };
+};
+
 export async function getUserActiveSubscription({ userId }: { userId: string }) {
   const subscriptions = await auth.api.listActiveSubscriptions({
     query: {
@@ -17,8 +27,14 @@ export async function getUserActiveSubscription({ userId }: { userId: string }) 
   const jobsTotalLimit = subscriptions?.[0]?.limits?.jobsTotal ?? 0;
   const executionsPerMonthLimit = subscriptions?.[0]?.limits?.executionsPerMonth ?? 0;
 
-  const subscription = {
-    isValid: activeSubscription !== undefined,
+  if (activeSubscription === undefined) {
+    return undefined;
+  }
+
+  const subscription: SubscriptionLimits = {
+    features: {
+      analytics: true,
+    },
     limits: {
       jobsTotal: jobsTotalLimit,
       executionsPerMonth: executionsPerMonthLimit,

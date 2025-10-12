@@ -1,5 +1,6 @@
 import { verifyApiKey } from '@/app/api/utils';
 import { dbGetProjectById } from '@/db/functions/project';
+import { toErrorMessage } from '@/utils/error';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -46,8 +47,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: project }, { status: 200 });
   } catch (error) {
+    console.error({ error, errorMessage: toErrorMessage(error) });
     return NextResponse.json(
-      { success: false, errors: [{ message: 'Internal Server Error' }] },
+      {
+        success: false,
+        errors: [{ message: 'Internal Server Error' }],
+      },
       { status: 500 },
     );
   }

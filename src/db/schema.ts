@@ -1,5 +1,4 @@
 import { type AuthProvider } from '@/auth/types';
-import Stripe from '@better-auth/stripe';
 import {
   boolean,
   index,
