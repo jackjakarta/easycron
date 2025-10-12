@@ -16,6 +16,8 @@ export const env = createEnv({
     openaiApiKey: z.string().min(1),
     stripeSecretKey: z.string().min(1),
     stripeWebhookSecret: z.string().min(1),
+    monthlyPriceId: z.string().min(1),
+    yearlyPriceId: z.string().min(1),
     devMode: z.enum(['true', 'false']).default('false'),
   },
   client: {},
@@ -33,6 +35,8 @@ export const env = createEnv({
     openaiApiKey: process.env.OPENAI_API_KEY,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    monthlyPriceId: process.env.MONTHLY_PRICE_ID,
+    yearlyPriceId: process.env.YEARLY_PRICE_ID,
     devMode: process.env.DEV_MODE,
   },
 });

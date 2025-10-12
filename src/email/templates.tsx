@@ -76,6 +76,12 @@ export async function createInformationMailTemplate(information: InformationEmai
         'Your account has been successfully deleted. We are sorry to see you go.',
       );
 
+    case 'subscription-purchased':
+      return renderInformationTemplate(
+        'Subscription purchased',
+        'Thank you for purchasing a subscription. You can now enjoy the benefits of being a pro user.',
+      );
+
     default:
       return undefined;
   }

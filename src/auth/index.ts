@@ -1,4 +1,5 @@
 import { db } from '@/db';
+import { dbGetUserById } from '@/db/functions/user';
 import {
   accountTable,
   apiKeyTable,
@@ -8,7 +9,7 @@ import {
   userTable,
   verificationTable,
 } from '@/db/schema';
-import { sendUserActionEmail } from '@/email/send';
+import { sendUserActionEmail, sendUserActionInformationEmail } from '@/email/send';
 import { env } from '@/env';
 import { stripe as stripeClient } from '@/stripe';
 import { stripe } from '@better-auth/stripe';
@@ -75,17 +76,33 @@ export const auth = betterAuth({
         plans: [
           {
             name: 'pro',
-            priceId: 'price_1SHBjdCl6l0YAcu7e40O6TGg',
-            annualDiscountPriceId: 'price_1SHBjdCl6l0YAcu7BYK6hOtj',
+            priceId: env.monthlyPriceId,
+            annualDiscountPriceId: env.yearlyPriceId,
             limits: {
-              jobsTotal: 10,
-              executionsPerMonth: 500,
+              jobsTotal: 100,
+              executionsPerMonth: 50000,
             },
             freeTrial: {
               days: 7,
             },
           },
         ],
+        onSubscriptionComplete: async ({ subscription }) => {
+          try {
+            const user = await dbGetUserById({ userId: subscription.referenceId });
+
+            if (user === undefined) {
+              throw new Error(`User with ID ${subscription.referenceId} not found`);
+            }
+
+            await sendUserActionInformationEmail({
+              to: user.email,
+              information: { type: 'subscription-purchased' },
+            });
+          } catch (error) {
+            console.error('Error sending subscription purchased email:', error);
+          }
+        },
       },
     }),
     haveIBeenPwned({
