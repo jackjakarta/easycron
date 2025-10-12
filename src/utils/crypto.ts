@@ -13,8 +13,8 @@ export async function hashString(input: string, saltRounds: number = 10): Promis
   return hashedString;
 }
 
-export async function verifyHash(data: { input: string; hash: string }): Promise<boolean> {
-  const isMatch = await bcrypt.compare(data.input, data.hash);
+export async function verifyHash(input: string, hash: string): Promise<boolean> {
+  const isMatch = await bcrypt.compare(input, hash);
 
   return isMatch;
 }
