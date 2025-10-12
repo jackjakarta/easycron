@@ -1,6 +1,5 @@
 'use client';
 
-import { authClient } from '@/auth/client';
 import { type UserAndContext } from '@/auth/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -19,30 +18,16 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
-import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { toast } from 'sonner';
-import Stripe from 'stripe';
 
 export default function NavUser({ user }: { user: UserAndContext }) {
   const { isMobile } = useSidebar();
-  const locale = useLocale();
-
-  async function handleOpenBillingPortal() {
-    const { error } = await authClient.subscription.billingPortal({
-      locale: locale as Stripe.Checkout.Session.Locale,
-      returnUrl: '/dashboard',
-    });
-
-    if (error !== null) {
-      console.error(error);
-      toast.error('Failed to open billing portal. Please try again.');
-      return;
-    }
-  }
 
   const MENU_ITEMS = [
     { label: 'Account', icon: BadgeCheck, href: '/settings/account' },
+    ...(user.subscription.type === 'pro'
+      ? [{ label: 'Billing', icon: CreditCard, href: '/settings/billing' }]
+      : []),
     { label: 'Developers', icon: Code, href: '/developers' },
   ];
 
@@ -107,12 +92,6 @@ export default function NavUser({ user }: { user: UserAndContext }) {
                   </Link>
                 </DropdownMenuItem>
               ))}
-              {user.subscription.type === 'pro' && (
-                <DropdownMenuItem onSelect={handleOpenBillingPortal}>
-                  <CreditCard />
-                  Billing
-                </DropdownMenuItem>
-              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

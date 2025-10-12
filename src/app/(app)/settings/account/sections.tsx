@@ -12,23 +12,23 @@ import Disable2FAButton from './disable-2fa-button';
 import Enable2FAButton from './enable-2fa-button';
 
 type AccountSettingsSectionsProps = {
-  hasNoPasswordAccount: boolean;
+  hasSocialAccount: boolean;
   twoFaEnabled: boolean;
 };
 
 export default function AccountSettingsSections({
-  hasNoPasswordAccount,
+  hasSocialAccount,
   twoFaEnabled,
 }: AccountSettingsSectionsProps) {
   const { theme } = useTheme();
   const twoFaButton = twoFaEnabled ? <Disable2FAButton /> : <Enable2FAButton />;
 
   return (
-    <>
-      <SectionLabel>Account Security</SectionLabel>
-      <div className="flex flex-col gap-8">
-        {!hasNoPasswordAccount && (
-          <>
+    <div className="mt-4 flex flex-col gap-4">
+      {!hasSocialAccount && (
+        <>
+          <SectionLabel>Account Security</SectionLabel>
+          <div className="flex flex-col gap-8">
             <SettingsItem
               title="Two-Factor Authentication (2FA)"
               description="Enhance the security of your account by enabling two-factor authentication (2FA)."
@@ -44,11 +44,10 @@ export default function AccountSettingsSections({
                 </Button>
               }
             />
-          </>
-        )}
-      </div>
-
-      <Separator className="mt-4 mb-2" />
+          </div>
+          <Separator className="mt-4 mb-2" />
+        </>
+      )}
 
       <SectionLabel>Appearance</SectionLabel>
       <div className="flex flex-col gap-8">
@@ -68,7 +67,8 @@ export default function AccountSettingsSections({
           }
         />
       </div>
-    </>
+      <Separator className="mt-4 mb-2" />
+    </div>
   );
 }
 
