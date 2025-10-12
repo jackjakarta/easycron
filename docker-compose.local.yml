@@ -1,12 +1,13 @@
 services:
   web:
     image: easycron-local:latest
+    command: ['node', 'server.js']
     container_name: web
     networks:
       - local_network
     depends_on:
-      - redis
-    command: ['node', 'server.js']
+      - worker
+      - scheduler
     env_file:
       - .env.compose
     ports:

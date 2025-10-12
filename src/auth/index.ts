@@ -12,6 +12,7 @@ import {
 import { sendUserActionEmail, sendUserActionInformationEmail } from '@/email/send';
 import { env } from '@/env';
 import { stripe as stripeClient } from '@/stripe';
+import { NUMBER_OF_TRIAL_DAYS } from '@/stripe/const';
 import { stripe } from '@better-auth/stripe';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
@@ -78,15 +79,20 @@ export const auth = betterAuth({
             name: 'pro',
             priceId: env.monthlyPriceId,
             annualDiscountPriceId: env.yearlyPriceId,
-            limits: {
-              jobsTotal: 100,
-              executionsPerMonth: 50000,
-            },
             freeTrial: {
-              days: 7,
+              days: NUMBER_OF_TRIAL_DAYS,
             },
           },
         ],
+        getCheckoutSessionParams: async () => {
+          return {
+            params: {
+              automatic_tax: {
+                enabled: true,
+              },
+            },
+          };
+        },
         onSubscriptionComplete: async ({ subscription }) => {
           try {
             const user = await dbGetUserById({ userId: subscription.referenceId });

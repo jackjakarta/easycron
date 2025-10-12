@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import {
@@ -67,4 +67,30 @@ export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | unde
   const [insertedJob] = await db.insert(jobTable).values(data).returning();
 
   return insertedJob;
+}
+
+export async function dbGetJobCountByUserId({ userId }: { userId: string }): Promise<number> {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(jobTable)
+    .where(eq(jobTable.userId, userId));
+
+  const count = result?.count ?? 0;
+
+  return count;
+}
+
+export async function dbGetEnabledJobCountByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<number> {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(jobTable)
+    .where(and(eq(jobTable.userId, userId), eq(jobTable.enabled, true)));
+
+  const count = result?.count ?? 0;
+
+  return count;
 }

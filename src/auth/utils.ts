@@ -1,12 +1,13 @@
 import { auth } from '@/auth';
 import { dbGetUserById } from '@/db/functions/user';
-import { getUserActiveSubscription, type SubscriptionLimits } from '@/stripe/subscription';
+import { getUserActiveSubscription } from '@/stripe/subscription';
+import { SubscriptionFeaturesAndLimits } from '@/stripe/types';
 import { headers } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
 import { type UserAnd } from './types';
 
-type Subscription = { subscription?: SubscriptionLimits };
+type Subscription = { subscription: SubscriptionFeaturesAndLimits };
 export type UserAndContext = UserAnd<Subscription>;
 
 export async function getMaybeSession() {

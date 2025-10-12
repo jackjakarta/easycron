@@ -1,17 +1,14 @@
 import { auth } from '@/auth';
 import { headers } from 'next/headers';
 
-export type SubscriptionLimits = {
-  features: {
-    analytics: boolean;
-  };
-  limits: {
-    jobsTotal: number;
-    executionsPerMonth: number;
-  };
-};
+import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION } from './const';
+import { type SubscriptionFeaturesAndLimits } from './types';
 
-export async function getUserActiveSubscription({ userId }: { userId: string }) {
+export async function getUserActiveSubscription({
+  userId,
+}: {
+  userId: string;
+}): Promise<SubscriptionFeaturesAndLimits> {
   const subscriptions = await auth.api.listActiveSubscriptions({
     query: {
       referenceId: userId,
@@ -23,22 +20,13 @@ export async function getUserActiveSubscription({ userId }: { userId: string }) 
     (sub) => sub.status === 'active' || sub.status === 'trialing',
   );
 
-  const jobsTotalLimit = subscriptions?.[0]?.limits?.jobsTotal ?? 0;
-  const executionsPerMonthLimit = subscriptions?.[0]?.limits?.executionsPerMonth ?? 0;
-
   if (activeSubscription === undefined) {
-    return undefined;
+    return FREE_SUBSCRIPTION;
   }
 
-  const subscription: SubscriptionLimits = {
-    features: {
-      analytics: true,
-    },
-    limits: {
-      jobsTotal: jobsTotalLimit,
-      executionsPerMonth: executionsPerMonthLimit,
-    },
-  };
+  if (activeSubscription.plan === 'pro') {
+    return PRO_SUBSCRIPTION;
+  }
 
-  return subscription;
+  return FREE_SUBSCRIPTION;
 }
