@@ -1,6 +1,6 @@
 'use client';
 
-import { type UserAndContext } from '@/auth/utils';
+import { type UserAndContext } from '@/auth/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,

@@ -14,6 +14,7 @@ import {
 import { cn } from '@/utils/tailwind';
 import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 type PricingCardProps = {
   name: string;
@@ -27,6 +28,7 @@ type PricingCardProps = {
   plan?: 'pro' | 'basic' | 'free';
   annual?: boolean;
   isLoggedIn?: boolean;
+  userId?: string;
 };
 
 export function PricingCard({
@@ -41,10 +43,26 @@ export function PricingCard({
   plan = 'pro',
   annual = false,
   isLoggedIn = false,
+  userId,
 }: PricingCardProps) {
   const router = useRouter();
 
   async function handleSubscribe() {
+    const { data: subscriptions } = await authClient.subscription.list({
+      query: {
+        referenceId: userId,
+      },
+    });
+
+    const activeSubscription = subscriptions?.find(
+      (sub) => sub.status === 'active' || sub.status === 'trialing',
+    );
+
+    if (activeSubscription !== undefined) {
+      toast.error('You already have an active subscription.');
+      return;
+    }
+
     const { error } = await authClient.subscription.upgrade({
       plan,
       successUrl: '/dashboard',

@@ -1,6 +1,6 @@
 'use client';
 
-import { authClient } from '@/auth/client';
+import { type BetterAuthSession } from '@/auth/types';
 import PageContainer from '@/components/layout/page-container';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -10,8 +10,7 @@ import React from 'react';
 
 import { PricingCard } from './pricing-card';
 
-export default function Page2() {
-  const { data: session } = authClient.useSession();
+export default function Page2({ session }: { session: BetterAuthSession | null }) {
   const [isAnnual, setIsAnnual] = React.useState(true);
 
   return (
@@ -62,6 +61,7 @@ export default function Page2() {
           buttonVariant="secondary"
           annual={isAnnual}
           isLoggedIn={session !== null}
+          userId={session?.user.id}
         />
 
         <PricingCard
@@ -80,6 +80,7 @@ export default function Page2() {
           highlighted
           annual={isAnnual}
           isLoggedIn={session !== null}
+          userId={session?.user.id}
         />
       </div>
     </PageContainer>

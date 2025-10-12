@@ -1,8 +1,7 @@
 'use client';
 
-import { type UserAndContext } from '@/auth/utils';
+import { type UserAndContext } from '@/auth/types';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
-import React from 'react';
 
 import NavHeader from './nav-header';
 import NavMain from './nav-main';
