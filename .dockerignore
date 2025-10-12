@@ -12,3 +12,4 @@ next-env.d.ts
 docker-compose.local.yml
 docker-compose.yml
 .env.compose
+.env

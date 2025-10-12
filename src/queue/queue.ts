@@ -9,7 +9,7 @@ export const connection = new IORedis(env.redisUrl, {
 
 export type RunJobPayload = {
   jobId: string;
-  scheduledForISO: string; // ISO of the due time computed by scheduler
+  scheduledForISO: string;
 };
 
 export const RUN_QUEUE_NAME = 'easycron-runs';

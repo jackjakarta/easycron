@@ -3,7 +3,7 @@
 import { getUser } from '@/auth/utils';
 import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
-import { dbUpsertSecret } from '@/db/functions/secret';
+import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
 import { encryptSecret } from '@/utils/crypto';
@@ -97,7 +97,7 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
   return updatedJob;
 }
 
-export async function createProjectSecretAction({ projectId }: { projectId: string }) {
+export async function createOrUpdateProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
   const project = await dbGetProjectById({ projectId, userId: user.id });
 
@@ -127,4 +127,15 @@ export async function generateCronExpressionAction({ prompt }: { prompt: string 
   const { cronExpression } = await generateCronExpression(prompt);
 
   return cronExpression;
+}
+
+export async function deleteJobSecretAction({ projectId }: { projectId: string }) {
+  const user = await getUser();
+  const deletedSecret = await dbDeleteSecret({ projectId, userId: user.id });
+
+  if (deletedSecret === undefined) {
+    throw new Error('Failed to delete secret');
+  }
+
+  return deletedSecret;
 }

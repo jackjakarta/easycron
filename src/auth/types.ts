@@ -1,3 +1,4 @@
+import { type UserModel } from '@/db/schema';
 import { z } from 'zod';
 
 export const credentialProviderSchema = z.literal('credential');
@@ -6,3 +7,5 @@ export const authProviderSchema = z.union([credentialProviderSchema, socialProvi
 
 export type SocialProvider = z.infer<typeof socialProviderSchema>;
 export type AuthProvider = z.infer<typeof authProviderSchema>;
+
+export type UserAnd<T> = UserModel & T;

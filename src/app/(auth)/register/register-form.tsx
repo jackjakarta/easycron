@@ -61,9 +61,8 @@ export default function RegisterForm() {
     router.replace('/login');
   }
 
-  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
-
   const errorMessageClassName = 'text-destructive text-sm';
+  const submitButtonDisabled = isSubmitting || isSubmitSuccessful;
 
   return (
     <div className="flex flex-col gap-6">

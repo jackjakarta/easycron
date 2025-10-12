@@ -28,10 +28,10 @@ export function DeveloperAPI() {
             <div className="bg-background border-border overflow-x-auto rounded-lg border p-4 font-mono text-sm">
               <div className="text-green-400">POST /api/v1/jobs</div>
               <div className="text-muted-foreground mt-2">{'{'}</div>
-              <div className="text-muted-foreground ml-4">"name": "backup-db",</div>
-              <div className="text-muted-foreground ml-4">"schedule": "0 2 * * *",</div>
+              <div className="text-muted-foreground ml-4">{'"name": "backup-db",'}</div>
+              <div className="text-muted-foreground ml-4">{'"schedule": "0 2 * * *",'}</div>
               <div className="text-muted-foreground ml-4">
-                "url": "https://api.example.com/backup"
+                {'"url": "https://api.example.com/backup"'}
               </div>
               <div className="text-muted-foreground">{'}'}</div>
             </div>

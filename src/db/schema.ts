@@ -12,7 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
 
-import { type UpdateDbRow } from './types';
+import { type MetadataColumn, type UpdateDbRow } from './types';
 
 export const appSchema = pgSchema('app');
 
@@ -22,6 +22,7 @@ export const userTable = appSchema.table('user_entity', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
+  stripeCustomerId: text('stripe_customer_id').unique(),
   twoFactorEnabled: boolean('two_factor_enabled').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -197,6 +198,7 @@ export const jobTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .defaultNow()
@@ -243,6 +245,7 @@ export const executionTable = appSchema.table(
     responseTruncated: boolean('response_truncated').notNull().default(false),
     errorMessage: text('error_message'),
     responsePreview: text('response_preview'),
+    metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
   },
   (table) => [index('exec_job_started_idx').on(table.startedAt, table.jobId)],
 );
@@ -295,3 +298,27 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
 export type WebhookEndpointModel = typeof webhookEndpointTable.$inferSelect;
 export type InsertWebhookEndpointModel = typeof webhookEndpointTable.$inferInsert;
 export type UpdateWebhookEndpointModel = UpdateDbRow<WebhookEndpointModel>;
+
+export const subscriptionTable = appSchema.table('subscription', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  plan: text('plan').notNull(),
+  referenceId: uuid('reference_id').notNull(),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  status: text('status').notNull(),
+  periodStart: timestamp('period_start', { withTimezone: true }),
+  periodEnd: timestamp('period_end', { withTimezone: true }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false).notNull(),
+  seats: integer('seats'),
+  trialStart: timestamp('trial_start', { withTimezone: true }),
+  trialEnd: timestamp('trial_end', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type SubscriptionModel = typeof subscriptionTable.$inferSelect;
+export type InsertSubscriptionModel = typeof subscriptionTable.$inferInsert;
+export type UpdateSubscriptionModel = UpdateDbRow<SubscriptionModel>;

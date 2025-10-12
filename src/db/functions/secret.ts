@@ -30,3 +30,18 @@ export async function dbGetSecretByProjectId({
 
   return secret;
 }
+
+export async function dbDeleteSecret({
+  projectId,
+  userId,
+}: {
+  projectId: string;
+  userId: string;
+}): Promise<SecretModel | undefined> {
+  const [deletedSecret] = await db
+    .delete(secretTable)
+    .where(and(eq(secretTable.projectId, projectId), eq(secretTable.userId, userId)))
+    .returning();
+
+  return deletedSecret;
+}

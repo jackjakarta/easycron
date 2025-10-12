@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  allowedDevOrigins: ['jakarta.ngrok.app'],
 };
 
 const withNextIntl = createNextIntlPlugin();
