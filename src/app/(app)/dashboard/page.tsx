@@ -1,3 +1,4 @@
+import BuySubscriptionButton from '@/app/(auth)/_components/buy-subscription-button';
 import { getUser } from '@/auth/utils';
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
@@ -70,10 +71,15 @@ export default async function Page() {
   const user = await getUser();
   const [firstName] = user.name.split(' ');
 
+  console.debug({ subscription: user.subscription });
+
   return (
     <>
       <Header>
         <CustomBreadcrumbs current="Dashboard" />
+        <div className="flex flex-1 items-center justify-end">
+          <BuySubscriptionButton />
+        </div>
       </Header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <h1 className="text-xl font-medium selection:bg-red-500">

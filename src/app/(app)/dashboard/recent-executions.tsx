@@ -12,7 +12,6 @@ type ExecutionStatus = 'succeeded' | 'failed' | 'timed_out' | 'skipped';
 
 export function RecentExecutions() {
   const { data: executions = [], isLoading, isError } = useRecentJobExecutionsQuery();
-  console.debug(executions); // Debug log
 
   return (
     <Card>

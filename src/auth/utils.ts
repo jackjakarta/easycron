@@ -4,6 +4,8 @@ import { type UserModel } from '@/db/schema';
 import { headers } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
+import { getUserActiveSubscription } from './subscription';
+
 export async function getMaybeSession() {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -22,7 +24,17 @@ export async function getValidSession() {
   return session;
 }
 
-export async function getUser(): Promise<UserModel> {
+type UserAndSubscription = UserModel & {
+  subscription: {
+    isValid: boolean;
+    limits: {
+      jobsTotal: number;
+      executionsPerMonth: number;
+    };
+  };
+};
+
+export async function getUser(): Promise<UserAndSubscription> {
   const session = await getValidSession();
   const user = await dbGetUserById({ userId: session.user.id });
 
@@ -30,5 +42,10 @@ export async function getUser(): Promise<UserModel> {
     redirect('/login', RedirectType.replace);
   }
 
-  return user;
+  const subscription = await getUserActiveSubscription({ userId: user.id });
+
+  return {
+    ...user,
+    subscription,
+  };
 }

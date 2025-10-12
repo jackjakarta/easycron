@@ -1,12 +1,12 @@
-import { dbUpdateCustomerSubscriptions } from '@/db/functions/customer';
-import { dbGetUserEmailByCustomerId } from '@/db/functions/user';
+import { dbUpsertCustomerSubscriptions } from '@/db/functions/customer';
+// import { dbGetUserEmailByCustomerId } from '@/db/functions/user';
 import { sendUserActionInformationEmail } from '@/email/send';
 import { env } from '@/env';
 import { getStripeSubscriptionsByCustomerId } from '@/stripe/subscription';
 import {
   getMaybeCustomerIdFromStripeEvent,
   stripeWebhooksConstructEvent,
-  stripeWebhooksConstructEventWithResult,
+  // stripeWebhooksConstructEventWithResult,
 } from '@/stripe/webhook';
 import { NextRequest } from 'next/server';
 
@@ -42,18 +42,18 @@ export async function POST(req: NextRequest) {
       customerId,
     });
 
-    await dbUpdateCustomerSubscriptions({ customerId, subscriptions });
+    await dbUpsertCustomerSubscriptions({ customerId, subscriptions });
 
-    if (event?.type === 'invoice.paid') {
-      const userEmailObject = await dbGetUserEmailByCustomerId({ customerId });
+    // if (event?.type === 'invoice.paid') {
+    //   const userEmailObject = await dbGetUserEmailByCustomerId({ customerId });
 
-      if (userEmailObject !== undefined) {
-        await sendUserActionInformationEmail({
-          to: userEmailObject.email,
-          information: { type: 'invoice-paid' },
-        });
-      }
-    }
+    //   if (userEmailObject !== undefined) {
+    //     await sendUserActionInformationEmail({
+    //       to: userEmailObject.email,
+    //       information: { type: 'invoice-paid' },
+    //     });
+    //   }
+    // }
 
     return Response.json({ message: 'Ok' }, { status: 200 });
   } catch (error) {

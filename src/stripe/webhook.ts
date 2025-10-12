@@ -21,11 +21,17 @@ export function getMaybeCustomerIdFromStripeEvent({ event }: { event: Stripe.Eve
   if (event === null) return undefined;
 
   try {
-    const { id: customerId } = event.data.object as {
-      id: string;
-    };
+    const dataObject = event.data.object as { customer?: string; id: string };
 
-    return customerId;
+    if (dataObject.customer) {
+      return dataObject.customer;
+    }
+
+    if (event.type.startsWith('customer.')) {
+      return dataObject.id;
+    }
+
+    return undefined;
   } catch (error) {
     console.error({ error, event });
     return undefined;
