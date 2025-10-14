@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto';
 
-import { executeHttp } from '@/core/http';
 import { db } from '@/db';
 import { dbUpdateJob } from '@/db/functions/job';
 import { executionTable, jobTable, type ExecutionStatus } from '@/db/schema';
 import { type RunJobPayload } from '@/queue/queue';
+import { executeHttp } from '@/utils/http';
 import { Job } from 'bullmq';
 import { eq } from 'drizzle-orm';
 
