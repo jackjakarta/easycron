@@ -14,7 +14,7 @@ export default async function Page() {
     provider: 'credential',
   });
 
-  const hasNoPasswordAccount = account === undefined || account.password === null;
+  const hasSocialAccount = account === undefined || account.password === null;
 
   return (
     <>
@@ -24,7 +24,7 @@ export default async function Page() {
       <PageContainer>
         <AccountSettingsSections
           twoFaEnabled={user.twoFactorEnabled}
-          hasNoPasswordAccount={hasNoPasswordAccount}
+          hasSocialAccount={hasSocialAccount}
         />
       </PageContainer>
     </>

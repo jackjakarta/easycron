@@ -1,7 +1,13 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { dbDeleteJob, dbGetJobById, dbInsertJob, dbUpdateJob } from '@/db/functions/job';
+import {
+  dbDeleteJob,
+  dbGetJobById,
+  dbGetJobCountByUserId,
+  dbInsertJob,
+  dbUpdateJob,
+} from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
 import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
@@ -44,6 +50,16 @@ export async function createJobAction({
   projectId: string;
 }) {
   const user = await getUser();
+  const { subscription } = user;
+
+  if (subscription.type === 'free') {
+    const jobsCount = await dbGetJobCountByUserId({ userId: user.id });
+
+    if (jobsCount >= subscription.limits.jobsTotal) {
+      throw new Error('Free plan users can only have 2 jobs. Please upgrade to create more.');
+    }
+  }
+
   const newJob = await dbInsertJob({
     ...data,
     projectId,

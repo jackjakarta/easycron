@@ -17,7 +17,7 @@ export function Header() {
         </div>
         <nav className="hidden items-center gap-8 md:flex">
           <Link
-            href="#features"
+            href="/"
             className="text-muted-foreground hover:text-card-foreground text-sm transition-colors"
           >
             Features
@@ -32,7 +32,7 @@ export function Header() {
             href="/docs"
             className="text-muted-foreground hover:text-card-foreground text-sm transition-colors"
           >
-            Docs
+            Developers
           </Link>
         </nav>
         {session === null ? (

@@ -36,6 +36,21 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "close": "Close",
+    "next": "Next",
+    "previous": "Previous",
+    "view-all": "View all",
     "loading": "Loading..."
+  },
+  "dashboard": {
+    "welcome": "Welcome to easyCron",
+    "description": "Your reliable cron job service",
+    "jobs-overview": "Jobs Overview",
+    "active": "Active",
+    "paused": "Paused",
+    "error": "Error",
+    "no-jobs": "No jobs found",
+    "total-jobs": "Total Jobs",
+    "create-first-job": "Create your first cron job",
+    "recent-executions": "Recent Executions"
   }
 }

@@ -6,18 +6,14 @@ import { Activity, CheckCircle2, Clock } from 'lucide-react';
 type DashboardStatsProps = {
   totalJobs: number;
   activeJobs: number;
-  totalExecutions: number;
   successRate: number;
-  failedExecutions: number;
   avgLatencyMs: number;
 };
 
 export function DashboardStats({
   totalJobs,
   activeJobs,
-  totalExecutions,
   successRate,
-  failedExecutions,
   avgLatencyMs,
 }: DashboardStatsProps) {
   return (
@@ -43,10 +39,6 @@ export function DashboardStats({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{successRate.toFixed(1)}%</div>
-          <p className="text-muted-foreground text-xs">
-            {totalExecutions - failedExecutions} succeeded ·{' '}
-            <span className="text-red-600 dark:text-red-400">{failedExecutions} failed</span>
-          </p>
         </CardContent>
       </Card>
 
@@ -56,8 +48,7 @@ export function DashboardStats({
           <Clock className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{avgLatencyMs}ms</div>
-          <p className="text-muted-foreground text-xs">Across {totalExecutions} executions</p>
+          <div className="text-2xl font-bold">{avgLatencyMs}ms</div>{' '}
         </CardContent>
       </Card>
     </div>

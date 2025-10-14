@@ -6,11 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRecentJobExecutionsQuery } from '@/hooks/query/use-recent-executions';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Activity, ArrowRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 type ExecutionStatus = 'succeeded' | 'failed' | 'timed_out' | 'skipped';
 
 export function RecentExecutions() {
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
+
   const { data: executions = [], isLoading, isError } = useRecentJobExecutionsQuery();
 
   return (
@@ -18,11 +22,11 @@ export function RecentExecutions() {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
-          Recent Executions
+          {t('recent-executions')}
         </CardTitle>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/executions">
-            View all
+            {tCommon('view-all')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

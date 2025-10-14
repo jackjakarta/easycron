@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { TypographyP } from '@/components/ui/typography';
 import { httpMethodSchema } from '@/db/schema';
 import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -98,23 +99,28 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               <Label htmlFor="name">Job Name</Label>
               <Input
                 id="name"
-                placeholder="Enter job name"
                 {...register('name')}
+                placeholder="Enter job name"
                 className={cn(errors.name && 'border-destructive')}
               />
-              {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+              {errors.name && (
+                <TypographyP className="text-destructive text-sm">
+                  {errors.name.message}
+                </TypographyP>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="url">URL</Label>
               <Input
                 id="url"
-                type="url"
-                placeholder="https://example.com/api/endpoint"
                 {...register('url')}
+                placeholder="https://example.com/api/endpoint"
                 className={cn(errors.url && 'border-destructive')}
               />
-              {errors.url && <p className="text-destructive text-sm">{errors.url.message}</p>}
+              {errors.url && (
+                <TypographyP className="text-destructive text-sm">{errors.url.message}</TypographyP>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -138,7 +144,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                 )}
               />
               {errors.httpMethod && (
-                <p className="text-destructive text-sm">{errors.httpMethod.message}</p>
+                <TypographyP className="text-destructive text-sm">
+                  {errors.httpMethod.message}
+                </TypographyP>
               )}
             </div>
 
@@ -156,32 +164,36 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </div>
               <Input
                 id="scheduleCron"
-                placeholder="0 0 * * *"
                 {...register('scheduleCron')}
+                placeholder="0 0 * * *"
                 className={cn(errors.scheduleCron && 'border-destructive')}
               />
               {errors.scheduleCron && (
-                <p className="text-destructive text-sm">{errors.scheduleCron.message}</p>
+                <TypographyP className="text-destructive text-sm">
+                  {errors.scheduleCron.message}
+                </TypographyP>
               )}
-              <p className="text-muted-foreground text-xs">
+              <TypographyP className="text-muted-foreground text-xs">
                 {`Example: "0 0 * * *" runs daily at midnight`}
-              </p>
+              </TypographyP>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="timezone">Timezone</Label>
               <Input
                 id="timezone"
-                placeholder="UTC"
                 {...register('timezone')}
+                placeholder="UTC"
                 className={cn(errors.timezone && 'border-destructive')}
               />
               {errors.timezone && (
-                <p className="text-destructive text-sm">{errors.timezone.message}</p>
+                <TypographyP className="text-destructive text-sm">
+                  {errors.timezone.message}
+                </TypographyP>
               )}
-              <p className="text-muted-foreground text-xs">
+              <TypographyP className="text-muted-foreground text-xs">
                 Example: UTC, America/New_York, Europe/London
-              </p>
+              </TypographyP>
             </div>
 
             <div className="space-y-2">
@@ -203,26 +215,26 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                   <div key={field.id} className="flex items-center space-x-2">
                     <div className="flex-1">
                       <Input
-                        placeholder="Header name (e.g., Content-Type)"
                         {...register(`headers.${index}.k`)}
+                        placeholder="Header name (e.g., Content-Type)"
                         className={cn(errors.headers?.[index]?.k && 'border-destructive')}
                       />
                       {errors.headers?.[index]?.k && (
-                        <p className="text-destructive mt-1 text-sm">
+                        <TypographyP className="text-destructive mt-1 text-sm">
                           {errors.headers[index]?.k?.message}
-                        </p>
+                        </TypographyP>
                       )}
                     </div>
                     <div className="flex-1">
                       <Input
-                        placeholder="Header value (e.g., application/json)"
                         {...register(`headers.${index}.v`)}
+                        placeholder="Header value (e.g., application/json)"
                         className={cn(errors.headers?.[index]?.v && 'border-destructive')}
                       />
                       {errors.headers?.[index]?.v && (
-                        <p className="text-destructive mt-1 text-sm">
+                        <TypographyP className="text-destructive mt-1 text-sm">
                           {errors.headers[index]?.v?.message}
-                        </p>
+                        </TypographyP>
                       )}
                     </div>
                     <Button
@@ -237,24 +249,28 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                   </div>
                 ))}
                 {fields.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
+                  <TypographyP className="text-muted-foreground text-sm">
                     {`No headers added. Click "Add Header" to include custom request headers.`}
-                  </p>
+                  </TypographyP>
                 )}
               </div>
             </div>
 
-            {(httpMethodValue === 'POST' || httpMethodValue === 'PUT') && (
+            {httpMethodValue !== 'GET' && (
               <div className="space-y-2">
                 <Label htmlFor="body">Request Body (Optional)</Label>
                 <Textarea
                   id="body"
-                  placeholder="JSON payload for POST/PUT requests"
-                  rows={4}
                   {...register('body')}
+                  rows={4}
+                  placeholder="JSON payload for POST/PUT requests"
                   className={cn(errors.body && 'border-destructive')}
                 />
-                {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
+                {errors.body && (
+                  <TypographyP className="text-destructive text-sm">
+                    {errors.body.message}
+                  </TypographyP>
+                )}
               </div>
             )}
           </div>

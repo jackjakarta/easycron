@@ -1,5 +1,6 @@
 'use client';
 
+import { type UserAndContext } from '@/auth/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -16,18 +17,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { type UserModel } from '@/db/schema';
 import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
-const MENU_ITEMS = [
-  { label: 'Account', icon: BadgeCheck, href: '/settings/account' },
-  { label: 'Billing', icon: CreditCard, href: '/settings/billing' },
-  { label: 'Developers', icon: Code, href: '/developers' },
-];
-
-export default function NavUser({ user }: { user: UserModel }) {
+export default function NavUser({ user }: { user: UserAndContext }) {
   const { isMobile } = useSidebar();
+
+  const MENU_ITEMS = [
+    { label: 'Account', icon: BadgeCheck, href: '/settings/account' },
+    ...(user.subscription.type === 'pro'
+      ? [{ label: 'Billing', icon: CreditCard, href: '/settings/billing' }]
+      : []),
+    { label: 'Developers', icon: Code, href: '/developers' },
+  ];
 
   return (
     <SidebarMenu>
@@ -51,9 +53,9 @@ export default function NavUser({ user }: { user: UserModel }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? 'bottom' : 'right'}
             align="end"
-            sideOffset={4}
+            side={isMobile ? 'top' : 'right'}
+            sideOffset={isMobile ? 8 : 4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -68,13 +70,19 @@ export default function NavUser({ user }: { user: UserModel }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            {user.subscription.type === 'free' && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/pricing">
+                      <Sparkles />
+                      Upgrade to Pro
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuGroup>
               {MENU_ITEMS.map((item) => (
                 <DropdownMenuItem asChild key={item.href}>

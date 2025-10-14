@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: 'easyCron - Free and Open Source Cron Job Manager',
     description:
       'A free and open source cron job manager to schedule and manage your cron jobs with ease.',
-    icons: { icon: '/favicon.ico' },
+    icons: { icon: '/favicon.png' },
   };
 }
 

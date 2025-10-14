@@ -1,49 +1,32 @@
-import { stripe } from '@/stripe';
-import Stripe from 'stripe';
+import { auth } from '@/auth';
+import { headers } from 'next/headers';
 
-export type SubscriptionState = 'premium' | 'free' | 'trialing';
+import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION } from './const';
+import { type SubscriptionFeaturesAndLimits } from './types';
 
-export function getSubscriptionStateBySubscriptions({
-  subscriptions,
-  hasFreeTrial,
+export async function getUserActiveSubscription({
+  userId,
 }: {
-  subscriptions: Stripe.Subscription[];
-  hasFreeTrial: boolean;
-}): SubscriptionState {
-  if (hasFreeTrial) {
-    return 'premium';
+  userId: string;
+}): Promise<SubscriptionFeaturesAndLimits> {
+  const subscriptions = await auth.api.listActiveSubscriptions({
+    query: {
+      referenceId: userId,
+    },
+    headers: await headers(),
+  });
+
+  const activeSubscription = subscriptions.find(
+    (sub) => sub.status === 'active' || sub.status === 'trialing',
+  );
+
+  if (activeSubscription === undefined) {
+    return FREE_SUBSCRIPTION;
   }
 
-  const activeSubscription = subscriptions.find((s) => s.status === 'active');
-
-  if (activeSubscription !== undefined) {
-    return 'premium';
+  if (activeSubscription.plan === 'pro') {
+    return PRO_SUBSCRIPTION;
   }
 
-  const trialingSubscription = subscriptions.find((s) => s.status === 'trialing');
-
-  if (trialingSubscription !== undefined) {
-    return 'trialing';
-  }
-
-  return 'free';
-}
-
-export async function getStripeSubscriptionsByCustomerId({
-  customerId,
-}: {
-  customerId: string | null;
-}) {
-  if (customerId === null) return [];
-
-  try {
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-    });
-
-    return subscriptions.data;
-  } catch (error) {
-    console.error({ error });
-    return [];
-  }
+  return FREE_SUBSCRIPTION;
 }

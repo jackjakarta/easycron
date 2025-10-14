@@ -112,6 +112,7 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
               />
 
               <CreateJobDialog
+                key="create-job-dialog-1"
                 projectId={projectId}
                 trigger={
                   <Button>
@@ -140,7 +141,31 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cronJobs.length > 0 ? (
+              {cronJobs.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-32 py-8">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <Clock className="text-muted-foreground mb-4 h-12 w-12" />
+                      <h3 className="text-lg font-semibold">No jobs yet</h3>
+                      <p className="text-muted-foreground mb-4 text-sm">
+                        Get started by creating your first cron job.
+                      </p>
+                      <CreateJobDialog
+                        key="create-job-dialog-2"
+                        projectId={projectId}
+                        trigger={
+                          <Button>
+                            Create Job
+                            <Plus className="size-4" />
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {cronJobs.length > 0 &&
                 cronJobs.map((job) => (
                   <TableRow key={job.id}>
                     <TableCell className="font-medium">{job.name}</TableCell>
@@ -273,29 +298,7 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={8} className="h-32 py-8">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <Clock className="text-muted-foreground mb-4 h-12 w-12" />
-                      <h3 className="text-lg font-semibold">No jobs yet</h3>
-                      <p className="text-muted-foreground mb-4 text-sm">
-                        Get started by creating your first cron job.
-                      </p>
-                      <CreateJobDialog
-                        projectId={projectId}
-                        trigger={
-                          <Button>
-                            <Plus className="mr-2 size-4" />
-                            Create Job
-                          </Button>
-                        }
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
+                ))}
             </TableBody>
           </Table>
         </div>
@@ -308,8 +311,8 @@ function methodToClassName(method: HttpMethod) {
   const httpMethodColors: Record<HttpMethod, string> = {
     GET: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
     POST: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-    PUT: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-    DELETE: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+    PUT: 'bg-chart-5/10 text-chart-5 dark:bg-chart-4/10 dark:text-chart-4',
+    DELETE: 'bg-destructive/10 text-destructive',
   };
 
   return httpMethodColors[method];

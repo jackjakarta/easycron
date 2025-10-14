@@ -1,19 +1,17 @@
-import { CTA } from './cta';
-import { DeveloperAPI } from './developer-api';
-import { Features } from './features';
-import { Header } from './header';
-import { Hero } from './hero';
-import { Stats } from './stats';
+import { CTA } from './_components/cta';
+import { DeveloperAPI } from './_components/developer-api';
+import { Features } from './_components/features';
+import { Hero } from './_components/hero';
+import { Stats } from './_components/stats';
 
 export default function Page() {
   return (
-    <main className="bg-background min-h-screen">
-      <Header />
+    <>
       <Hero />
       <Stats />
       <Features />
       <DeveloperAPI />
       <CTA />
-    </main>
+    </>
   );
 }
