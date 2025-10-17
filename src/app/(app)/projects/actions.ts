@@ -29,5 +29,9 @@ export async function createProjectAction({
     userId: user.id,
   });
 
+  if (newProject === undefined) {
+    throw new Error('Failed to create project');
+  }
+
   return newProject;
 }

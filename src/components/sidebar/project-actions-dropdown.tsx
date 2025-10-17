@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { type ProjectModel } from '@/db/schema';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
@@ -21,6 +22,7 @@ type ProjectActionsDropdownProps = {
 export default function ProjectActionsDropdown({ trigger, project }: ProjectActionsDropdownProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -37,7 +39,10 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
       if (pathname.includes(project.id)) {
         router.replace('/projects');
       }
+
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
+      console.error('Error deleting project:', error);
       toast.error('Failed to delete project');
     } finally {
       setIsDeleting(false);

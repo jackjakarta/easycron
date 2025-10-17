@@ -18,6 +18,7 @@ import { TypographyP } from '@/components/ui/typography';
 import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -33,11 +34,19 @@ const newProjectSchema = z.object({
 type NewProjectFormData = z.infer<typeof newProjectSchema>;
 
 type CreateProjectDialogProps = {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  buttonRef?: React.ComponentProps<'button'>['ref'];
+  hidden?: boolean;
 };
 
-export default function CreateProjectDialog({ trigger }: CreateProjectDialogProps) {
+export default function CreateProjectDialog({
+  trigger,
+  buttonRef,
+  hidden = false,
+}: CreateProjectDialogProps) {
+  const router = useRouter();
   const queryClient = useQueryClient();
+
   const [isOpen, setIsOpen] = React.useState(false);
 
   const {
@@ -59,15 +68,16 @@ export default function CreateProjectDialog({ trigger }: CreateProjectDialogProp
       _description === undefined || _description.trim().length === 0 ? undefined : _description;
 
     try {
-      await createProjectAction({ name, description });
+      const newProject = await createProjectAction({ name, description });
       setIsOpen(false);
       reset();
 
       toast.success('Job created successfully');
+      router.push(`/projects/${newProject.id}`);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
-      console.error('Failed to update job:', error);
-      toast.error('Failed to update job');
+      console.error('Failed to create project:', error);
+      toast.error('Failed to create project');
     }
   }
 
@@ -76,7 +86,13 @@ export default function CreateProjectDialog({ trigger }: CreateProjectDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <Button ref={buttonRef} className={cn(hidden && 'hidden')}>
+            Create Project
+          </Button>
+        )}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Project</DialogTitle>

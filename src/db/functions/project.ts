@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '..';
 import {
@@ -121,9 +121,8 @@ export async function dbDeleteProject({
       .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)));
 
     if (projectJobs.length > 0) {
-      await Promise.all(
-        projectJobs.map((job) => tx.delete(executionTable).where(eq(executionTable.jobId, job.id))),
-      );
+      const jobIds = projectJobs.map((job) => job.id);
+      await tx.delete(executionTable).where(inArray(executionTable.jobId, jobIds));
 
       await tx
         .delete(jobTable)
