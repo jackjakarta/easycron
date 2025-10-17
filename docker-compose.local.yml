@@ -65,7 +65,7 @@ services:
     volumes:
       - redis_data_local:/data
     healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
+      test: ['CMD', 'redis-cli', '-a', 'mysecretpassword', 'ping']
       interval: 30s
       timeout: 3s
       retries: 3

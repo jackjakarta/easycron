@@ -28,7 +28,7 @@ export default function NavMain() {
     <SidebarGroup>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Recent Jobs">
+          <SidebarMenuButton asChild tooltip="Dashboard">
             <Link href="/dashboard">
               <SquaresUnite />
               <span>Dashboard</span>
