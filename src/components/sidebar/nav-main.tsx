@@ -15,19 +15,30 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { useProjectsQuery } from '@/hooks/query/use-projects-query';
-import { ChevronRight, Clock, FolderPlus } from 'lucide-react';
+import { useSidebarSkeletons } from '@/hooks/use-sidebar-skeletons';
+import { ChevronRight, Clock, FolderPlus, SquaresUnite } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 
 export default function NavMain() {
   const { data: projects = [], isLoading, isError } = useProjectsQuery();
+  const skeletonSeeds = useSidebarSkeletons(2, 8);
 
   return (
     <SidebarGroup>
       <SidebarMenu>
         <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Dashboard">
+            <Link href="/dashboard">
+              <SquaresUnite />
+              <span>Dashboard</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
           <CreateProjectDialog
             trigger={
-              <SidebarMenuButton tooltip="New Job" className="cursor-pointer">
+              <SidebarMenuButton tooltip="New Project" className="cursor-pointer">
                 <FolderPlus />
                 <span>New Project</span>
               </SidebarMenuButton>
@@ -45,7 +56,7 @@ export default function NavMain() {
             </SidebarMenuButton>
 
             {isLoading &&
-              Array.from({ length: 8 }).map((_, index) => <SidebarMenuSkeleton key={index} />)}
+              skeletonSeeds.map((seed) => <SidebarMenuSkeleton key={seed} seed={seed} />)}
 
             {isError && (
               <div className="text-destructive mt-2 ml-2 text-sm">Error fetching projects</div>

@@ -13,6 +13,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { hashStringToNumber } from '@/utils/crypto';
 import { cn } from '@/utils/tailwind';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, VariantProps } from 'class-variance-authority';
@@ -577,16 +578,17 @@ function SidebarMenuBadge({ className, ...props }: React.ComponentProps<'div'>) 
 function SidebarMenuSkeleton({
   className,
   showIcon = false,
+  seed,
   ...props
 }: React.ComponentProps<'div'> & {
   showIcon?: boolean;
+  seed?: string;
 }) {
-  const id = React.useId();
-
   const width = React.useMemo(() => {
-    const n = hashString(id) % 41;
+    if (!seed) return '75%'; // Default width
+    const n = hashStringToNumber(seed) % 41;
     return `${50 + n}%`;
-  }, [id]);
+  }, [seed]);
 
   return (
     <div
@@ -693,9 +695,3 @@ export {
   SidebarTrigger,
   useSidebar,
 };
-
-function hashString(str: string) {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
-  return h >>> 0;
-}

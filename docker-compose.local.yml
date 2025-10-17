@@ -13,6 +13,11 @@ services:
     ports:
       - '3000:3000'
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://web:3000/api/health']
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   worker:
     image: easycron-local:latest
@@ -59,6 +64,11 @@ services:
     command: ['redis-server', '--requirepass', 'mysecretpassword']
     volumes:
       - redis_data_local:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'mysecretpassword', 'ping']
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
 networks:
   local_network:
