@@ -27,6 +27,7 @@ export default function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenu>
+        <SidebarGroupLabel>Shortcuts</SidebarGroupLabel>
         <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Dashboard">
             <Link href="/dashboard">

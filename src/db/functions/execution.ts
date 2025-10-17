@@ -1,7 +1,7 @@
 import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
 
 import { db } from '..';
-import { executionTable, jobTable, type ExecutionModel } from '../schema';
+import { executionTable, jobTable, projectTable, type ExecutionModel } from '../schema';
 
 export async function dbGetFinishedExecutionsByJobId({
   jobId,
@@ -18,7 +18,19 @@ export async function dbGetFinishedExecutionsByJobId({
   return executions;
 }
 
-export async function dbGetRecentExecutions({ userId }: { userId: string }) {
+export type ExecutionWithDetails = Pick<
+  ExecutionModel,
+  'id' | 'jobId' | 'status' | 'finishedAt' | 'startedAt' | 'httpStatus' | 'latencyMs'
+> & {
+  jobName: string;
+  projectName: string;
+};
+
+export async function dbGetRecentExecutions({
+  userId,
+}: {
+  userId: string;
+}): Promise<ExecutionWithDetails[]> {
   const recentExecutions = await db
     .select({
       id: executionTable.id,
@@ -28,10 +40,12 @@ export async function dbGetRecentExecutions({ userId }: { userId: string }) {
       startedAt: executionTable.startedAt,
       httpStatus: executionTable.httpStatus,
       jobName: jobTable.name,
+      projectName: projectTable.name,
       latencyMs: executionTable.latencyMs,
     })
     .from(executionTable)
     .innerJoin(jobTable, eq(executionTable.jobId, jobTable.id))
+    .innerJoin(projectTable, eq(jobTable.projectId, projectTable.id))
     .where(eq(jobTable.userId, userId))
     .orderBy(desc(executionTable.finishedAt))
     .limit(5);

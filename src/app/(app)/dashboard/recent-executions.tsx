@@ -76,9 +76,9 @@ export function RecentExecutions() {
                   </Badge>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{'job one'}</p>
+                      <p className="font-medium">{execution.jobName}</p>
                       <span className="text-muted-foreground text-xs">·</span>
-                      {/* <p className="text-muted-foreground text-sm">{execution.projectName}</p> */}
+                      <p className="text-muted-foreground text-sm">{execution.projectName}</p>
                     </div>
                     <p className="text-muted-foreground text-xs">
                       {formatDistanceToNow(execution.startedAt, { addSuffix: true })} ·{' '}
