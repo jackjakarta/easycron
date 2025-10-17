@@ -22,7 +22,8 @@
           "login-with": "Continue with"
         }
       }
-    }
+    },
+    "logout": "Logout"
   },
   "common": {
     "or": "or",
@@ -52,5 +53,19 @@
     "total-jobs": "Total Jobs",
     "create-first-job": "Create your first cron job",
     "recent-executions": "Recent Executions"
+  },
+  "sidebar": {
+    "quick-actions": "Quick Actions",
+    "dashboard": "Dashboard",
+    "projects": { "label": "Projects", "error": "Failed to load projects" },
+    "create-project": "Create Project",
+    "settings": "Settings",
+    "latest": "Latest",
+    "profile": "Profile",
+    "billing": "Billing",
+    "logout": "Logout",
+    "upgrade": "Upgrade to Pro",
+    "account": "Account",
+    "developers": "Developers"
   }
 }
