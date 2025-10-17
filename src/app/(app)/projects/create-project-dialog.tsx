@@ -79,16 +79,16 @@ export default function CreateProjectDialog({ trigger }: CreateProjectDialogProp
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Job</DialogTitle>
-          <DialogDescription>Create a new job with the details below.</DialogDescription>
+          <DialogTitle>Create Project</DialogTitle>
+          <DialogDescription>Create a new project with the details below.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
           <div className="space-y-6 px-0">
             <div className="space-y-2">
-              <Label htmlFor="name">Job Name</Label>
+              <Label htmlFor="name">Project Name</Label>
               <Input
                 id="name"
-                placeholder="Enter job name"
+                placeholder="Enter project name"
                 {...register('name')}
                 className={cn(errors.name && 'border-destructive')}
               />
@@ -102,7 +102,7 @@ export default function CreateProjectDialog({ trigger }: CreateProjectDialogProp
               <Label htmlFor="description">Job Description</Label>
               <Textarea
                 id="description"
-                placeholder="Enter job description"
+                placeholder="Enter project description"
                 {...register('description')}
                 className={cn(errors.description && 'border-destructive')}
               />
@@ -119,7 +119,7 @@ export default function CreateProjectDialog({ trigger }: CreateProjectDialogProp
               <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Button type="submit" disabled={buttonDisabled}>
-              {isSubmitting ? 'Saving...' : 'Save changes'}
+              {isSubmitting ? 'Creating...' : 'Create Project'}
             </Button>
           </DialogFooter>
         </form>
