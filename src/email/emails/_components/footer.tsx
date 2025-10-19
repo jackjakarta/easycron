@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <Section className="rounded-b-lg bg-gray-100 px-8 py-6">
       <Text className="mb-2 text-center text-sm leading-5 text-gray-600">
-        This email was sent by PDF Exporter
+        This email was sent by easyCron.
       </Text>
       <Row className="text-center">
         <Column>

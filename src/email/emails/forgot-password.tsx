@@ -22,7 +22,7 @@ export default function ForgotPasswordTemplate({ actionUrl, userEmail }: ForgotP
       <Section className="mb-6 text-center">
         <Button
           href={actionUrl}
-          className="rounded-lg bg-red-900 px-8 py-3 text-base font-medium text-white"
+          className="rounded-lg bg-gray-900 px-8 py-3 text-base font-medium text-white"
         >
           Reset Password
         </Button>

@@ -25,14 +25,14 @@ export default function VerifyEmailTemplate({ actionUrl, userEmail }: VerifyEmai
       <Section className="mb-6 text-center">
         <Button
           href={actionUrl}
-          className="rounded-lg bg-red-900 px-8 py-3 text-base font-medium text-white"
+          className="rounded-lg bg-gray-900 px-8 py-3 text-base font-medium text-white"
         >
           Verify Email Address
         </Button>
       </Section>
 
       <Text className="mb-4 text-sm leading-5 text-gray-600">
-        If you did not create an account with PDF Exporter, you can safely ignore this email.
+        If you did not create an account with easyCron, you can safely ignore this email.
       </Text>
     </BaseEmailTemplate>
   );

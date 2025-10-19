@@ -10,6 +10,12 @@ export type InformationEmailMetadata =
     }
   | {
       type: 'subscription-purchased';
+    }
+  | {
+      type: 'trial-expired';
+    }
+  | {
+      type: 'trial-ended';
     };
 
 export type MailTemplateResult = {
