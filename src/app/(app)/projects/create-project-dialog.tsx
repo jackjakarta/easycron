@@ -18,6 +18,7 @@ import { TypographyP } from '@/components/ui/typography';
 import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -47,6 +48,9 @@ export default function CreateProjectDialog({
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const t = useTranslations('projects.actions.create');
+  const tCommon = useTranslations('common');
+
   const [isOpen, setIsOpen] = React.useState(false);
 
   const {
@@ -68,16 +72,30 @@ export default function CreateProjectDialog({
       _description === undefined || _description.trim().length === 0 ? undefined : _description;
 
     try {
-      const newProject = await createProjectAction({ name, description });
+      const result = await createProjectAction({ name, description });
+      const { data: newProject } = result;
+
+      if (result.code === 402) {
+        toast.error(t('toast.limits-exceeded'));
+        setIsOpen(false);
+        reset();
+        return;
+      }
+
+      if (newProject === undefined) {
+        toast.error(t('toast.create-error'));
+        return;
+      }
+
       setIsOpen(false);
       reset();
 
-      toast.success('Job created successfully');
+      toast.success(t('toast.created-success'));
       router.push(`/projects/${newProject.id}`);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
       console.error('Failed to create project:', error);
-      toast.error('Failed to create project');
+      toast.error(t('toast.create-error'));
     }
   }
 
@@ -89,22 +107,22 @@ export default function CreateProjectDialog({
       <DialogTrigger asChild>
         {trigger ?? (
           <Button ref={buttonRef} className={cn(hidden && 'hidden')}>
-            Create Project
+            {t('title')}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Project</DialogTitle>
-          <DialogDescription>Create a new project with the details below.</DialogDescription>
+          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogDescription>{t('description')}</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
           <div className="space-y-6 px-0">
             <div className="space-y-2">
-              <Label htmlFor="name">Project Name</Label>
+              <Label htmlFor="name">{t('form.name.label')}</Label>
               <Input
                 id="name"
-                placeholder="Enter project name"
+                placeholder={t('form.name.placeholder')}
                 {...register('name')}
                 className={cn(errors.name && 'border-destructive')}
               />
@@ -115,10 +133,10 @@ export default function CreateProjectDialog({
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Job Description</Label>
+              <Label htmlFor="description">{t('form.description.label')}</Label>
               <Textarea
                 id="description"
-                placeholder="Enter project description"
+                placeholder={t('form.description.placeholder')}
                 {...register('description')}
                 className={cn(errors.description && 'border-destructive')}
               />
@@ -132,10 +150,10 @@ export default function CreateProjectDialog({
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">{tCommon('cancel')}</Button>
             </DialogClose>
             <Button type="submit" disabled={buttonDisabled}>
-              {isSubmitting ? 'Creating...' : 'Create Project'}
+              {isSubmitting ? tCommon('loading') : t('form.buttons.create')}
             </Button>
           </DialogFooter>
         </form>

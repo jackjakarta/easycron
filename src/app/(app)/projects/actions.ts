@@ -17,9 +17,11 @@ export async function createProjectAction({
     const userProjects = await dbGetProjects({ userId: user.id });
 
     if (userProjects.length >= subscription.limits.projects) {
-      throw new Error(
-        'Exceeded the number of projects allowed in the Free plan. Please upgrade to create more.',
-      );
+      return {
+        success: false,
+        error: 'You have reached the maximum number of projects for your plan.',
+        code: 402,
+      };
     }
   }
 
@@ -30,8 +32,12 @@ export async function createProjectAction({
   });
 
   if (newProject === undefined) {
-    throw new Error('Failed to create project');
+    return {
+      success: false,
+      error: 'Failed to create project',
+      code: 500,
+    };
   }
 
-  return newProject;
+  return { success: true, data: newProject, code: 201 };
 }

@@ -8,6 +8,7 @@ import {
 import { type ProjectModel } from '@/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { toast } from 'sonner';
@@ -24,6 +25,9 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const t = useTranslations('projects.actions.delete-confirmation');
+  const tCommon = useTranslations('common');
+
   const [isOpen, setIsOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -34,7 +38,7 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
       await deleteProjectAction({ projectId: project.id });
 
       setIsOpen(false);
-      toast.success('Project deleted successfully');
+      toast.success(t('toast.deleted-success'));
 
       if (pathname.includes(project.id)) {
         router.replace('/projects');
@@ -43,7 +47,7 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (error) {
       console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
+      toast.error(t('toast.delete-error'));
     } finally {
       setIsDeleting(false);
     }
@@ -62,11 +66,11 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
               className="text-destructive focus:text-destructive"
             >
               <Trash2 className="text-destructive size-4" />
-              Delete
+              {tCommon('delete')}
             </DropdownMenuItem>
           }
-          title="Delete Project"
-          description={`Are you sure you want to delete ${project.name} ?`}
+          title={t('title')}
+          description={t('description', { projectName: project.name })}
           type="destructive"
           onConfirm={handleDeleteProject}
           isLoading={isDeleting}

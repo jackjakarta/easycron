@@ -16,7 +16,7 @@ export default function NavHeader() {
             <Link href="/dashboard">
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">easyCron</span>
-                <span className="truncate text-xs">Jakarta Enterprise</span>
+                <span className="truncate text-xs">Personal Account</span>
               </div>
             </Link>
           </SidebarMenuButton>
