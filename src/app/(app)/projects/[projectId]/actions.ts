@@ -8,7 +8,7 @@ import {
   dbInsertJob,
   dbUpdateJob,
 } from '@/db/functions/job';
-import { dbGetProjectById } from '@/db/functions/project';
+import { dbDeleteProject, dbGetProjectById } from '@/db/functions/project';
 import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
@@ -68,7 +68,7 @@ export async function createJobAction({
   });
 
   if (newJob === undefined) {
-    throw new Error('Failed to create job');
+    throw new Error('Failed to insert job in database');
   }
 
   return newJob;
@@ -125,7 +125,7 @@ export async function createOrUpdateProjectSecretAction({ projectId }: { project
   const encryptedSecret = encryptSecret(rawSecret);
 
   const newSecret = await dbUpsertSecret({
-    name: 'HMAC Signing Key',
+    name: `${project.name} - HMAC Signing Key`,
     value: encryptedSecret,
     projectId: project.id,
     userId: user.id,
@@ -145,7 +145,7 @@ export async function generateCronExpressionAction({ prompt }: { prompt: string 
   return cronExpression;
 }
 
-export async function deleteJobSecretAction({ projectId }: { projectId: string }) {
+export async function deleteProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
   const deletedSecret = await dbDeleteSecret({ projectId, userId: user.id });
 
@@ -154,4 +154,15 @@ export async function deleteJobSecretAction({ projectId }: { projectId: string }
   }
 
   return deletedSecret;
+}
+
+export async function deleteProjectAction({ projectId }: { projectId: string }) {
+  const user = await getUser();
+  const deletedProject = await dbDeleteProject({ projectId, userId: user.id });
+
+  if (deletedProject === undefined) {
+    throw new Error('Failed to delete project');
+  }
+
+  return deletedProject;
 }

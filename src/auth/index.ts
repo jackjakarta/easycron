@@ -81,6 +81,46 @@ export const auth = betterAuth({
             annualDiscountPriceId: env.yearlyPriceId,
             freeTrial: {
               days: NUMBER_OF_TRIAL_DAYS,
+              onTrialEnd: async ({ subscription }) => {
+                try {
+                  const user = await dbGetUserById({ userId: subscription.referenceId });
+
+                  if (user === undefined) {
+                    console.error(
+                      `User with ID ${subscription.referenceId} not found for email notification`,
+                    );
+                    return;
+                  }
+
+                  await sendUserActionInformationEmail({
+                    to: user.email,
+                    information: { type: 'trial-ended' },
+                  });
+                } catch (error) {
+                  console.error('Error sending trial ended email:', error);
+                  return;
+                }
+              },
+              onTrialExpired: async (subscription) => {
+                try {
+                  const user = await dbGetUserById({ userId: subscription.referenceId });
+
+                  if (user === undefined) {
+                    console.error(
+                      `User with ID ${subscription.referenceId} not found for email notification`,
+                    );
+                    return;
+                  }
+
+                  await sendUserActionInformationEmail({
+                    to: user.email,
+                    information: { type: 'trial-expired' },
+                  });
+                } catch (error) {
+                  console.error('Error sending trial expired email:', error);
+                  return;
+                }
+              },
             },
           },
         ],
@@ -98,7 +138,10 @@ export const auth = betterAuth({
             const user = await dbGetUserById({ userId: subscription.referenceId });
 
             if (user === undefined) {
-              throw new Error(`User with ID ${subscription.referenceId} not found`);
+              console.error(
+                `User with ID ${subscription.referenceId} not found for email notification`,
+              );
+              return;
             }
 
             await sendUserActionInformationEmail({
@@ -107,6 +150,7 @@ export const auth = betterAuth({
             });
           } catch (error) {
             console.error('Error sending subscription purchased email:', error);
+            return;
           }
         },
       },

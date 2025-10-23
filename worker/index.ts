@@ -14,6 +14,10 @@ async function main() {
     concurrency,
   });
 
+  worker.on('ready', () => {
+    console.info('Worker ready');
+  });
+
   worker.on('active', (job) => {
     console.info('active', job.id);
   });

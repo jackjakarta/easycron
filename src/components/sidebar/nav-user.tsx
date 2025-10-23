@@ -18,17 +18,21 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export default function NavUser({ user }: { user: UserAndContext }) {
   const { isMobile } = useSidebar();
 
+  const t = useTranslations('sidebar');
+  const tAuth = useTranslations('auth');
+
   const MENU_ITEMS = [
-    { label: 'Account', icon: BadgeCheck, href: '/settings/account' },
+    { label: t('account'), icon: BadgeCheck, href: '/settings/account' },
     ...(user.subscription.type === 'pro'
-      ? [{ label: 'Billing', icon: CreditCard, href: '/settings/billing' }]
+      ? [{ label: t('billing'), icon: CreditCard, href: '/settings/billing' }]
       : []),
-    { label: 'Developers', icon: Code, href: '/developers' },
+    { label: t('developers'), icon: Code, href: '/developers' },
   ];
 
   return (
@@ -76,7 +80,7 @@ export default function NavUser({ user }: { user: UserAndContext }) {
                   <DropdownMenuItem asChild>
                     <Link href="/pricing">
                       <Sparkles />
-                      Upgrade to Pro
+                      {t('upgrade')}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -97,7 +101,7 @@ export default function NavUser({ user }: { user: UserAndContext }) {
             <DropdownMenuItem asChild>
               <Link href="/logout">
                 <LogOut />
-                Log out
+                {tAuth('logout')}
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

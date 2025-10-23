@@ -16,50 +16,66 @@ import {
 } from '@/components/ui/sidebar';
 import { useProjectsQuery } from '@/hooks/query/use-projects-query';
 import { useSidebarSkeletons } from '@/hooks/use-sidebar-skeletons';
-import { ChevronRight, Clock, FolderPlus, SquaresUnite } from 'lucide-react';
+import { ChevronRight, Clock, Ellipsis, FolderPlus, SquaresUnite } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React from 'react';
+
+import ProjectActionsDropdown from './project-actions-dropdown';
 
 export default function NavMain() {
   const { data: projects = [], isLoading, isError } = useProjectsQuery();
   const skeletonSeeds = useSidebarSkeletons(2, 8);
+  const t = useTranslations('sidebar');
 
   return (
     <SidebarGroup>
       <SidebarMenu>
+        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          {t('quick-actions')}
+        </SidebarGroupLabel>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Dashboard">
+          <SidebarMenuButton asChild tooltip={t('dashboard')}>
             <Link href="/dashboard">
               <SquaresUnite />
-              <span>Dashboard</span>
+              <span>{t('dashboard')}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
           <CreateProjectDialog
             trigger={
-              <SidebarMenuButton tooltip="New Project" className="cursor-pointer">
+              <SidebarMenuButton tooltip={t('create-project')} className="cursor-pointer">
                 <FolderPlus />
-                <span>New Project</span>
+                <span>{t('create-project')}</span>
               </SidebarMenuButton>
             }
           />
         </SidebarMenuItem>
-        <SidebarGroupLabel className="mt-2">Latest</SidebarGroupLabel>
+
+        <SidebarGroupLabel className="mt-2 group-data-[collapsible=icon]:hidden">
+          {t('latest')}
+        </SidebarGroupLabel>
         <Collapsible asChild key="projects" defaultOpen={true}>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Projects">
+            <SidebarMenuButton asChild tooltip={t('projects.label')}>
               <Link href="/projects">
                 <Clock />
-                <span>Projects</span>
+                <span>{t('projects.label')}</span>
               </Link>
             </SidebarMenuButton>
 
             {isLoading &&
-              skeletonSeeds.map((seed) => <SidebarMenuSkeleton key={seed} seed={seed} />)}
+              skeletonSeeds.map((seed) => (
+                <SidebarMenuSkeleton
+                  className="group-data-[collapsible=icon]:hidden"
+                  key={seed}
+                  seed={seed}
+                />
+              ))}
 
             {isError && (
-              <div className="text-destructive mt-2 ml-2 text-sm">Error fetching projects</div>
+              <div className="text-destructive mt-2 ml-2 text-sm">{t('projects.error')}</div>
             )}
 
             {!isLoading && !isError && projects.length > 0 && (
@@ -72,13 +88,23 @@ export default function NavMain() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {projects.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.id}>
+                    {projects.map((project) => (
+                      <SidebarMenuSubItem key={project.id} className="group/sub">
                         <SidebarMenuSubButton asChild>
-                          <Link href={`/projects/${subItem.id}`}>
-                            <span>{subItem.name}</span>
+                          <Link href={`/projects/${project.id}`}>
+                            <span>{project.name}</span>
                           </Link>
                         </SidebarMenuSubButton>
+
+                        <ProjectActionsDropdown
+                          project={project}
+                          trigger={
+                            <SidebarMenuAction className="invisible cursor-pointer group-hover/sub:visible data-[state=open]:visible">
+                              <Ellipsis className="text-muted-foreground" />
+                              <span className="sr-only">Project actions</span>
+                            </SidebarMenuAction>
+                          }
+                        />
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>

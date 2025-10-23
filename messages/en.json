@@ -22,7 +22,8 @@
           "login-with": "Continue with"
         }
       }
-    }
+    },
+    "logout": "Logout"
   },
   "common": {
     "or": "or",
@@ -52,5 +53,54 @@
     "total-jobs": "Total Jobs",
     "create-first-job": "Create your first cron job",
     "recent-executions": "Recent Executions"
+  },
+  "projects": {
+    "actions": {
+      "create": {
+        "title": "Create New Project",
+        "description": "Organize your cron jobs into projects",
+        "form": {
+          "name": {
+            "label": "Project Name",
+            "placeholder": "My Project",
+            "error": "Please enter a project name"
+          },
+          "description": {
+            "label": "Project Description",
+            "placeholder": "A brief description of the project (optional)"
+          },
+          "buttons": {
+            "create": "Create Project"
+          }
+        },
+        "toast": {
+          "created-success": "Project created successfully",
+          "create-error": "Failed to create project",
+          "limits-exceeded": "Project creation limit exceeded. Please upgrade your plan."
+        }
+      },
+      "delete-confirmation": {
+        "title": "Delete Project",
+        "description": "Are you sure you want to delete {projectName} ? This action cannot be undone.",
+        "toast": {
+          "deleted-success": "Project deleted successfully",
+          "delete-error": "Failed to delete project"
+        }
+      }
+    }
+  },
+  "sidebar": {
+    "quick-actions": "Quick Actions",
+    "dashboard": "Dashboard",
+    "projects": { "label": "Projects", "error": "Failed to load projects" },
+    "create-project": "Create Project",
+    "settings": "Settings",
+    "latest": "Latest",
+    "profile": "Profile",
+    "billing": "Billing",
+    "logout": "Logout",
+    "upgrade": "Upgrade to Pro",
+    "account": "Account",
+    "developers": "Developers"
   }
 }

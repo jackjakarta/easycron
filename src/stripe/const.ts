@@ -9,9 +9,10 @@ export const PAYMENT_METHOD_TYPES = ['card'] satisfies Stripe.Emptyable<
 >;
 
 export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
-  type: 'free' as const,
+  type: 'free',
   features: {
     analytics: false,
+    ai: false,
   },
   limits: {
     projects: 1,
@@ -24,6 +25,7 @@ export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   type: 'pro',
   features: {
     analytics: true,
+    ai: true,
   },
   limits: {
     projects: Infinity,

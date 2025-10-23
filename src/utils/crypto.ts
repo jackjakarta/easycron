@@ -65,9 +65,3 @@ export function decryptSecret(encryptedData: string): string {
 
   return decrypted;
 }
-
-export function hashStringToNumber(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
-  return h >>> 0;
-}

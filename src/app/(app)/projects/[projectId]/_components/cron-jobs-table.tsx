@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table';
 import { type HttpMethod, type JobModel } from '@/db/schema';
 import { describeCronExpression } from '@/utils/cron';
+import { cn } from '@/utils/tailwind';
 import { format, formatDistanceToNow } from 'date-fns';
 import {
   Clock,
@@ -281,7 +282,7 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
                           <ConfirmationDialog
                             title="Delete Job"
                             type="destructive"
-                            description="Are you sure you want to delete this job? This action cannot be undone."
+                            description={`Are you sure you want to delete ${job.name} ? This action cannot be undone.`}
                             onConfirm={() => handleDeleteJob(job.id)}
                             isLoading={deletingJobId === job.id}
                             trigger={
@@ -309,10 +310,10 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
 
 function methodToClassName(method: HttpMethod) {
   const httpMethodColors: Record<HttpMethod, string> = {
-    GET: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-    POST: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-    PUT: 'bg-chart-5/10 text-chart-5 dark:bg-chart-4/10 dark:text-chart-4',
-    DELETE: 'bg-destructive/10 text-destructive',
+    GET: cn('bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'),
+    POST: cn('bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'),
+    PUT: cn('text-chart-5 bg-chart-5/10 dark:bg-chart-4/10 dark:text-chart-4'),
+    DELETE: cn('bg-destructive/10 text-destructive'),
   };
 
   return httpMethodColors[method];

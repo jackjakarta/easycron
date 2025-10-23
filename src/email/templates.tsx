@@ -82,6 +82,18 @@ export async function createInformationMailTemplate(information: InformationEmai
         'Thank you for purchasing a subscription. You can now enjoy the benefits of being a pro user.',
       );
 
+    case 'trial-expired':
+      return renderInformationTemplate(
+        'Trial expired',
+        'Your trial period has expired. To continue using our pro features, please consider purchasing a subscription.',
+      );
+
+    case 'trial-ended':
+      return renderInformationTemplate(
+        'Trial ended',
+        'Your trial period has ended. From now on, you will be charged the regular subscription fee.',
+      );
+
     default:
       return undefined;
   }

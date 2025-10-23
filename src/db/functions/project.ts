@@ -1,9 +1,12 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 
 import { db } from '..';
 import {
+  executionTable,
   jobTable,
   projectTable,
+  secretTable,
+  webhookEndpointTable,
   type InsertProjectModel,
   type JobModel,
   type ProjectModel,
@@ -102,4 +105,47 @@ export async function dbUpdateProject({
     .returning();
 
   return project;
+}
+
+export async function dbDeleteProject({
+  projectId,
+  userId,
+}: {
+  projectId: string;
+  userId: string;
+}): Promise<ProjectModel | undefined> {
+  const deleted = await db.transaction(async (tx) => {
+    const projectJobs = await tx
+      .select()
+      .from(jobTable)
+      .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)));
+
+    if (projectJobs.length > 0) {
+      const jobIds = projectJobs.map((job) => job.id);
+      await tx.delete(executionTable).where(inArray(executionTable.jobId, jobIds));
+
+      await tx
+        .delete(jobTable)
+        .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)));
+    }
+
+    await tx
+      .delete(secretTable)
+      .where(and(eq(secretTable.projectId, projectId), eq(secretTable.userId, userId)));
+
+    await tx
+      .delete(webhookEndpointTable)
+      .where(
+        and(eq(webhookEndpointTable.projectId, projectId), eq(webhookEndpointTable.userId, userId)),
+      );
+
+    const [deletedProject] = await tx
+      .delete(projectTable)
+      .where(and(eq(projectTable.id, projectId), eq(projectTable.userId, userId)))
+      .returning();
+
+    return deletedProject;
+  });
+
+  return deleted;
 }

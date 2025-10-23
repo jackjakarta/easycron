@@ -37,8 +37,9 @@ export default function BaseEmailTemplate({
                   🔒 Security Notice
                 </Text>
                 <Text className="text-sm leading-5 text-gray-700">
-                  For your security, never share this verification code with anyone. PDF Exporter
-                  will never ask for your verification code via phone or email.
+                  If you did not request this email, please ignore it. For your security, do not
+                  share any links or codes contained within. If you have any concerns, please
+                  contact our support team.
                 </Text>
               </Section>
             </Section>
