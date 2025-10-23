@@ -7,6 +7,7 @@ export type SubscriptionFeaturesAndLimits = {
   type: SubscriptionType;
   features: {
     analytics: boolean;
+    ai: boolean;
   };
   limits: {
     projects: number;

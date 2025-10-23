@@ -4,9 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
 
-type JobExecutionQueryOptions = QueryOptions<ExecutionWithDetails[]>;
-
-export function useRecentJobExecutionsQuery(options?: JobExecutionQueryOptions) {
+export function useRecentJobExecutionsQuery(options?: QueryOptions<ExecutionWithDetails[]>) {
   return useQuery<ExecutionWithDetails[]>({
     ...options,
     queryKey: ['recent-job-executions'],
