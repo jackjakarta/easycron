@@ -51,7 +51,7 @@ export async function sendUserActionEmail({
       text: textPart,
     });
 
-    if (request.response.status !== 200) {
+    if (request.response.status >= 400 && request.response.status <= 599) {
       console.error('Email send returned the following error:', request.response.statusText);
       return {
         success: false,

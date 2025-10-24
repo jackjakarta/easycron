@@ -1,7 +1,7 @@
-import BuySubscriptionButton from '@/app/(auth)/_components/buy-subscription-button';
 import { getUser } from '@/auth/utils';
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
+import PageContainer from '@/components/layout/page-container';
 import { TypographyH3 } from '@/components/ui/typography';
 import { dbGetJobsExecutionsSuccessRate } from '@/db/functions/execution';
 import { dbGetEnabledJobCountByUserId, dbGetJobCountByUserId } from '@/db/functions/job';
@@ -81,13 +81,8 @@ export default async function Page() {
     <>
       <Header>
         <CustomBreadcrumbs current="Dashboard" />
-        {user.subscription === undefined && (
-          <div className="flex flex-1 items-center justify-end">
-            <BuySubscriptionButton />
-          </div>
-        )}
       </Header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <PageContainer wide>
         <TypographyH3>{getTimeBasedGreeting(firstName?.trim())}</TypographyH3>
         <DashboardStats
           {...{
@@ -102,7 +97,7 @@ export default async function Page() {
           <RecentExecutions />
           <JobsOverview jobs={dashboardData.jobs} />
         </div>
-      </div>
+      </PageContainer>
     </>
   );
 }

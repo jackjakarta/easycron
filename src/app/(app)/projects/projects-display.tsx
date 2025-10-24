@@ -121,7 +121,7 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
-const getTimeAgo = (date: Date) => {
+function getTimeAgo(date: Date) {
   const now = new Date();
   const diffInMs = now.getTime() - new Date(date).getTime();
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
@@ -132,4 +132,4 @@ const getTimeAgo = (date: Date) => {
   if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
   if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
   return `${Math.floor(diffInDays / 365)} years ago`;
-};
+}

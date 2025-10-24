@@ -1,5 +1,6 @@
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
+import PageContainer from '@/components/layout/page-container';
 
 import ApiKeysTable from './api-keys-table';
 
@@ -12,9 +13,9 @@ export default async function Page() {
           trail={[{ name: 'Developers', href: '/developers' }]}
         />
       </Header>
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <PageContainer wide>
         <ApiKeysTable />
-      </div>
+      </PageContainer>
     </>
   );
 }
