@@ -69,11 +69,6 @@ services:
         - traefik.http.routers.easycron.tls=true
         - traefik.http.routers.easycron.tls.certresolver=myresolver
         - traefik.http.services.easycron.loadbalancer.server.port=3000
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
   worker:
     image: jackjakarta/easycron:${TAG_VERSION}
