@@ -77,10 +77,10 @@ export default function Page2({ session }: { session: BetterAuthSession | null }
           buttonText={session !== null ? 'Upgrade to Pro' : 'Buy Pro Plan'}
           buttonVariant="default"
           plan="pro"
-          highlighted
           annual={isAnnual}
           isLoggedIn={session !== null}
           userId={session?.user.id}
+          highlighted
         />
       </div>
     </PageContainer>

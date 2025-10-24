@@ -13,11 +13,6 @@ services:
     ports:
       - '3000:3000'
     restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://web:3000/api/health']
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
   worker:
     image: easycron-local:latest

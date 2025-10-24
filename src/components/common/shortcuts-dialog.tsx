@@ -38,11 +38,8 @@ export default function ShortcutsDialog({
       ],
     },
     {
-      category: 'Documents',
-      items: [
-        { keys: [platformKey, 'Shift', 'L'], description: 'New folder' },
-        { keys: [platformKey, 'Shift', 'O'], description: 'New document' },
-      ],
+      category: 'Projects',
+      items: [{ keys: [platformKey, 'Shift', 'O'], description: 'New project' }],
     },
     {
       category: 'Utility',

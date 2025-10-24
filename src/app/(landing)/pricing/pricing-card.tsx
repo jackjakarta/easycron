@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { cn } from '@/utils/tailwind';
 import { Check } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 type PricingCardProps = {
@@ -25,7 +25,7 @@ type PricingCardProps = {
   buttonText: string;
   buttonVariant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
   highlighted?: boolean;
-  plan?: 'pro' | 'basic' | 'free';
+  plan?: 'pro' | 'free';
   annual?: boolean;
   isLoggedIn?: boolean;
   userId?: string;
@@ -45,8 +45,6 @@ export function PricingCard({
   isLoggedIn = false,
   userId,
 }: PricingCardProps) {
-  const router = useRouter();
-
   async function handleSubscribe() {
     const { data: subscriptions } = await authClient.subscription.list({
       query: {
@@ -74,10 +72,6 @@ export function PricingCard({
       console.error('Error creating subscription:', error);
       return;
     }
-  }
-
-  function handleNavigateToLogin() {
-    router.push('/dashboard');
   }
 
   return (
@@ -117,14 +111,20 @@ export function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        <Button
-          size="lg"
-          variant={buttonVariant}
-          className="w-full font-medium"
-          onClick={plan === 'pro' && isLoggedIn ? handleSubscribe : handleNavigateToLogin}
-        >
-          {buttonText}
-        </Button>
+        {plan === 'pro' && isLoggedIn ? (
+          <Button
+            size="lg"
+            variant={buttonVariant}
+            className="w-full font-medium"
+            onClick={handleSubscribe}
+          >
+            {buttonText}
+          </Button>
+        ) : (
+          <Button asChild size="lg" variant={buttonVariant} className="w-full font-medium">
+            <Link href="/dashboard">{buttonText}</Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
