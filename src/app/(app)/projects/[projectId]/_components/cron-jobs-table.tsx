@@ -1,6 +1,7 @@
 'use client';
 
 import ConfirmationDialog from '@/components/common/confirmation-dialog';
+import ProjectActionsDropdown from '@/components/sidebar/project-actions-dropdown';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { type HttpMethod, type JobModel } from '@/db/schema';
+import { type HttpMethod, type JobModel, type ProjectModel } from '@/db/schema';
 import { describeCronExpression } from '@/utils/cron';
 import { cn } from '@/utils/tailwind';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -44,11 +45,11 @@ import SecretDialog from './secret-dialog';
 
 type CronJobsTableProps = {
   cronJobs: JobModel[];
-  projectId: string;
+  project: ProjectModel;
   secretEnabled: boolean;
 };
 
-export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: CronJobsTableProps) {
+export default function CronJobsTable({ cronJobs, project, secretEnabled }: CronJobsTableProps) {
   const router = useRouter();
   const [deletingJobId, setDeletingJobId] = React.useState<string | null>(null);
 
@@ -100,30 +101,39 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
             Enabled Jobs ({enabledJobs.length})
           </div>
 
-          {cronJobs.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
-              <SecretDialog
-                projectId={projectId}
-                regenerate={secretEnabled}
-                trigger={
-                  <Button variant="outline">
-                    {secretEnabled ? 'Regenerate Secret' : 'Enable Signing'}
-                  </Button>
-                }
-              />
-
+          <div className="flex flex-wrap items-center gap-2">
+            {cronJobs.length > 0 && (
               <CreateJobDialog
                 key="create-job-dialog-1"
-                projectId={projectId}
+                projectId={project.id}
                 trigger={
-                  <Button>
+                  <Button variant="secondary">
                     Create Job
                     <Plus className="size-4" />
                   </Button>
                 }
               />
-            </div>
-          )}
+            )}
+
+            <SecretDialog
+              projectId={project.id}
+              regenerate={secretEnabled}
+              trigger={
+                <Button variant="secondary">
+                  {secretEnabled ? 'Regenerate Secret' : 'Enable Signing'}
+                </Button>
+              }
+            />
+
+            <ProjectActionsDropdown
+              trigger={
+                <Button variant="secondary" size="icon">
+                  <MoreHorizontal className="size-5" />
+                </Button>
+              }
+              project={project}
+            />
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -153,7 +163,7 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
                       </p>
                       <CreateJobDialog
                         key="create-job-dialog-2"
-                        projectId={projectId}
+                        projectId={project.id}
                         trigger={
                           <Button>
                             Create Job
@@ -273,7 +283,7 @@ export default function CronJobsTable({ cronJobs, projectId, secretEnabled }: Cr
                           )}
 
                           <DropdownMenuItem
-                            onSelect={() => router.push(`/projects/${projectId}/job/${job.id}`)}
+                            onSelect={() => router.push(`/projects/${project.id}/job/${job.id}`)}
                           >
                             <RefreshCcw className="mr-2 size-4" />
                             Executions

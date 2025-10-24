@@ -44,7 +44,7 @@ export default async function Page(context: PageContext) {
       <PageContainer wide>
         <CronJobsTable
           cronJobs={project.jobs}
-          projectId={project.id}
+          project={project}
           secretEnabled={secret !== undefined}
         />
       </PageContainer>

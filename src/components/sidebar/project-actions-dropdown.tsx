@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { type ProjectModel } from '@/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { Trash2 } from 'lucide-react';
+import { Copy, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
@@ -53,12 +53,26 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
     }
   }
 
+  async function copyProjectIdToClipboard() {
+    try {
+      await navigator.clipboard.writeText(project.id);
+      toast.success('Project ID copied to clipboard');
+    } catch (error) {
+      console.error('Error copying project ID to clipboard:', error);
+      toast.error('Error copying project ID to clipboard');
+    }
+  }
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild aria-label="Project actions menu">
         {trigger}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={copyProjectIdToClipboard}>
+          <Copy className="size-4" />
+          Project ID
+        </DropdownMenuItem>
         <ConfirmationDialog
           trigger={
             <DropdownMenuItem
