@@ -6,7 +6,7 @@ import {
   dbInsertProject,
   dbUpdateProject,
 } from '@/db/functions/project';
-import { getUserActiveSubscription } from '@/stripe/subscription';
+import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { toErrorMessage } from '@/utils/error';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     }
 
     const [subscription, projectCount] = await Promise.all([
-      getUserActiveSubscription({ userId: user.id }),
+      getUserActiveSubscriptionApi({ userId: user.id }),
       dbGetProjectCountByUserId({ userId: user.id }),
     ]);
 

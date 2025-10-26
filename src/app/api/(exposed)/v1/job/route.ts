@@ -1,7 +1,7 @@
 import { verifyApiKey } from '@/app/api/utils';
 import { dbGetJobCountByUserId, dbInsertJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
-import { getUserActiveSubscription } from '@/stripe/subscription';
+import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requestBodySchema } from './schemas';
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const [subscription, jobCount] = await Promise.all([
-      getUserActiveSubscription({ userId: user.id }),
+      getUserActiveSubscriptionApi({ userId: user.id }),
       dbGetJobCountByUserId({ userId: user.id }),
     ]);
 
