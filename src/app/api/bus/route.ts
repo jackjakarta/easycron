@@ -34,6 +34,5 @@ export async function POST(req: NextRequest) {
   }
 
   console.debug({ success: isValid, data: parsed.data });
-
   return NextResponse.json({ success: isValid, data: parsed.data }, { status: 200 });
 }

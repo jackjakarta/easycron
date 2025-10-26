@@ -15,14 +15,25 @@ export const requestBodySchema = z
     body: z.string().max(5000, 'Body must be at most 5000 characters').optional(),
     enabled: z.boolean().optional(),
     projectId: z.uuid(),
-    headers: z.array(
-      z.object({
+    authorizationHeader: z
+      .object({
         k: z
           .string()
           .min(1, 'Header name is required')
           .max(200, 'Header name must be at most 200 characters'),
         v: z.string().max(1000, 'Header value must be at most 1000 characters'),
-      }),
-    ),
+      })
+      .optional(),
+    headers: z
+      .array(
+        z.object({
+          k: z
+            .string()
+            .min(1, 'Header name is required')
+            .max(200, 'Header name must be at most 200 characters'),
+          v: z.string().max(1000, 'Header value must be at most 1000 characters'),
+        }),
+      )
+      .optional(),
   })
   .strict();

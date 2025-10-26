@@ -1,6 +1,7 @@
 import { verifyApiKey } from '@/app/api/utils';
-import { dbInsertJob } from '@/db/functions/job';
+import { dbGetJobCountByUserId, dbInsertJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
+import { getUserActiveSubscription } from '@/stripe/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { requestBodySchema } from './schemas';
@@ -23,6 +24,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, errors: [{ message: 'User not found' }] },
         { status: 404 },
+      );
+    }
+
+    const [subscription, jobCount] = await Promise.all([
+      getUserActiveSubscription({ userId: user.id }),
+      dbGetJobCountByUserId({ userId: user.id }),
+    ]);
+
+    if (jobCount >= subscription.limits.jobsTotal) {
+      return NextResponse.json(
+        {
+          success: false,
+          errors: [
+            {
+              message:
+                'Job limit reached for free plan. Please upgrade your subscription to add more jobs.',
+            },
+          ],
+        },
+        { status: 402 },
       );
     }
 
@@ -50,6 +71,13 @@ export async function POST(req: NextRequest) {
       projectId: project.id,
       nextRunAt: new Date(),
     });
+
+    if (job === undefined) {
+      return NextResponse.json(
+        { success: false, errors: [{ message: 'Failed to create job' }] },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ success: true, data: job }, { status: 201 });
   } catch (error) {
