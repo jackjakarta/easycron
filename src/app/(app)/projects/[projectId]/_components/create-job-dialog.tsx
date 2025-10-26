@@ -190,7 +190,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </TypographyP>
               {errors.authorizationHeader && (
                 <TypographyP className="text-destructive text-sm">
-                  {errors.authorizationHeader.message} - AN ERROR
+                  {errors.authorizationHeader.message}
                 </TypographyP>
               )}
             </div>
