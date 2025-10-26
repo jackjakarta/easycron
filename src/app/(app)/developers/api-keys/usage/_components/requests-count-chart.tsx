@@ -2,11 +2,17 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { type ApiKeyModel } from '@/db/schema';
 import { useApiKeysQuery } from '@/hooks/query/use-api-keys-query';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
-export default function RequestsCountChart() {
+type RequestCountChartProps = {
+  initialApiKeys: ApiKeyModel[];
+};
+
+export default function RequestsCountChart({ initialApiKeys }: RequestCountChartProps) {
   const { data: apiKeys = [] } = useApiKeysQuery({
+    initialData: initialApiKeys,
     refetchInterval: 120000, // refetch every 2 minutes
   });
 

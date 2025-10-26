@@ -36,7 +36,7 @@ export default async function Page() {
           avgLatencyMs={Math.round(avgLatencyMs)}
           successRate={successRate}
         />
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4">
           <RecentExecutions />
         </div>
       </PageContainer>

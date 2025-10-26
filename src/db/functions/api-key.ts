@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import { apiKeyTable, type ApiKeyModel, type UpdateApiKeyModel } from '../schema';
@@ -29,4 +29,21 @@ export async function dbUpdateApiKey({
     .returning();
 
   return updatedKey;
+}
+
+export async function dbGetTotalRequestsCountByUserId({
+  userId,
+}: {
+  userId: string;
+}): Promise<number> {
+  const [row] = await db
+    .select({
+      count: sql<number>`SUM(${apiKeyTable.requestCount})`,
+    })
+    .from(apiKeyTable)
+    .where(eq(apiKeyTable.userId, userId));
+
+  const { count } = row ?? { count: 0 };
+
+  return count;
 }

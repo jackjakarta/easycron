@@ -1,13 +1,19 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TypographyP } from '@/components/ui/typography';
 
-export default function TopStats() {
+type TopStatsProps = {
+  totalRequests: number;
+  activeKeys: number;
+  totalKeys: number;
+};
+
+export default function TopStats({ totalRequests, activeKeys, totalKeys }: TopStatsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="pb-2">
           <CardDescription>Total Requests</CardDescription>
-          <CardTitle className="text-3xl">45,090</CardTitle>
+          <CardTitle className="text-3xl">{totalRequests.toString()}</CardTitle>
         </CardHeader>
         <CardContent>
           <TypographyP className="text-muted-foreground text-xs">+12.5% from last week</TypographyP>
@@ -16,10 +22,12 @@ export default function TopStats() {
       <Card>
         <CardHeader className="pb-2">
           <CardDescription>Active Keys</CardDescription>
-          <CardTitle className="text-3xl">12</CardTitle>
+          <CardTitle className="text-3xl">{activeKeys.toString()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TypographyP className="text-muted-foreground text-xs">Out of 17 total keys</TypographyP>
+          <TypographyP className="text-muted-foreground text-xs">
+            Out of {totalKeys.toString()} total keys
+          </TypographyP>
         </CardContent>
       </Card>
       <Card>
