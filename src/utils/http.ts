@@ -1,15 +1,16 @@
 import crypto from 'crypto';
 
-import { JobRequestHeaders } from '@/db/schema';
+import { JobRequestHeader } from '@/db/schema';
 import { request } from 'undici';
 
 export type OutboundRequest = {
   method: string;
   url: string;
-  headers: JobRequestHeaders[];
+  headers: JobRequestHeader[];
+  authorizationHeader?: JobRequestHeader;
   body?: string | null;
   timeoutMs: number;
-  runId: string; // UUID for idempotency header
+  runId: string;
   hmacSecret?: string | null;
 };
 
@@ -46,6 +47,11 @@ export async function executeHttp(req: OutboundRequest): Promise<OutboundRespons
   const to = setTimeout(() => controller.abort(), req.timeoutMs || RUN_DEFAULT_TIMEOUT_MS);
 
   try {
+    if (req.authorizationHeader !== undefined) {
+      headers[req.authorizationHeader.k] = req.authorizationHeader.v;
+      // console.debug({ headersAfter: headers });
+    }
+
     const res = await request(req.url, {
       method: req.method,
       headers,

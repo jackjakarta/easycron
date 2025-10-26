@@ -1,3 +1,4 @@
+import { decryptSecret } from '@/utils/crypto';
 import { and, eq } from 'drizzle-orm';
 
 import { db } from '..';
@@ -44,4 +45,28 @@ export async function dbDeleteSecret({
     .returning();
 
   return deletedSecret;
+}
+
+export async function dbGetHmacSecretForWorker({
+  projectId,
+}: {
+  projectId: string | null;
+}): Promise<string | null> {
+  if (projectId === null) {
+    return null;
+  }
+
+  const [secretRow] = await db
+    .select()
+    .from(secretTable)
+    .where(eq(secretTable.projectId, projectId));
+
+  if (secretRow === undefined) {
+    return null;
+  }
+
+  const { value: encrypted } = secretRow;
+  const decrypted = decryptSecret(encrypted);
+
+  return decrypted;
 }

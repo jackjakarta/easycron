@@ -1,3 +1,4 @@
+import SecretDialog from '@/app/(app)/projects/[projectId]/_components/secret-dialog';
 import { deleteProjectAction } from '@/app/(app)/projects/[projectId]/actions';
 import {
   DropdownMenu,
@@ -7,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { type ProjectModel } from '@/db/schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { Copy, Trash2 } from 'lucide-react';
+import { Copy, Key, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
@@ -18,9 +19,16 @@ import ConfirmationDialog from '../common/confirmation-dialog';
 type ProjectActionsDropdownProps = {
   trigger: React.ReactNode;
   project: ProjectModel;
+  secretEnabled: boolean;
+  showManageSecret?: boolean;
 };
 
-export default function ProjectActionsDropdown({ trigger, project }: ProjectActionsDropdownProps) {
+export default function ProjectActionsDropdown({
+  trigger,
+  project,
+  secretEnabled,
+  showManageSecret = true,
+}: ProjectActionsDropdownProps) {
   const pathname = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -73,6 +81,20 @@ export default function ProjectActionsDropdown({ trigger, project }: ProjectActi
           <Copy className="size-4" />
           Project ID
         </DropdownMenuItem>
+
+        {showManageSecret && (
+          <SecretDialog
+            projectId={project.id}
+            regenerate={secretEnabled}
+            trigger={
+              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <Key className="size-4" />
+                {secretEnabled ? 'Regenerate Secret' : 'Enable Signing'}
+              </DropdownMenuItem>
+            }
+          />
+        )}
+
         <ConfirmationDialog
           trigger={
             <DropdownMenuItem

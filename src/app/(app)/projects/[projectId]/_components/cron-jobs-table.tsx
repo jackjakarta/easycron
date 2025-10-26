@@ -41,7 +41,6 @@ import { toast } from 'sonner';
 import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from '../actions';
 import CreateJobDialog from './create-job-dialog';
 import EditJobSheet from './edit-job-sheet';
-import SecretDialog from './secret-dialog';
 
 type CronJobsTableProps = {
   cronJobs: JobModel[];
@@ -103,31 +102,31 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
 
           <div className="flex flex-wrap items-center gap-2">
             {cronJobs.length > 0 && (
-              <CreateJobDialog
-                key="create-job-dialog-1"
-                projectId={project.id}
-                trigger={
-                  <Button variant="secondary">
-                    Create Job
-                    <Plus className="size-4" />
-                  </Button>
-                }
-              />
+              <>
+                <CreateJobDialog
+                  key="create-job-dialog-1"
+                  projectId={project.id}
+                  trigger={
+                    <Button variant="secondary" size="icon" tooltip="Create job">
+                      <Plus className="size-4" />
+                    </Button>
+                  }
+                />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  tooltip="Reload jobs"
+                  onClick={() => router.refresh()}
+                >
+                  <RefreshCcw className="size-4" />
+                </Button>
+              </>
             )}
 
-            <SecretDialog
-              projectId={project.id}
-              regenerate={secretEnabled}
-              trigger={
-                <Button variant="secondary">
-                  {secretEnabled ? 'Regenerate Secret' : 'Enable Signing'}
-                </Button>
-              }
-            />
-
             <ProjectActionsDropdown
+              secretEnabled={secretEnabled}
               trigger={
-                <Button variant="secondary" size="icon">
+                <Button variant="secondary" size="icon" tooltip="More actions">
                   <MoreHorizontal className="size-5" />
                 </Button>
               }

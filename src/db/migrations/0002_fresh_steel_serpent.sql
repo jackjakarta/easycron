@@ -1,0 +1,1 @@
+ALTER TABLE "app"."job" ADD COLUMN "authorization_header" jsonb;

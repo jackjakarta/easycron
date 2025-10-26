@@ -97,6 +97,8 @@ export default function NavMain() {
                         </SidebarMenuSubButton>
 
                         <ProjectActionsDropdown
+                          showManageSecret={false}
+                          secretEnabled={false}
                           project={project}
                           trigger={
                             <SidebarMenuAction className="invisible cursor-pointer group-hover/sub:visible data-[state=open]:visible">
