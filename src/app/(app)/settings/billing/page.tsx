@@ -1,25 +1,29 @@
 import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { getBaseUrlFromHeaders } from '@/utils/host';
+import { getLocale } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import Stripe from 'stripe';
 
 export default async function Page() {
-  const user = await getUser();
-  const { subscription } = user;
+  const [user, locale, baseUrl, _headers] = await Promise.all([
+    getUser(),
+    getLocale(),
+    getBaseUrlFromHeaders(),
+    headers(),
+  ]);
 
-  if (subscription.type === 'free') {
+  if (user.subscription.type === 'free') {
     redirect('/pricing');
   }
 
-  const baseUrl = await getBaseUrlFromHeaders();
-
   const { url } = await auth.api.createBillingPortal({
     body: {
-      locale: 'en',
+      locale: locale as Stripe.Checkout.Session.Locale,
       returnUrl: `${baseUrl}/dashboard`,
     },
-    headers: await headers(),
+    headers: _headers,
   });
 
   redirect(url);

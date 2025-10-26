@@ -23,7 +23,7 @@ type JobsOverviewProps = {
   jobs: Job[];
 };
 
-export function JobsOverview({ jobs }: JobsOverviewProps) {
+export default function JobsOverview({ jobs }: JobsOverviewProps) {
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
 

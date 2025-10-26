@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 type ExecutionStatus = 'succeeded' | 'failed' | 'timed_out' | 'skipped';
 
-export function RecentExecutions() {
+export default function RecentExecutions() {
   const t = useTranslations('dashboard');
   const tCommon = useTranslations('common');
 
