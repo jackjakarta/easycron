@@ -54,6 +54,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
       name: job.name,
       url: job.url,
       httpMethod: job.httpMethod,
+      authorizationHeader: job.authorizationHeader,
       scheduleCron: job.scheduleCron,
       timezone: job.timezone,
       headers: job.headers,
@@ -143,6 +144,29 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
               />
               {errors.httpMethod && (
                 <p className="text-destructive text-sm">{errors.httpMethod.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="authorizationHeader">Authorization Header (Optional)</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Input
+                  id="authorizationHeaderKey"
+                  placeholder="Key"
+                  {...register('authorizationHeader.k')}
+                />
+                <Input
+                  id="authorizationHeaderValue"
+                  placeholder="Value"
+                  type="password"
+                  {...register('authorizationHeader.v')}
+                />
+              </div>
+              <p className="text-muted-foreground text-xs">
+                Values are not stored in plaintext and are securely encrypted.
+              </p>
+              {errors.authorizationHeader && (
+                <p className="text-destructive text-sm">{errors.authorizationHeader.message}</p>
               )}
             </div>
 
