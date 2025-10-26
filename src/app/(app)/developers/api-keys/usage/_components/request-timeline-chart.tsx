@@ -1,24 +1,6 @@
-import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
-import Header from '@/components/common/header';
-import PageContainer from '@/components/layout/page-container';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { TypographyH3, TypographyP } from '@/components/ui/typography';
-import { useApiKeysQuery } from '@/hooks/query/use-api-keys-query';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 const requestTimelineData = [
   { date: 'Jan 20', requests: 1200 },
