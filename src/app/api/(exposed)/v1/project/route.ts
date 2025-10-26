@@ -11,7 +11,7 @@ import { toErrorMessage } from '@/utils/error';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { deleteRequestSchema, postRequestSchema, putRequestSchema } from './schemas';
+import { postRequestSchema, putRequestSchema } from './schemas';
 
 export async function GET(req: NextRequest) {
   try {
@@ -112,7 +112,6 @@ export async function POST(req: NextRequest) {
     const body = postRequestSchema.safeParse(json);
 
     if (!body.success) {
-      console.error('Validation errors:', body.error.issues);
       return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
@@ -123,8 +122,8 @@ export async function POST(req: NextRequest) {
 
     if (newProject === undefined) {
       return NextResponse.json(
-        { success: false, errors: [{ message: 'Project not found or access denied' }] },
-        { status: 404 },
+        { success: false, errors: [{ message: 'Failed to create project' }] },
+        { status: 500 },
       );
     }
 
@@ -219,15 +218,18 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const json = await req.json();
-    const body = deleteRequestSchema.safeParse(json);
+    const { searchParams } = req.nextUrl;
+    const _projectId = searchParams.get('projectId');
+    const parsedProjectId = z.uuid().safeParse(_projectId);
 
-    if (!body.success) {
-      console.error('Validation errors:', body.error.issues);
-      return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
+    if (!parsedProjectId.success) {
+      return NextResponse.json(
+        { success: false, errors: parsedProjectId.error.issues },
+        { status: 400 },
+      );
     }
 
-    const { projectId } = body.data;
+    const projectId = parsedProjectId.data;
     const deleted = await dbDeleteProject({ projectId, userId: user.id });
 
     if (deleted === undefined) {

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const postRequestSchema = z
   .object({
-    name: z.string().min(1, { message: 'Name is required' }),
+    name: z.string().nonempty(),
     description: z
       .string()
       .nonempty({ message: 'Description cannot be empty if provided' })
@@ -14,11 +14,11 @@ export const postRequestSchema = z
 export const putRequestSchema = z
   .object({
     projectId: z.uuid(),
-    name: z.string().optional(),
-    description: z.string().optional().nullable(),
+    name: z.string().nonempty().optional(),
+    description: z
+      .string()
+      .nonempty({ message: 'Description cannot be empty if provided' })
+      .optional()
+      .nullable(),
   })
   .strict();
-
-export const deleteRequestSchema = z.object({
-  projectId: z.uuid(),
-});

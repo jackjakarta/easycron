@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
           errors: [
             {
               message:
-                'Project limit reached for free plan. Please upgrade your subscription to add more projects.',
+                'Job limit reached for free plan. Please upgrade your subscription to add more jobs.',
             },
           ],
         },
@@ -71,6 +71,13 @@ export async function POST(req: NextRequest) {
       projectId: project.id,
       nextRunAt: new Date(),
     });
+
+    if (job === undefined) {
+      return NextResponse.json(
+        { success: false, errors: [{ message: 'Failed to create job' }] },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ success: true, data: job }, { status: 201 });
   } catch (error) {
