@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import {
@@ -148,4 +148,15 @@ export async function dbDeleteProject({
   });
 
   return deleted;
+}
+
+export async function dbGetProjectCountByUserId({ userId }: { userId: string }): Promise<number> {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(projectTable)
+    .where(eq(projectTable.userId, userId));
+
+  const count = result?.count ?? 0;
+
+  return count;
 }
