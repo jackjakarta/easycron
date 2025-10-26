@@ -19,7 +19,11 @@ export default function NavSecondary({
           <SidebarMenuItem>
             <ShortcutsDialog
               trigger={
-                <SidebarMenuButton className="cursor-pointer" size="sm">
+                <SidebarMenuButton
+                  className="cursor-pointer"
+                  size="sm"
+                  tooltip="Keyboard Shortcuts"
+                >
                   <Command />
                   <span>Shortcuts</span>
                 </SidebarMenuButton>
@@ -27,9 +31,9 @@ export default function NavSecondary({
             />
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild size="sm">
+            <SidebarMenuButton asChild size="sm" tooltip="GitHub Repo">
               <a
-                href="https://github.com/jackjakarta/pdf-exporter"
+                href="https://github.com/jackjakarta/easycron"
                 target="_blank"
                 rel="noopener noreferrer"
               >

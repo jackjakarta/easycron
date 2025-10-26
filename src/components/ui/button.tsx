@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/utils/tailwind';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -31,18 +32,44 @@ const buttonVariants = cva(
   },
 );
 
+type ExtentedButtonProps = React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    tooltip?: string;
+    tooltipSide?: 'top' | 'right' | 'bottom' | 'left';
+  };
+
 function Button({
   className,
   variant,
   size,
   type = 'button',
   asChild = false,
+  tooltip,
+  tooltipSide,
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+}: ExtentedButtonProps) {
   const Comp = asChild ? Slot : 'button';
+
+  if (tooltip !== undefined) {
+    return (
+      <TooltipProvider delayDuration={0}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Comp
+              data-slot="button"
+              type={type}
+              className={cn(buttonVariants({ variant, size, className }))}
+              {...props}
+            />
+          </TooltipTrigger>
+          <TooltipContent side={tooltipSide}>
+            <p>{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
 
   return (
     <Comp

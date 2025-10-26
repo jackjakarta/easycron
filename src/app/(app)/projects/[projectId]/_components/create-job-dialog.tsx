@@ -55,7 +55,14 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
+      name: '',
+      url: '',
       httpMethod: 'GET',
+      scheduleCron: '',
+      timezone: '',
+      body: null,
+      headers: [],
+      authorizationHeader: null,
     },
   });
 
@@ -90,8 +97,8 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
       toast.success('Job created successfully');
       router.refresh();
     } catch (error) {
-      console.error('Failed to update job:', error);
-      toast.error('Failed to update job');
+      console.error('Failed to create job:', error);
+      toast.error('Failed to create job');
     }
   }
 
