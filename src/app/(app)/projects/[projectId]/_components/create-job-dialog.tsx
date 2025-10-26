@@ -54,6 +54,9 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     watch,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
+    defaultValues: {
+      httpMethod: 'GET',
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -62,12 +65,21 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
   });
 
   async function onSubmit(data: JobFormData) {
-    const { body: _body } = data;
+    const { body: _body, authorizationHeader } = data;
     const body = _body?.trim().length === 0 ? null : _body;
+
+    const authHeaderCleaned =
+      authorizationHeader?.k && authorizationHeader?.v
+        ? {
+            k: authorizationHeader.k.trim(),
+            v: authorizationHeader.v.trim(),
+          }
+        : null;
 
     const cleanedData = {
       ...data,
       body,
+      authorizationHeader: authHeaderCleaned,
     };
 
     try {
@@ -88,14 +100,14 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[95dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Job</DialogTitle>
           <DialogDescription>Create a new job with the details below.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 overflow-y-auto">
-          <div className="space-y-6 px-4">
-            <div className="space-y-2">
+          <div className="space-y-6 pt-1">
+            <div className="space-y-4">
               <Label htmlFor="name">Job Name</Label>
               <Input
                 id="name"
@@ -110,7 +122,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label htmlFor="url">URL</Label>
               <Input
                 id="url"
@@ -123,29 +135,55 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="httpMethod">HTTP Method</Label>
-              <Controller
-                name="httpMethod"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className={errors.httpMethod ? 'border-destructive' : ''}>
-                      <SelectValue placeholder="Select HTTP method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {httpMethodSchema.options.map((method) => (
-                        <SelectItem key={method} value={method}>
-                          {method}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <Label htmlFor="httpMethod">HTTP Method</Label>
+                <Controller
+                  name="httpMethod"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className={errors.httpMethod ? 'border-destructive' : ''}>
+                        <SelectValue placeholder="Select HTTP method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {httpMethodSchema.options.map((method) => (
+                          <SelectItem key={method} value={method}>
+                            {method}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
               {errors.httpMethod && (
                 <TypographyP className="text-destructive text-sm">
                   {errors.httpMethod.message}
+                </TypographyP>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <Label htmlFor="authorizationHeader">Authorization Header (Optional)</Label>
+              <div className="flex items-center justify-between gap-2">
+                <Input
+                  id="authorizationHeaderKey"
+                  placeholder="Key"
+                  {...register('authorizationHeader.k')}
+                />
+                <Input
+                  id="authorizationHeaderValue"
+                  placeholder="Value"
+                  {...register('authorizationHeader.v')}
+                />
+              </div>
+              <TypographyP className="text-muted-foreground -mt-2 text-xs">
+                Values are not stored in plaintext and are securely encrypted.
+              </TypographyP>
+              {errors.authorizationHeader && (
+                <TypographyP className="text-destructive text-sm">
+                  {errors.authorizationHeader.message} - AN ERROR
                 </TypographyP>
               )}
             </div>
@@ -178,7 +216,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </TypographyP>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label htmlFor="timezone">Timezone</Label>
               <Input
                 id="timezone"
@@ -191,12 +229,12 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                   {errors.timezone.message}
                 </TypographyP>
               )}
-              <TypographyP className="text-muted-foreground text-xs">
+              <TypographyP className="text-muted-foreground -mt-2 text-xs">
                 Example: UTC, America/New_York, Europe/London
               </TypographyP>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <Label>Request Headers (Optional)</Label>
                 <Button
@@ -249,7 +287,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
                   </div>
                 ))}
                 {fields.length === 0 && (
-                  <TypographyP className="text-muted-foreground text-sm">
+                  <TypographyP className="text-muted-foreground -mt-2 text-sm">
                     {`No headers added. Click "Add Header" to include custom request headers.`}
                   </TypographyP>
                 )}
@@ -257,7 +295,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
             </div>
 
             {httpMethodValue !== 'GET' && (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label htmlFor="body">Request Body (Optional)</Label>
                 <Textarea
                   id="body"

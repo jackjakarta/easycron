@@ -1,3 +1,4 @@
+import { decryptSecret, encryptSecret } from '@/utils/crypto';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { db } from '..';
@@ -64,7 +65,18 @@ export async function dbDeleteJob({
 }
 
 export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | undefined> {
-  const [insertedJob] = await db.insert(jobTable).values(data).returning();
+  const [insertedJob] = await db
+    .insert(jobTable)
+    .values({
+      ...data,
+      authorizationHeader: data.authorizationHeader
+        ? {
+            k: data.authorizationHeader.k,
+            v: encryptSecret(data.authorizationHeader.v),
+          }
+        : undefined,
+    })
+    .returning();
 
   return insertedJob;
 }
@@ -93,4 +105,20 @@ export async function dbGetEnabledJobCountByUserId({
   const count = result?.count ?? 0;
 
   return count;
+}
+
+export async function dbGetJobForWorker({ jobId }: { jobId: string }) {
+  const [job] = await db.select().from(jobTable).where(eq(jobTable.id, jobId));
+
+  return job !== undefined
+    ? {
+        ...job,
+        authorizationHeader: job?.authorizationHeader
+          ? {
+              v: decryptSecret(job.authorizationHeader.v),
+              k: job.authorizationHeader.k,
+            }
+          : undefined,
+      }
+    : undefined;
 }

@@ -21,6 +21,16 @@ export const jobFormSchema = z.object({
       v: z.string().max(1000, 'Header value must be at most 1000 characters'),
     }),
   ),
+  authorizationHeader: z
+    .object({
+      k: z
+        .string()
+        .min(1, 'Header name is required')
+        .max(200, 'Header name must be at most 200 characters')
+        .optional(),
+      v: z.string().max(1000, 'Header value must be at most 1000 characters').optional(),
+    })
+    .nullable(),
 });
 
 export type JobFormData = z.infer<typeof jobFormSchema>;

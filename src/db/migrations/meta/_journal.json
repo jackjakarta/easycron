@@ -15,6 +15,13 @@
       "when": 1760228081219,
       "tag": "0001_fluffy_smasher",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761471599475,
+      "tag": "0002_fresh_steel_serpent",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@
     "dev:email": "email dev --dir src/email/emails --port 3001",
     "dev:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx scheduler/index.ts",
     "dev:worker": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx worker/index.ts",
+    "encrypt:secret": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx src/utils/crypto.ts",
     "fetch:env": "ENVIRONMENT=development op inject -i .env.op -o .env",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

@@ -1,14 +1,15 @@
 import { randomUUID } from 'crypto';
 
 import { db } from '@/db';
-import { dbUpdateJob } from '@/db/functions/job';
+import { dbGetJobForWorker, dbUpdateJob } from '@/db/functions/job';
+import { dbGetHmacSecretForWorker } from '@/db/functions/secret';
 import { executionTable, jobTable, type ExecutionStatus } from '@/db/schema';
 import { type RunJobPayload } from '@/queue/queue';
+import { decryptSecret } from '@/utils/crypto';
 import { executeHttp } from '@/utils/http';
 import { Job } from 'bullmq';
 import { eq } from 'drizzle-orm';
 
-import { getHmacSecret } from './secret';
 import { sleep } from './utils';
 
 const RUN_DEFAULT_TIMEOUT_MS = 3214;
@@ -16,7 +17,7 @@ const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 
 export async function runOnce(bull: Job<RunJobPayload>) {
   const runId = randomUUID();
-  const [jobRow] = await db.select().from(jobTable).where(eq(jobTable.id, bull.data.jobId));
+  const jobRow = await dbGetJobForWorker({ jobId: bull.data.jobId });
 
   if (jobRow === undefined) return;
   if (!jobRow.enabled) return;
@@ -29,7 +30,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
   // if (await quotaExceeded(jobRow.projectId)) { ... }
 
   const projectId = jobRow.projectId;
-  const hmacSecret = await getHmacSecret({ projectId });
+  const hmacSecret = await dbGetHmacSecretForWorker({ projectId });
 
   let attempt = 0;
   let lastError: any = null;
@@ -51,6 +52,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
         method: jobRow.httpMethod,
         url: jobRow.url,
         headers: jobRow.headers ?? [],
+        authorizationHeader: jobRow.authorizationHeader,
         body: jobRow.body ?? undefined,
         timeoutMs,
         runId,

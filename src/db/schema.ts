@@ -167,7 +167,7 @@ export const httpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE']);
 export const httpMethodPgEnum = appSchema.enum('http_method', httpMethodSchema.enum);
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 
-export type JobRequestHeaders = {
+export type JobRequestHeader = {
   k: string;
   v: string;
 };
@@ -182,7 +182,8 @@ export const jobTable = appSchema.table(
     timezone: text('timezone').default('UTC').notNull(),
     httpMethod: httpMethodPgEnum('http_method').notNull().default('GET'),
     url: text('url').notNull(),
-    headers: jsonb('headers').$type<JobRequestHeaders[]>().notNull().default([]),
+    headers: jsonb('headers').$type<JobRequestHeader[]>().notNull().default([]),
+    authorizationHeader: jsonb('authorization_header').$type<JobRequestHeader>(),
     body: text('body'),
     timeoutMs: integer('timeout_ms').notNull().default(10000),
     maxRetries: integer('max_retries').notNull().default(2),
