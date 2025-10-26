@@ -2,6 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { TypographyP } from '@/components/ui/typography';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import NextError from 'next/error';
 import React from 'react';
@@ -23,9 +24,9 @@ export default function Error({ error, reset }: { error: NextError; reset: () =>
             issue.
           </AlertDescription>
         </Alert>
-        <p className="text-muted-foreground">
+        <TypographyP className="text-muted-foreground">
           You can try refreshing the page or going back to the previous page.
-        </p>
+        </TypographyP>
         <Button onClick={() => reset()} className="px-8 py-6 text-base" size="lg">
           <RefreshCw className="mr-2 h-5 w-5" />
           Try again

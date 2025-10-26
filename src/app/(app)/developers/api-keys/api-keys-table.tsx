@@ -24,6 +24,7 @@ import { formatDateToDayMonthYearTime } from '@/utils/date';
 import { cn } from '@/utils/tailwind';
 import { useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, MoreHorizontal, Plus, Search, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import React from 'react';
 import { toast } from 'sonner';
 
@@ -88,14 +89,20 @@ export default function ApiKeysTable() {
               Manage your API keys and monitor their usage
             </CardDescription>
           </div>
-          <CreateKeyDialog
-            trigger={
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
-                Create API Key
-              </Button>
-            }
-          />
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline">
+              <Link href="/developers/api-keys/usage">Usage</Link>
+            </Button>
+
+            <CreateKeyDialog
+              trigger={
+                <Button className="gap-2">
+                  <Plus className="size-4" />
+                  Create API Key
+                </Button>
+              }
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-4 pt-4">
@@ -256,7 +263,3 @@ export default function ApiKeysTable() {
     </Card>
   );
 }
-
-// function formatNumber(num: number) {
-//   return new Intl.NumberFormat('en-US').format(num);
-// }

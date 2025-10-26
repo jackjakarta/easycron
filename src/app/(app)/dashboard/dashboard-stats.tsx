@@ -10,7 +10,7 @@ type DashboardStatsProps = {
   avgLatencyMs: number;
 };
 
-export function DashboardStats({
+export default function DashboardStats({
   totalJobs,
   activeJobs,
   successRate,
