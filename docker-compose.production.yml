@@ -115,6 +115,7 @@ services:
     networks: [edge]
     depends_on:
       - redis
+      - worker
     env_file:
       - .env
     deploy:
