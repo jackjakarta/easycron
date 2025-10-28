@@ -82,6 +82,12 @@ export async function createInformationMailTemplate(information: InformationEmai
         'Thank you for purchasing a subscription. You can now enjoy the benefits of being a pro user.',
       );
 
+    case 'subscription-canceled':
+      return renderInformationTemplate(
+        'Subscription canceled',
+        'Your subscription has been successfully canceled. You will retain access to pro features until the end of your current billing cycle.',
+      );
+
     case 'trial-expired':
       return renderInformationTemplate(
         'Trial expired',

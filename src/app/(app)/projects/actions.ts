@@ -1,7 +1,7 @@
 'use server';
 
 import { getUser } from '@/auth/utils';
-import { dbGetProjects, dbInsertProject } from '@/db/functions/project';
+import { dbGetProjectCountByUserId, dbInsertProject } from '@/db/functions/project';
 
 export async function createProjectAction({
   name,
@@ -14,9 +14,9 @@ export async function createProjectAction({
   const { subscription } = user;
 
   if (subscription.type === 'free') {
-    const userProjects = await dbGetProjects({ userId: user.id });
+    const userProjectCount = await dbGetProjectCountByUserId({ userId: user.id });
 
-    if (userProjects.length >= subscription.limits.projects) {
+    if (userProjectCount >= subscription.limits.projects) {
       return {
         success: false,
         error: 'You have reached the maximum number of projects for your plan.',

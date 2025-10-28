@@ -12,6 +12,9 @@ export type InformationEmailMetadata =
       type: 'subscription-purchased';
     }
   | {
+      type: 'subscription-canceled';
+    }
+  | {
       type: 'trial-expired';
     }
   | {
