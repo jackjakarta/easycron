@@ -18,6 +18,7 @@ export const env = createEnv({
     stripeWebhookSecret: z.string().min(1),
     monthlyPriceId: z.string().min(1),
     yearlyPriceId: z.string().min(1),
+    easyCronWebhookSecret: z.string().min(1),
     devMode: z.enum(['true', 'false']).default('false'),
   },
   client: {},
@@ -37,6 +38,7 @@ export const env = createEnv({
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     monthlyPriceId: process.env.MONTHLY_PRICE_ID,
     yearlyPriceId: process.env.YEARLY_PRICE_ID,
+    easyCronWebhookSecret: process.env.EASY_CRON_WEBHOOK_SECRET,
     devMode: process.env.DEV_MODE,
   },
 });
