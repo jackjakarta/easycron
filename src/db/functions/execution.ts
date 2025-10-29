@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, isNotNull, lt, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import { executionTable, jobTable, projectTable, type ExecutionModel } from '../schema';
@@ -70,4 +70,22 @@ export async function dbGetJobsExecutionsSuccessRate({ userId }: { userId: strin
     successRate: result?.successRate ?? 0,
     avgLatencyMs: result?.avgLatencyMs ?? 0,
   };
+}
+
+export async function dbDeleteOldExecutions() {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const deletedCount = await db.transaction(async (tx) => {
+    const result = await tx
+      .delete(executionTable)
+      .where(lt(executionTable.startedAt, oneWeekAgo))
+      .returning();
+
+    const deletedCount = result.length;
+
+    return deletedCount;
+  });
+
+  return deletedCount;
 }
