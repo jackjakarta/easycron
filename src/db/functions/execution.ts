@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import { executionTable, jobTable, projectTable, type ExecutionModel } from '../schema';
@@ -77,14 +77,22 @@ export async function dbDeleteOldExecutions() {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const deletedCount = await db.transaction(async (tx) => {
-    const result = await tx
-      .delete(executionTable)
+    const idsToDelete = await tx
+      .select({ id: executionTable.id })
+      .from(executionTable)
       .where(lt(executionTable.startedAt, oneWeekAgo))
-      .returning();
+      .limit(10_000);
 
-    const deletedCount = result.length;
+    if (idsToDelete.length > 0) {
+      await tx.delete(executionTable).where(
+        inArray(
+          executionTable.id,
+          idsToDelete.map((r) => r.id),
+        ),
+      );
+    }
 
-    return deletedCount;
+    return idsToDelete.length;
   });
 
   return deletedCount;
