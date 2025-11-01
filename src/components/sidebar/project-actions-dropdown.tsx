@@ -99,7 +99,7 @@ export default function ProjectActionsDropdown({
           trigger={
             <DropdownMenuItem
               onSelect={(e) => e.preventDefault()}
-              className="text-destructive focus:text-destructive"
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <Trash2 className="text-destructive size-4" />
               {tCommon('delete')}

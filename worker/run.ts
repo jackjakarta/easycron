@@ -1,14 +1,13 @@
-import { randomUUID } from 'crypto';
+import crypto from 'crypto';
 
 import { db } from '@/db';
 import { dbGetJobForWorker, dbUpdateJob } from '@/db/functions/job';
 import { dbGetHmacSecretForWorker } from '@/db/functions/secret';
-import { executionTable, jobTable, type ExecutionStatus } from '@/db/schema';
+import { dbGetWebhookEndpointsForEvent, dbInsertWebhookEvent } from '@/db/functions/webhook';
+import { executionTable, type ExecutionStatus } from '@/db/schema';
 import { type RunJobPayload } from '@/queue/queue';
-import { decryptSecret } from '@/utils/crypto';
 import { executeHttp } from '@/utils/http';
 import { Job } from 'bullmq';
-import { eq } from 'drizzle-orm';
 
 import { sleep } from './utils';
 
@@ -16,18 +15,17 @@ const RUN_DEFAULT_TIMEOUT_MS = 3214;
 const RUN_MAX_RESPONSE_PREVIEW_BYTES = 4096;
 
 export async function runOnce(bull: Job<RunJobPayload>) {
-  const runId = randomUUID();
+  const runId = crypto.randomUUID();
   const jobRow = await dbGetJobForWorker({ jobId: bull.data.jobId });
 
   if (jobRow === undefined) return;
   if (!jobRow.enabled) return;
 
-  const execId = randomUUID();
+  const execId = crypto.randomUUID();
   const scheduledFor = new Date(bull.data.scheduledForISO);
   const startedAt = new Date();
 
   // Optional: enforce quotas/plan here; if exceeded, record skipped
-  // if (await quotaExceeded(jobRow.projectId)) { ... }
 
   const projectId = jobRow.projectId;
   const hmacSecret = await dbGetHmacSecretForWorker({ projectId });
@@ -67,9 +65,128 @@ export async function runOnce(bull: Job<RunJobPayload>) {
       if (res.statusCode >= 200 && res.statusCode < 400) {
         finalStatus = 'succeeded';
         lastError = null;
+
+        const payload = {
+          jobId: jobRow.id,
+          executionId: execId,
+          status: finalStatus,
+          httpStatus: res.statusCode,
+          latencyMs: res.latencyMs,
+          responseSize: res.responseSize,
+        };
+
+        const insertedEvent = await dbInsertWebhookEvent({
+          eventType: 'job.execution.completed',
+          projectId: jobRow.projectId,
+          userId: jobRow.userId,
+          payload,
+        });
+
+        if (insertedEvent === undefined) {
+          console.error('Failed to insert webhook event for job execution');
+        }
+
+        const sig =
+          hmacSecret !== null
+            ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
+            : null;
+
+        const webhookEndpoints = await dbGetWebhookEndpointsForEvent({
+          projectId: jobRow.projectId,
+          userId: jobRow.userId,
+          eventType: 'job.execution.completed',
+        });
+
+        await Promise.all(
+          webhookEndpoints.map((endpoint) =>
+            fetch(endpoint.url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(sig !== null ? { 'X-Easycron-Signature': `sha256=${sig}` } : {}),
+              },
+              body: JSON.stringify({
+                eventType: 'job.execution.completed',
+                projectId: jobRow.projectId,
+                userId: jobRow.userId,
+                payload,
+              }),
+              signal: AbortSignal.timeout(2000),
+            }).catch((err) => {
+              console.error(
+                `Failed to deliver webhook to endpoint ${endpoint.id} for job ${jobRow.id}:`,
+                err,
+              );
+            }),
+          ),
+        );
+
         break;
       } else {
         lastError = new Error(`HTTP ${res.statusCode}`);
+        finalStatus = 'failed';
+
+        const insertedEvent = await dbInsertWebhookEvent({
+          eventType: 'job.execution.failed',
+          projectId: jobRow.projectId,
+          userId: jobRow.userId,
+          payload: {
+            jobId: jobRow.id,
+            executionId: execId,
+            status: finalStatus,
+            httpStatus: res.statusCode,
+            latencyMs: res.latencyMs,
+            responseSize: res.responseSize,
+          },
+        });
+
+        if (insertedEvent === undefined) {
+          console.error('Failed to insert webhook event for job execution');
+        }
+
+        const payload = {
+          jobId: jobRow.id,
+          executionId: execId,
+          status: finalStatus,
+          httpStatus: res.statusCode,
+          latencyMs: res.latencyMs,
+          responseSize: res.responseSize,
+        };
+
+        const sig =
+          hmacSecret !== null
+            ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
+            : null;
+
+        const webhookEndpoints = await dbGetWebhookEndpointsForEvent({
+          projectId: jobRow.projectId,
+          userId: jobRow.userId,
+          eventType: 'job.execution.failed',
+        });
+
+        await Promise.all(
+          webhookEndpoints.map((endpoint) =>
+            fetch(endpoint.url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...(sig !== null ? { 'X-Easycron-Signature': `sha256=${sig}` } : {}),
+              },
+              body: JSON.stringify({
+                eventType: 'job.execution.failed',
+                projectId: jobRow.projectId,
+                userId: jobRow.userId,
+                payload,
+              }),
+              signal: AbortSignal.timeout(2000),
+            }).catch((err) => {
+              console.error(
+                `Failed to deliver webhook to endpoint ${endpoint.id} for job ${jobRow.id}:`,
+                err,
+              );
+            }),
+          ),
+        );
       }
     } catch (err: any) {
       lastError = err?.name === 'AbortError' ? new Error('timeout') : err;

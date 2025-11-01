@@ -163,7 +163,7 @@ export type ProjectModel = typeof projectTable.$inferSelect;
 export type InsertProjectModel = typeof projectTable.$inferInsert;
 export type UpdateProjectModel = UpdateDbRow<ProjectModel>;
 
-export const httpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE']);
+export const httpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
 export const httpMethodPgEnum = appSchema.enum('http_method', httpMethodSchema.enum);
 export type HttpMethod = z.infer<typeof httpMethodSchema>;
 
@@ -283,6 +283,7 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
   isActive: boolean('is_active').default(true).notNull(),
   consecutiveFailures: integer('consecutive_failures').default(0).notNull(),
   lastFailureAt: timestamp('last_failure_at', { withTimezone: true }),
+  enabledEventTypes: jsonb('enabled_event_types').$type<EventType[]>().notNull().default([]),
   projectId: uuid('project_id')
     .references(() => projectTable.id)
     .notNull(),
@@ -299,6 +300,33 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
 export type WebhookEndpointModel = typeof webhookEndpointTable.$inferSelect;
 export type InsertWebhookEndpointModel = typeof webhookEndpointTable.$inferInsert;
 export type UpdateWebhookEndpointModel = UpdateDbRow<WebhookEndpointModel>;
+
+export const eventTypeSchema = z.enum(['job.execution.completed', 'job.execution.failed']);
+export type EventType = z.infer<typeof eventTypeSchema>;
+
+export const webhookEventTable = appSchema.table(
+  'webhook_event',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    eventType: text('event_type').$type<EventType>().notNull(),
+    payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
+    projectId: uuid('project_id')
+      .references(() => projectTable.id)
+      .notNull(),
+    userId: uuid('user_id')
+      .references(() => userTable.id)
+      .notNull(),
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+    success: boolean('success').notNull().default(false),
+    errorMessage: text('error_message'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index('webhook_events_event_type_idx').on(table.eventType)],
+);
+
+export type WebhookEventModel = typeof webhookEventTable.$inferSelect;
+export type InsertWebhookEventModel = typeof webhookEventTable.$inferInsert;
+export type UpdateWebhookEventModel = UpdateDbRow<WebhookEventModel>;
 
 export const subscriptionTable = appSchema.table('subscription', {
   id: uuid('id').defaultRandom().primaryKey(),

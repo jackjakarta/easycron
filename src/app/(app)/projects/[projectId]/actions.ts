@@ -56,7 +56,7 @@ export async function createJobAction({
     const jobsCount = await dbGetJobCountByUserId({ userId: user.id });
 
     if (jobsCount >= subscription.limits.jobsTotal) {
-      throw new Error('Free plan users can only have 2 jobs. Please upgrade to create more.');
+      return { success: false, error: 'Job limit reached for free plan', code: 402 };
     }
   }
 
@@ -68,10 +68,10 @@ export async function createJobAction({
   });
 
   if (newJob === undefined) {
-    throw new Error('Failed to insert job in database');
+    return { success: false, error: 'Failed to create job', code: 500 };
   }
 
-  return newJob;
+  return { success: true, data: newJob, code: 201 };
 }
 
 export async function enableOrDisableJobAction({

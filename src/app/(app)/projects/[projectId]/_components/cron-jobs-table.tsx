@@ -252,7 +252,7 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
                             job={job}
                             trigger={
                               <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                <Pencil className="mr-2 size-4" />
+                                <Pencil className="mr-1 size-4" />
                                 Edit
                               </DropdownMenuItem>
                             }
@@ -263,12 +263,12 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
                           >
                             {job.enabled ? (
                               <>
-                                <Pause className="mr-2 size-4" />
+                                <Pause className="mr-1 size-4" />
                                 Disable
                               </>
                             ) : (
                               <>
-                                <Play className="mr-2 size-4" />
+                                <Play className="mr-1 size-4" />
                                 Enable
                               </>
                             )}
@@ -276,7 +276,7 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
 
                           {job.enabled && (
                             <DropdownMenuItem onSelect={() => handleRunJobNow(job.id)}>
-                              <Play className="mr-2 size-4" />
+                              <Play className="mr-1 size-4" />
                               Run Now
                             </DropdownMenuItem>
                           )}
@@ -284,7 +284,7 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
                           <DropdownMenuItem
                             onSelect={() => router.push(`/projects/${project.id}/job/${job.id}`)}
                           >
-                            <RefreshCcw className="mr-2 size-4" />
+                            <RefreshCcw className="mr-1 size-4" />
                             Executions
                           </DropdownMenuItem>
 
@@ -297,9 +297,9 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
                             trigger={
                               <DropdownMenuItem
                                 onSelect={(e) => e.preventDefault()}
-                                className="text-destructive focus:text-destructive"
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
                               >
-                                <Trash2 className="text-destructive mr-2 size-4" />
+                                <Trash2 className="text-destructive mr-1 size-4" />
                                 Delete
                               </DropdownMenuItem>
                             }
@@ -322,6 +322,7 @@ function methodToClassName(method: HttpMethod) {
     GET: cn('bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'),
     POST: cn('bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'),
     PUT: cn('text-chart-5 bg-chart-5/10 dark:bg-chart-4/10 dark:text-chart-4'),
+    PATCH: cn('bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'),
     DELETE: cn('bg-destructive/10 text-destructive'),
   };
 

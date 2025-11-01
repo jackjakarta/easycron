@@ -68,12 +68,21 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
   });
 
   async function onSubmit(data: JobFormData) {
-    const { body: _body } = data;
+    const { body: _body, authorizationHeader } = data;
     const body = _body?.trim().length === 0 ? null : _body;
+
+    const authHeaderCleaned =
+      authorizationHeader?.k?.trim() && authorizationHeader?.v?.trim()
+        ? {
+            k: authorizationHeader.k.trim(),
+            v: authorizationHeader.v.trim(),
+          }
+        : null;
 
     const cleanedData = {
       ...data,
       body,
+      authorizationHeader: authHeaderCleaned,
     };
 
     try {

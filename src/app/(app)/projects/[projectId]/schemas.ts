@@ -23,11 +23,26 @@ export const jobFormSchema = z.object({
   ),
   authorizationHeader: z
     .object({
-      k: z.string().min(0).max(200, 'Header name must be at most 200 characters'),
-      v: z.string().min(0).max(1000, 'Header value must be at most 1000 characters'),
+      k: z.string().max(200, 'Header name must be at most 200 characters'),
+      v: z.string().max(1000, 'Header value must be at most 1000 characters'),
     })
     .nullable()
-    .optional(),
+    .optional()
+    .superRefine((val, ctx) => {
+      // If one field is filled but not the other, add error
+      if (val && ((val.k?.trim() && !val.v?.trim()) || (!val.k?.trim() && val.v?.trim()))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Both header name and value are required if authorization header is provided',
+          path: ['k'],
+        });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Both header name and value are required if authorization header is provided',
+          path: ['v'],
+        });
+      }
+    }),
 });
 
 export type JobFormData = z.infer<typeof jobFormSchema>;
