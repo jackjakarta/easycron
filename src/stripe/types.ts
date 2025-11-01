@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const subscriptionTypeSchema = z.enum(['free', 'pro']);
+export const subscriptionTypeSchema = z.enum(['free', 'pro', 'team']);
 export type SubscriptionType = z.infer<typeof subscriptionTypeSchema>;
 
 export type SubscriptionFeaturesAndLimits = {

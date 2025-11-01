@@ -44,4 +44,4 @@ export type EmailActionResult = {
 
 export type InformationEmailType = InformationEmailMetadata['type'];
 
-export type EmailAction = 'verify-email' | 'reset-password';
+export type EmailAction = 'verify-email' | 'reset-password' | 'organization-invite';

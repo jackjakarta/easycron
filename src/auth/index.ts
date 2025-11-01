@@ -1,5 +1,6 @@
 import { ac, admin, member, owner } from '@/auth/permissions';
 import { db } from '@/db';
+import { dbGetOrganizationMember } from '@/db/functions/organization';
 import { dbGetUserById } from '@/db/functions/user';
 import {
   accountTable,
@@ -41,6 +42,7 @@ export const auth = betterAuth({
 
       if (!result.success) {
         console.error('Error sending password reset email:', result.error);
+        throw new Error('Could not send password reset email');
       }
     },
   },
@@ -54,6 +56,7 @@ export const auth = betterAuth({
 
       if (!result.success) {
         console.error('Error sending email verification email:', result.error);
+        throw new Error('Could not send email verification email');
       }
     },
     sendOnSignUp: true,
@@ -102,6 +105,14 @@ export const auth = betterAuth({
               },
             },
           },
+          {
+            name: 'team',
+            priceId: 'price_1SOlbmE85tPzaCYUP5CichDd',
+            annualDiscountPriceId: 'price_1SOlc5E85tPzaCYU567G2VsQ',
+            freeTrial: {
+              days: 0,
+            },
+          },
         ],
         getCheckoutSessionParams: async () => {
           return {
@@ -111,6 +122,14 @@ export const auth = betterAuth({
               },
             },
           };
+        },
+        authorizeReference: async ({ user, referenceId }) => {
+          const member = await dbGetOrganizationMember({
+            userId: user.id,
+            organizationId: referenceId,
+          });
+
+          return member?.role === 'owner' || member?.role === 'admin';
         },
         onSubscriptionDeleted: async ({ subscription }) => {
           console.info(
@@ -139,56 +158,29 @@ export const auth = betterAuth({
         member,
       },
       requireEmailVerificationOnInvitation: true,
-      allowUserToCreateOrganization: true,
-      // allowUserToCreateOrganization: async (user) => {
-      //   const subscription = await getUserActiveSubscription({ userId: user.id });
-      //   return subscription.type === 'pro';
-      // },
-      async sendInvitationEmail(data) {
-        const baseUrl = await getBaseUrlFromHeaders();
-        const searchParams = new URLSearchParams({ inviteId: data.invitation.id });
-        const inviteLink = `${baseUrl}/org/${data.organization.slug}/accept-invitation?${searchParams.toString()}`;
-        console.debug({ inviteLink });
-
-        // sendOrganizationInvitation({
-        //   email: data.email,
-        //   invitedByUsername: data.inviter.user.name,
-        //   invitedByEmail: data.inviter.user.email,
-        //   teamName: data.organization.name,
-        //   inviteLink,
-        // });
+      allowUserToCreateOrganization: async (user) => {
+        const subscription = await getUserActiveSubscription({ userId: user.id });
+        return subscription.type === 'pro';
       },
-      // organizationHooks: {
-      //   // Organization creation hooks
-      //   beforeCreateOrganization: async ({ organization, user }) => {
-      //     // Run custom logic before organization is created
-      //     return {
-      //       data: {
-      //         ...organization,
-      //         metadata: {
-      //           customField: 'value',
-      //         },
-      //       },
-      //     };
-      //   },
-      //   afterCreateOrganization: async ({ organization, member, user }) => {
-      //     console.debug({ info: 'Organization created', organization, member, user });
-      //   },
-      //   // Organization update hooks
-      //   beforeUpdateOrganization: async ({ organization, user, member }) => {
-      //     // Validate updates, apply business rules
-      //     return {
-      //       data: {
-      //         ...organization,
-      //         name: organization.name?.toLowerCase(),
-      //       },
-      //     };
-      //   },
-      //   afterUpdateOrganization: async ({ organization, user, member }) => {
-      //     console.debug({ info: 'Organization updated', organization, user, member });
-      //     // await syncOrganizationToExternalSystems(organization);
-      //   },
-      // },
+      async sendInvitationEmail(data) {
+        const { organization, invitation } = data;
+        const searchParams = new URLSearchParams({ inviteId: invitation.id });
+
+        const baseUrl = await getBaseUrlFromHeaders();
+        const inviteLink = `${baseUrl}/org/${organization.slug}/accept-invitation?${searchParams.toString()}`;
+
+        const result = await sendUserActionEmail({
+          to: invitation.email,
+          action: 'organization-invite',
+          actionUrl: inviteLink,
+          extra: { organizationName: organization.name },
+        });
+
+        if (!result.success) {
+          console.error('Error sending organization invite email:', result.error);
+          throw new Error('Could not send organization invitation email');
+        }
+      },
     }),
     haveIBeenPwned({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',

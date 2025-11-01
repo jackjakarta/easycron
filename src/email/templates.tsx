@@ -1,5 +1,6 @@
 import { dbGetUserByEmail } from '@/db/functions/user';
 
+import AcceptInviteTemplate from './emails/accept-invite';
 import ForgotPasswordTemplate from './emails/forgot-password';
 import InformationTemplate from './emails/information';
 import VerifyEmailTemplate from './emails/verify-email';
@@ -14,10 +15,12 @@ export async function createUserActionMailTemplate({
   email,
   action,
   actionUrl,
+  extra,
 }: {
   email: string;
   action: EmailAction;
   actionUrl: string;
+  extra?: Record<string, string>;
 }): Promise<MailTemplateResponse | undefined> {
   if (action === 'reset-password' && (await dbGetUserByEmail({ email })) === undefined) {
     console.error({ error: `Cannot send email to non-existing user with email '${email}'` });
@@ -46,6 +49,23 @@ export async function createUserActionMailTemplate({
       return {
         success: true,
         subject: 'Reset your password',
+        mailTemplate: html,
+        textPart: text,
+      };
+    }
+
+    case 'organization-invite': {
+      const { html, text } = await renderEmailTemplate(
+        <AcceptInviteTemplate
+          actionUrl={actionUrl}
+          userEmail={email}
+          organizationName={extra?.organizationName}
+        />,
+      );
+
+      return {
+        success: true,
+        subject: 'You have been invited to join an organization',
         mailTemplate: html,
         textPart: text,
       };

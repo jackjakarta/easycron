@@ -15,12 +15,14 @@ export async function sendUserActionEmail({
   to,
   action,
   actionUrl,
+  extra,
 }: {
   to: string;
   action: EmailAction;
   actionUrl: string;
+  extra?: Record<string, string>;
 }): Promise<EmailActionResult> {
-  const result = await createUserActionMailTemplate({ email: to, action, actionUrl });
+  const result = await createUserActionMailTemplate({ email: to, action, actionUrl, extra });
 
   if (result === undefined || !result.success) {
     return {
