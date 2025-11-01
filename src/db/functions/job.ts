@@ -4,8 +4,8 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '..';
 import {
   executionTable,
-  InsertJobModel,
   jobTable,
+  type InsertJobModel,
   type JobModel,
   type UpdateJobModel,
 } from '../schema';
@@ -110,15 +110,18 @@ export async function dbGetEnabledJobCountByUserId({
 export async function dbGetJobForWorker({ jobId }: { jobId: string }) {
   const [job] = await db.select().from(jobTable).where(eq(jobTable.id, jobId));
 
-  return job !== undefined
-    ? {
-        ...job,
-        authorizationHeader: job?.authorizationHeader
-          ? {
-              v: decryptSecret(job.authorizationHeader.v),
-              k: job.authorizationHeader.k,
-            }
-          : undefined,
-      }
-    : undefined;
+  if (job === undefined) {
+    return undefined;
+  }
+
+  return {
+    ...job,
+    authorizationHeader:
+      job.authorizationHeader !== null
+        ? {
+            v: decryptSecret(job.authorizationHeader.v),
+            k: job.authorizationHeader.k,
+          }
+        : undefined,
+  };
 }
