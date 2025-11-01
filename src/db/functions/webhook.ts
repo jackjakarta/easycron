@@ -38,7 +38,7 @@ export async function dbInsertWebhookEvent(event: InsertWebhookEventModel) {
   return inserted;
 }
 
-export async function dbGetWebhookEndpointsJobSuccessEvents({
+export async function dbGetWebhookEndpointsWithJobSuccessEvents({
   projectId,
   userId,
 }: {
@@ -52,6 +52,7 @@ export async function dbGetWebhookEndpointsJobSuccessEvents({
       and(
         eq(webhookEndpointTable.projectId, projectId),
         eq(webhookEndpointTable.userId, userId),
+        eq(webhookEndpointTable.isActive, true),
         sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify(['job.execution.completed'])}`,
       ),
     );
@@ -59,7 +60,7 @@ export async function dbGetWebhookEndpointsJobSuccessEvents({
   return endpoints;
 }
 
-export async function dbGetWebhookEndpointsJobFailureEvents({
+export async function dbGetWebhookEndpointsWithJobFailureEvents({
   projectId,
   userId,
 }: {
@@ -73,6 +74,7 @@ export async function dbGetWebhookEndpointsJobFailureEvents({
       and(
         eq(webhookEndpointTable.projectId, projectId),
         eq(webhookEndpointTable.userId, userId),
+        eq(webhookEndpointTable.isActive, true),
         sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify(['job.execution.failed'])}`,
       ),
     );

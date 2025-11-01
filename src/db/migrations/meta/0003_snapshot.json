@@ -1,5 +1,5 @@
 {
-  "id": "470ddbee-362e-47ea-a266-3ec284221a5d",
+  "id": "1075071e-71b7-4bee-9f13-84cf0d678f09",
   "prevId": "2085847e-0574-4c06-80d3-3e984360c38b",
   "version": "7",
   "dialect": "postgresql",
@@ -1398,7 +1398,7 @@
     "app.http_method": {
       "name": "http_method",
       "schema": "app",
-      "values": ["GET", "POST", "PUT", "DELETE"]
+      "values": ["GET", "POST", "PUT", "PATCH", "DELETE"]
     }
   },
   "schemas": {

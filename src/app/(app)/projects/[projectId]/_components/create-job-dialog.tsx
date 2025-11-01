@@ -321,7 +321,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </div>
             </div>
 
-            {httpMethodValue !== 'GET' && (
+            {(httpMethodValue === 'POST' || httpMethodValue === 'PUT') && (
               <div className="space-y-4">
                 <Label htmlFor="body">Request Body (Optional)</Label>
                 <Textarea

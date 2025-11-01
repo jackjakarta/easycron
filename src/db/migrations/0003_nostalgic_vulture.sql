@@ -1,3 +1,4 @@
+ALTER TYPE "app"."http_method" ADD VALUE 'PATCH' BEFORE 'DELETE';--> statement-breakpoint
 CREATE TABLE "app"."webhook_event" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"event_type" text NOT NULL,

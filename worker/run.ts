@@ -4,8 +4,8 @@ import { db } from '@/db';
 import { dbGetJobForWorker, dbUpdateJob } from '@/db/functions/job';
 import { dbGetHmacSecretForWorker } from '@/db/functions/secret';
 import {
-  dbGetWebhookEndpointsJobFailureEvents,
-  dbGetWebhookEndpointsJobSuccessEvents,
+  dbGetWebhookEndpointsWithJobFailureEvents,
+  dbGetWebhookEndpointsWithJobSuccessEvents,
   dbInsertWebhookEvent,
 } from '@/db/functions/webhook';
 import { executionTable, type ExecutionStatus } from '@/db/schema';
@@ -95,7 +95,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
             ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
             : null;
 
-        const webhookEndpoints = await dbGetWebhookEndpointsJobSuccessEvents({
+        const webhookEndpoints = await dbGetWebhookEndpointsWithJobSuccessEvents({
           projectId: jobRow.projectId,
           userId: jobRow.userId,
         });
@@ -161,7 +161,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
             ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
             : null;
 
-        const webhookEndpoints = await dbGetWebhookEndpointsJobFailureEvents({
+        const webhookEndpoints = await dbGetWebhookEndpointsWithJobFailureEvents({
           projectId: jobRow.projectId,
           userId: jobRow.userId,
         });

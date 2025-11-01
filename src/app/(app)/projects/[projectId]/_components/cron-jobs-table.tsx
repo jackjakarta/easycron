@@ -322,6 +322,7 @@ function methodToClassName(method: HttpMethod) {
     GET: cn('bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'),
     POST: cn('bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'),
     PUT: cn('text-chart-5 bg-chart-5/10 dark:bg-chart-4/10 dark:text-chart-4'),
+    PATCH: cn('bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'),
     DELETE: cn('bg-destructive/10 text-destructive'),
   };
 
