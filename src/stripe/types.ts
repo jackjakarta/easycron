@@ -8,10 +8,14 @@ export type SubscriptionFeaturesAndLimits = {
   features: {
     analytics: boolean;
     ai: boolean;
+    organizations: boolean;
+    webhooks: boolean;
   };
   limits: {
-    projects: number;
-    jobsTotal: number;
+    projectsAmount: number;
+    jobsAmount: number;
     executionsPerMonth: number;
+    organizations: number;
+    webhookEndpointsPerProject: number;
   };
 };

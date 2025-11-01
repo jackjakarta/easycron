@@ -1,7 +1,25 @@
-import { and, desc, eq, inArray, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNotNull, lt, sql } from 'drizzle-orm';
 
 import { db } from '..';
 import { executionTable, jobTable, projectTable, type ExecutionModel } from '../schema';
+
+export async function dbGetAmountOfExecutionsThisMonth({
+  jobId,
+}: {
+  jobId: string;
+}): Promise<number> {
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  const [result] = await db
+    .select({
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(executionTable)
+    .where(and(eq(executionTable.jobId, jobId), gte(executionTable.startedAt, monthStart)));
+
+  return result?.count ?? 0;
+}
 
 export async function dbGetFinishedExecutionsByJobId({
   jobId,

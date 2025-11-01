@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       dbGetJobCountByUserId({ userId: user.id }),
     ]);
 
-    if (jobCount >= subscription.limits.jobsTotal) {
+    if (jobCount >= subscription.limits.jobsAmount) {
       return NextResponse.json(
         {
           success: false,

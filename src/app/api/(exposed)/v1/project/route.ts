@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       dbGetProjectCountByUserId({ userId: user.id }),
     ]);
 
-    if (projectCount >= subscription.limits.projects) {
+    if (projectCount >= subscription.limits.projectsAmount) {
       return NextResponse.json(
         {
           success: false,

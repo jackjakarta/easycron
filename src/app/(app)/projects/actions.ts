@@ -16,7 +16,7 @@ export async function createProjectAction({
   if (subscription.type === 'free') {
     const userProjectCount = await dbGetProjectCountByUserId({ userId: user.id });
 
-    if (userProjectCount >= subscription.limits.projects) {
+    if (userProjectCount >= subscription.limits.projectsAmount) {
       return {
         success: false,
         error: 'You have reached the maximum number of projects for your plan.',

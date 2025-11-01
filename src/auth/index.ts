@@ -1,8 +1,12 @@
+import { ac, admin, member, owner } from '@/auth/permissions';
 import { db } from '@/db';
 import { dbGetUserById } from '@/db/functions/user';
 import {
   accountTable,
   apiKeyTable,
+  invitationTable,
+  memberTable,
+  organizationTable,
   sessionTable,
   subscriptionTable,
   twoFactorTable,
@@ -14,11 +18,13 @@ import { type InformationEmailMetadata } from '@/email/types';
 import { env } from '@/env';
 import { stripe as stripeClient } from '@/stripe';
 import { NUMBER_OF_TRIAL_DAYS } from '@/stripe/const';
+import { getUserActiveSubscription } from '@/stripe/subscription';
+import { getBaseUrlFromHeaders } from '@/utils/host';
 import { stripe, type Subscription } from '@better-auth/stripe';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
-import { apiKey, haveIBeenPwned, twoFactor } from 'better-auth/plugins';
+import { apiKey, haveIBeenPwned, organization, twoFactor } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   appName: 'easyCron',
@@ -125,6 +131,65 @@ export const auth = betterAuth({
         },
       },
     }),
+    organization({
+      ac,
+      roles: {
+        owner,
+        admin,
+        member,
+      },
+      requireEmailVerificationOnInvitation: true,
+      allowUserToCreateOrganization: true,
+      // allowUserToCreateOrganization: async (user) => {
+      //   const subscription = await getUserActiveSubscription({ userId: user.id });
+      //   return subscription.type === 'pro';
+      // },
+      async sendInvitationEmail(data) {
+        const baseUrl = await getBaseUrlFromHeaders();
+        const searchParams = new URLSearchParams({ inviteId: data.invitation.id });
+        const inviteLink = `${baseUrl}/org/${data.organization.slug}/accept-invitation?${searchParams.toString()}`;
+        console.debug({ inviteLink });
+
+        // sendOrganizationInvitation({
+        //   email: data.email,
+        //   invitedByUsername: data.inviter.user.name,
+        //   invitedByEmail: data.inviter.user.email,
+        //   teamName: data.organization.name,
+        //   inviteLink,
+        // });
+      },
+      // organizationHooks: {
+      //   // Organization creation hooks
+      //   beforeCreateOrganization: async ({ organization, user }) => {
+      //     // Run custom logic before organization is created
+      //     return {
+      //       data: {
+      //         ...organization,
+      //         metadata: {
+      //           customField: 'value',
+      //         },
+      //       },
+      //     };
+      //   },
+      //   afterCreateOrganization: async ({ organization, member, user }) => {
+      //     console.debug({ info: 'Organization created', organization, member, user });
+      //   },
+      //   // Organization update hooks
+      //   beforeUpdateOrganization: async ({ organization, user, member }) => {
+      //     // Validate updates, apply business rules
+      //     return {
+      //       data: {
+      //         ...organization,
+      //         name: organization.name?.toLowerCase(),
+      //       },
+      //     };
+      //   },
+      //   afterUpdateOrganization: async ({ organization, user, member }) => {
+      //     console.debug({ info: 'Organization updated', organization, user, member });
+      //     // await syncOrganizationToExternalSystems(organization);
+      //   },
+      // },
+    }),
     haveIBeenPwned({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',
     }),
@@ -143,6 +208,9 @@ export const auth = betterAuth({
       twoFactor: twoFactorTable,
       apikey: apiKeyTable,
       subscription: subscriptionTable,
+      organization: organizationTable,
+      member: memberTable,
+      invitation: invitationTable,
     },
   }),
   user: {

@@ -11,25 +11,33 @@ export const PAYMENT_METHOD_TYPES = ['card'] satisfies Stripe.Emptyable<
 export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   type: 'free',
   features: {
-    analytics: false,
     ai: false,
+    analytics: false,
+    webhooks: true,
+    organizations: false,
   },
   limits: {
-    projects: 1,
-    jobsTotal: 2,
+    projectsAmount: 1,
+    jobsAmount: 2,
     executionsPerMonth: 500,
+    webhookEndpointsPerProject: 1,
+    organizations: 0,
   },
 };
 
 export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   type: 'pro',
   features: {
-    analytics: true,
     ai: true,
+    analytics: true,
+    organizations: true,
+    webhooks: true,
   },
   limits: {
-    projects: Infinity,
-    jobsTotal: Infinity,
+    projectsAmount: Infinity,
+    jobsAmount: Infinity,
     executionsPerMonth: Infinity,
+    webhookEndpointsPerProject: 10,
+    organizations: 5,
   },
 };

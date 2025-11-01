@@ -55,7 +55,7 @@ export async function createJobAction({
   if (subscription.type === 'free') {
     const jobsCount = await dbGetJobCountByUserId({ userId: user.id });
 
-    if (jobsCount >= subscription.limits.jobsTotal) {
+    if (jobsCount >= subscription.limits.jobsAmount) {
       return { success: false, error: 'Job limit reached for free plan', code: 402 };
     }
   }

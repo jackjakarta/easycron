@@ -44,6 +44,8 @@ export const sessionTable = appSchema.table('session', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
+  activeOrganizationId: uuid('active_organization_id'),
+  activeTeamId: uuid('active_team_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -351,3 +353,62 @@ export const subscriptionTable = appSchema.table('subscription', {
 export type SubscriptionModel = typeof subscriptionTable.$inferSelect;
 export type InsertSubscriptionModel = typeof subscriptionTable.$inferInsert;
 export type UpdateSubscriptionModel = UpdateDbRow<SubscriptionModel>;
+
+export const organizationTable = appSchema.table('organization', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  logo: text('logo'),
+  metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type OrganizationModel = typeof organizationTable.$inferSelect;
+export type InsertOrganizationModel = typeof organizationTable.$inferInsert;
+export type UpdateOrganizationModel = UpdateDbRow<OrganizationModel>;
+
+export const organizationMemberRoleSchema = z.enum(['owner', 'admin', 'member']);
+export type OrganizationMemberRole = z.infer<typeof organizationMemberRoleSchema>;
+
+export const memberTable = appSchema.table('member', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizationTable.id)
+    .notNull(),
+  role: text('role').$type<OrganizationMemberRole>().notNull(),
+  joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type MemberModel = typeof memberTable.$inferSelect;
+export type InsertMemberModel = typeof memberTable.$inferInsert;
+export type UpdateMemberModel = UpdateDbRow<MemberModel>;
+
+export const invitationTable = appSchema.table('invitation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull(),
+  inivterId: uuid('inviter_id')
+    .references(() => userTable.id)
+    .notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizationTable.id)
+    .notNull(),
+  role: text('role').notNull(),
+  status: text('status').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+});
+
+export type InvitationModel = typeof invitationTable.$inferSelect;
+export type InsertInvitationModel = typeof invitationTable.$inferInsert;
+export type UpdateInvitationModel = UpdateDbRow<InvitationModel>;
