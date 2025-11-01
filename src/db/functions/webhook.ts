@@ -1,13 +1,20 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 
 import { db } from '..';
-import { webhookEndpointTable, webhookEventTable, type InsertWebhookEventModel } from '../schema';
+import {
+  webhookEndpointTable,
+  webhookEventTable,
+  type InsertWebhookEndpointModel,
+  type InsertWebhookEventModel,
+  type WebhookEndpointModel,
+} from '../schema';
 
 export async function dbGetUserWebhookEndpoints({ userId }: { userId: string }) {
   const endpoints = await db
     .select()
     .from(webhookEndpointTable)
-    .where(and(eq(webhookEndpointTable.userId, userId), eq(webhookEndpointTable.isActive, true)));
+    .where(eq(webhookEndpointTable.userId, userId))
+    .orderBy(desc(webhookEndpointTable.isActive), desc(webhookEndpointTable.updatedAt));
 
   return endpoints;
 }
@@ -71,4 +78,12 @@ export async function dbGetWebhookEndpointsJobFailureEvents({
     );
 
   return endpoints;
+}
+
+export async function dbInsertWebhookEndpoint(
+  data: InsertWebhookEndpointModel,
+): Promise<WebhookEndpointModel | undefined> {
+  const [inserted] = await db.insert(webhookEndpointTable).values(data).returning();
+
+  return inserted;
 }
