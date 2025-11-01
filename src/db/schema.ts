@@ -326,7 +326,7 @@ export const webhookEventTable = appSchema.table(
 
 export type WebhookEventModel = typeof webhookEventTable.$inferSelect;
 export type InsertWebhookEventModel = typeof webhookEventTable.$inferInsert;
-export type UpdateWebhookEventModel = UpdateDbRow<Omit<WebhookEventModel, 'webhookEndpointId'>>;
+export type UpdateWebhookEventModel = UpdateDbRow<WebhookEventModel>;
 
 export const subscriptionTable = appSchema.table('subscription', {
   id: uuid('id').defaultRandom().primaryKey(),

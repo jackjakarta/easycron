@@ -3,11 +3,7 @@ import crypto from 'crypto';
 import { db } from '@/db';
 import { dbGetJobForWorker, dbUpdateJob } from '@/db/functions/job';
 import { dbGetHmacSecretForWorker } from '@/db/functions/secret';
-import {
-  dbGetWebhookEndpointsWithJobFailureEvents,
-  dbGetWebhookEndpointsWithJobSuccessEvents,
-  dbInsertWebhookEvent,
-} from '@/db/functions/webhook';
+import { dbGetWebhookEndpointsForEvent, dbInsertWebhookEvent } from '@/db/functions/webhook';
 import { executionTable, type ExecutionStatus } from '@/db/schema';
 import { type RunJobPayload } from '@/queue/queue';
 import { executeHttp } from '@/utils/http';
@@ -95,9 +91,10 @@ export async function runOnce(bull: Job<RunJobPayload>) {
             ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
             : null;
 
-        const webhookEndpoints = await dbGetWebhookEndpointsWithJobSuccessEvents({
+        const webhookEndpoints = await dbGetWebhookEndpointsForEvent({
           projectId: jobRow.projectId,
           userId: jobRow.userId,
+          eventType: 'job.execution.completed',
         });
 
         await Promise.all(
@@ -161,9 +158,10 @@ export async function runOnce(bull: Job<RunJobPayload>) {
             ? crypto.createHmac('sha256', hmacSecret).update(JSON.stringify(payload)).digest('hex')
             : null;
 
-        const webhookEndpoints = await dbGetWebhookEndpointsWithJobFailureEvents({
+        const webhookEndpoints = await dbGetWebhookEndpointsForEvent({
           projectId: jobRow.projectId,
           userId: jobRow.userId,
+          eventType: 'job.execution.failed',
         });
 
         await Promise.all(

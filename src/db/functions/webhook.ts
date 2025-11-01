@@ -4,6 +4,7 @@ import { db } from '..';
 import {
   webhookEndpointTable,
   webhookEventTable,
+  type EventType,
   type InsertWebhookEndpointModel,
   type InsertWebhookEventModel,
   type WebhookEndpointModel,
@@ -33,17 +34,19 @@ export async function dbGetWebhookEndpointById({
 }
 
 export async function dbInsertWebhookEvent(event: InsertWebhookEventModel) {
-  const inserted = await db.insert(webhookEventTable).values(event).returning();
+  const [inserted] = await db.insert(webhookEventTable).values(event).returning();
 
   return inserted;
 }
 
-export async function dbGetWebhookEndpointsWithJobSuccessEvents({
+export async function dbGetWebhookEndpointsForEvent({
   projectId,
   userId,
+  eventType,
 }: {
   projectId: string;
   userId: string;
+  eventType: EventType;
 }) {
   const endpoints = await db
     .select()
@@ -52,30 +55,7 @@ export async function dbGetWebhookEndpointsWithJobSuccessEvents({
       and(
         eq(webhookEndpointTable.projectId, projectId),
         eq(webhookEndpointTable.userId, userId),
-        eq(webhookEndpointTable.isActive, true),
-        sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify(['job.execution.completed'])}`,
-      ),
-    );
-
-  return endpoints;
-}
-
-export async function dbGetWebhookEndpointsWithJobFailureEvents({
-  projectId,
-  userId,
-}: {
-  projectId: string;
-  userId: string;
-}) {
-  const endpoints = await db
-    .select()
-    .from(webhookEndpointTable)
-    .where(
-      and(
-        eq(webhookEndpointTable.projectId, projectId),
-        eq(webhookEndpointTable.userId, userId),
-        eq(webhookEndpointTable.isActive, true),
-        sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify(['job.execution.failed'])}`,
+        sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify([eventType])}`,
       ),
     );
 
