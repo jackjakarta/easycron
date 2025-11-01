@@ -66,7 +66,7 @@ export default function Page2({ session }: { session: BetterAuthSession | null }
 
         <PricingCard
           name="Pro"
-          price={isAnnual ? '€150' : '€15'}
+          price={isAnnual ? '€180' : '€19'}
           period={isAnnual ? '/year' : '/month'}
           description="For higher limits and power users."
           features={[

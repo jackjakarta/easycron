@@ -97,6 +97,11 @@ export async function runOnce(bull: Job<RunJobPayload>) {
           eventType: 'job.execution.completed',
         });
 
+        if (webhookEndpoints.length === 0) {
+          console.warn(`No webhook endpoints for job.execution.completed for job ${jobRow.id}`);
+          break;
+        }
+
         await Promise.all(
           webhookEndpoints.map((endpoint) =>
             fetch(endpoint.url, {
@@ -163,6 +168,11 @@ export async function runOnce(bull: Job<RunJobPayload>) {
           userId: jobRow.userId,
           eventType: 'job.execution.failed',
         });
+
+        if (webhookEndpoints.length === 0) {
+          console.warn(`No webhook endpoints for job.execution.failed for job ${jobRow.id}`);
+          break;
+        }
 
         await Promise.all(
           webhookEndpoints.map((endpoint) =>

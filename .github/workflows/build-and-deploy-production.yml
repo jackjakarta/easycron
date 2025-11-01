@@ -14,6 +14,7 @@ on:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production
@@ -51,6 +52,7 @@ jobs:
           docker push ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: production
