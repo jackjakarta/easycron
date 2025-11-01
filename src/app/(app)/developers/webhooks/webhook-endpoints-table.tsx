@@ -18,9 +18,7 @@ import {
 } from '@/components/ui/table';
 import { type EventType, type WebhookEndpointModel } from '@/db/schema';
 import { format } from 'date-fns';
-import { AlertTriangle, Copy, MoreHorizontal } from 'lucide-react';
-
-import CreateWebhookDialog from './create-endpoint-dialog';
+import { AlertTriangle, Copy, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 
 type WebhookEndpointsTableProps = {
   endpoints: WebhookEndpointModel[];
@@ -105,8 +103,14 @@ export default function WebhookEndpointsTable({ endpoints }: WebhookEndpointsTab
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Pencil className="mr-1 size-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                        <Trash2 className="text-destructive mr-1 size-4" />
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

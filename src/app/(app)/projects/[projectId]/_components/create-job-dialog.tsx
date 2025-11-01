@@ -26,6 +26,7 @@ import { httpMethodSchema } from '@/db/schema';
 import { cn } from '@/utils/tailwind';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
@@ -76,7 +77,7 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     const body = _body?.trim().length === 0 ? null : _body;
 
     const authHeaderCleaned =
-      authorizationHeader?.k && authorizationHeader?.v
+      authorizationHeader?.k?.trim() && authorizationHeader?.v?.trim()
         ? {
             k: authorizationHeader.k.trim(),
             v: authorizationHeader.v.trim(),
@@ -90,7 +91,26 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
     };
 
     try {
-      await createJobAction({ data: cleanedData, projectId });
+      const result = await createJobAction({ data: cleanedData, projectId });
+
+      if (result.code === 402) {
+        setIsOpen(false);
+        reset();
+        toast.error(
+          <div>
+            Job limit reached for free plan. Upgrade to a paid plan to create more jobs.{' '}
+            <Link href="/pricing" className="underline">
+              View Plans
+            </Link>
+          </div>,
+        );
+        return;
+      }
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
       setIsOpen(false);
       reset();
 

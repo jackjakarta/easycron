@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { TypographyH1, TypographyP } from '@/components/ui/typography';
 import { type ProjectModel } from '@/db/schema';
 import { Plus } from 'lucide-react';
 
@@ -12,10 +13,10 @@ export default function HeaderSection({ projects }: HeaderSectionProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-foreground mb-2 text-4xl font-bold">Webhook Endpoints</h1>
-        <p className="text-muted-foreground">
+        <TypographyH1 className="text-foreground mb-2 text-start">Webhook Endpoints</TypographyH1>
+        <TypographyP className="text-muted-foreground">
           Manage and monitor your webhook endpoints for job execution events
-        </p>
+        </TypographyP>
       </div>
       <CreateWebhookDialog
         projects={projects}

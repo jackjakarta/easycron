@@ -107,7 +107,7 @@ export default function CreateWebhookDialog({ projects, trigger }: CreateWebhook
                       disabled={isLoading}
                     />
                   </FormControl>
-                  <FormDescription>The URL where we'll send webhook events</FormDescription>
+                  <FormDescription>The URL where we will send webhook events</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
