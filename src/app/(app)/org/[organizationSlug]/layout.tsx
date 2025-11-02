@@ -7,8 +7,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
     headers: await headers(),
   });
 
-  // User is not a member of this organization
   if (member === null) {
+    console.error('No active member found in protected organization layout');
     redirect('/dashboard');
   }
 

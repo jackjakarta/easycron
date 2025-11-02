@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { type SubscriptionType } from '@/stripe/types';
 import { cn } from '@/utils/tailwind';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
@@ -25,8 +26,9 @@ type PricingCardProps = {
   buttonText: string;
   buttonVariant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
   highlighted?: boolean;
-  plan?: 'pro' | 'free';
+  plan?: SubscriptionType;
   annual?: boolean;
+  organizationSlug?: string;
   isLoggedIn?: boolean;
   userId?: string;
 };
@@ -41,6 +43,7 @@ export function PricingCard({
   buttonVariant = 'default',
   highlighted = false,
   plan = 'pro',
+  organizationSlug,
   annual = false,
   isLoggedIn = false,
   userId,
@@ -62,9 +65,10 @@ export function PricingCard({
     }
 
     const { error } = await authClient.subscription.upgrade({
-      plan,
-      successUrl: '/dashboard',
+      plan: plan === 'team' ? 'team' : 'pro',
+      successUrl: plan === 'team' ? `/dashboard/org/${organizationSlug}` : '/dashboard',
       cancelUrl: '/pricing',
+      seats: plan === 'team' ? 10 : undefined,
       annual,
     });
 
@@ -85,7 +89,7 @@ export function PricingCard({
         <CardTitle className="text-card-foreground flex items-center gap-1 text-2xl font-bold">
           {name}
 
-          {annual && plan === 'pro' && (
+          {annual && (plan === 'pro' || plan === 'team') && (
             <Badge
               variant="secondary"
               className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
@@ -111,7 +115,7 @@ export function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        {plan === 'pro' && isLoggedIn ? (
+        {(plan === 'pro' || plan === 'team') && isLoggedIn ? (
           <Button
             size="lg"
             variant={buttonVariant}

@@ -25,12 +25,12 @@ export async function getUserActiveSubscription({
     return FREE_SUBSCRIPTION;
   }
 
-  if (activeSubscription.plan === 'pro') {
-    return PRO_SUBSCRIPTION;
-  }
-
   if (activeSubscription.plan === 'team') {
     return TEAM_SUBSCRIPTION;
+  }
+
+  if (activeSubscription.plan === 'pro') {
+    return PRO_SUBSCRIPTION;
   }
 
   return FREE_SUBSCRIPTION;
