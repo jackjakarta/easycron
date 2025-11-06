@@ -12,7 +12,7 @@ services:
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --certificatesresolvers.myresolver.acme.tlschallenge=true
-      - --certificatesresolvers.myresolver.acme.email=al.termure@gmail.com
+      - --certificatesresolvers.myresolver.acme.email=services@easycron.dev
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
     networks: [edge]
     ports:
