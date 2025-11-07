@@ -159,7 +159,7 @@ export const auth = betterAuth({
       },
       requireEmailVerificationOnInvitation: true,
       allowUserToCreateOrganization: async (user) => {
-        const subscription = await getUserActiveSubscription({ userId: user.id });
+        const subscription = await getUserActiveSubscription({ referenceId: user.id });
         return subscription.type === 'pro';
       },
       async sendInvitationEmail(data) {
@@ -189,7 +189,6 @@ export const auth = betterAuth({
     twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
-
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {

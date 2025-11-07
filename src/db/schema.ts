@@ -398,7 +398,7 @@ export type UpdateMemberModel = UpdateDbRow<MemberModel>;
 export const invitationTable = appSchema.table('invitation', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull(),
-  inivterId: uuid('inviter_id')
+  inviterId: uuid('inviter_id')
     .references(() => userTable.id)
     .notNull(),
   organizationId: uuid('organization_id')

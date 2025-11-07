@@ -6,13 +6,13 @@ import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION, TEAM_SUBSCRIPTION } from './const'
 import { type SubscriptionFeaturesAndLimits } from './types';
 
 export async function getUserActiveSubscription({
-  userId,
+  referenceId,
 }: {
-  userId: string;
+  referenceId: string;
 }): Promise<SubscriptionFeaturesAndLimits> {
   const subscriptions = await auth.api.listActiveSubscriptions({
     query: {
-      referenceId: userId,
+      referenceId,
     },
     headers: await headers(),
   });

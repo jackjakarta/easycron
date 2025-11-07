@@ -32,7 +32,7 @@ export async function getUser(): Promise<UserAndContext> {
     redirect('/login', RedirectType.replace);
   }
 
-  const subscription = await getUserActiveSubscription({ userId: user.id });
+  const subscription = await getUserActiveSubscription({ referenceId: user.id });
 
   return {
     ...user,
