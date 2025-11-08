@@ -8,6 +8,7 @@ import {
   real,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
@@ -56,26 +57,30 @@ export const sessionTable = appSchema.table('session', {
 export type SessionModel = typeof sessionTable.$inferSelect;
 export type InsertSessionModel = typeof sessionTable.$inferInsert;
 
-export const accountTable = appSchema.table('account', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => userTable.id),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').$type<AuthProvider>().notNull(),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
-  scope: text('scope'),
-  idToken: text('id_token'),
-  password: text('password'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
+export const accountTable = appSchema.table(
+  'account',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userTable.id),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').$type<AuthProvider>().notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+    scope: text('scope'),
+    idToken: text('id_token'),
+    password: text('password'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [unique('account_provider_user_unique_idx').on(table.providerId, table.userId)],
+);
 
 export type AccountModel = typeof accountTable.$inferSelect;
 export type InsertAccountModel = typeof accountTable.$inferInsert;

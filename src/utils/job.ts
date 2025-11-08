@@ -1,4 +1,4 @@
-export function occurrenceJobId(jobId: string, scheduledISO: string) {
+export function occurrenceJobId(jobId: string, scheduledISO: string, name: string = 'run') {
   const safeISO = scheduledISO.replace(/[:.]/g, '');
-  return `run-${jobId}-${safeISO}`;
+  return `${name}-${jobId}-${safeISO}`;
 }

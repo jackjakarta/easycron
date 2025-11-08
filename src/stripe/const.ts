@@ -13,15 +13,28 @@ export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   features: {
     ai: false,
     analytics: false,
-    webhooks: true,
-    organizations: false,
   },
   limits: {
     projectsAmount: 1,
     jobsAmount: 2,
     executionsPerMonth: 500,
     webhookEndpointsPerProject: 1,
-    organizations: 1,
+    organizationsAmount: 1,
+  },
+};
+
+export const HOBBY_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
+  type: 'hobby',
+  features: {
+    ai: true,
+    analytics: true,
+  },
+  limits: {
+    projectsAmount: 5,
+    jobsAmount: 50,
+    executionsPerMonth: 5000,
+    webhookEndpointsPerProject: 2,
+    organizationsAmount: 0,
   },
 };
 
@@ -30,15 +43,13 @@ export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   features: {
     ai: true,
     analytics: true,
-    organizations: true,
-    webhooks: true,
   },
   limits: {
     projectsAmount: Infinity,
     jobsAmount: Infinity,
     executionsPerMonth: Infinity,
     webhookEndpointsPerProject: 10,
-    organizations: 10,
+    organizationsAmount: 0,
   },
 };
 
@@ -47,14 +58,12 @@ export const TEAM_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   features: {
     ai: true,
     analytics: true,
-    organizations: true,
-    webhooks: true,
   },
   limits: {
     projectsAmount: Infinity,
     jobsAmount: Infinity,
     executionsPerMonth: Infinity,
     webhookEndpointsPerProject: 20,
-    organizations: 10,
+    organizationsAmount: 10,
   },
 };

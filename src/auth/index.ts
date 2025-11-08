@@ -169,7 +169,7 @@ export const auth = betterAuth({
           dbGetUserOwnedOrganizationsCount({ userId: user.id }),
         ]);
 
-        if (userOrganziationsCount >= subscription.limits.organizations) {
+        if (userOrganziationsCount >= subscription.limits.organizationsAmount) {
           return false;
         }
 

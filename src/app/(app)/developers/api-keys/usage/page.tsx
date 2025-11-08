@@ -41,7 +41,7 @@ export default async function Page() {
           </TypographyP>
         </div>
         <TopStats
-          totalRequests={totalRequests}
+          totalRequests={totalRequests ?? 0}
           activeKeys={noOfEnabledApiKeys}
           totalKeys={noOfApiKeys}
         />

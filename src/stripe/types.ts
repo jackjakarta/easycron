@@ -1,21 +1,19 @@
 import { z } from 'zod';
 
-export const subscriptionTypeSchema = z.enum(['free', 'pro', 'team']);
+export const subscriptionTypeSchema = z.enum(['free', 'hobby', 'pro', 'team']);
 export type SubscriptionType = z.infer<typeof subscriptionTypeSchema>;
 
 export type SubscriptionFeaturesAndLimits = {
   type: SubscriptionType;
   features: {
-    analytics: boolean;
     ai: boolean;
-    organizations: boolean;
-    webhooks: boolean;
+    analytics: boolean;
   };
   limits: {
     projectsAmount: number;
     jobsAmount: number;
     executionsPerMonth: number;
-    organizations: number;
+    organizationsAmount: number;
     webhookEndpointsPerProject: number;
   };
 };

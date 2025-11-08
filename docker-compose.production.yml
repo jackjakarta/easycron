@@ -35,7 +35,7 @@ services:
 
   web:
     image: jackjakarta/easycron:${TAG_VERSION}
-    command: ["node", "server.js"]
+    command: ['node', 'server.js']
     networks: [edge]
     depends_on:
       - redis

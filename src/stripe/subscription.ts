@@ -2,7 +2,12 @@ import { auth } from '@/auth';
 import { dbGetUserSubscriptions } from '@/db/functions/subscription';
 import { headers } from 'next/headers';
 
-import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION, TEAM_SUBSCRIPTION } from './const';
+import {
+  FREE_SUBSCRIPTION,
+  HOBBY_SUBSCRIPTION,
+  PRO_SUBSCRIPTION,
+  TEAM_SUBSCRIPTION,
+} from './const';
 import { type SubscriptionFeaturesAndLimits } from './types';
 
 export async function getUserActiveSubscription({
@@ -29,6 +34,10 @@ export async function getUserActiveSubscription({
 
   if (activeSubscription.plan === 'pro') {
     return PRO_SUBSCRIPTION;
+  }
+
+  if (activeSubscription.plan === 'hobby') {
+    return HOBBY_SUBSCRIPTION;
   }
 
   return FREE_SUBSCRIPTION;

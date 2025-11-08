@@ -2,6 +2,7 @@ import { db } from '@/db';
 import { jobTable } from '@/db/schema';
 import { getRunQueue } from '@/queue/queue';
 import { computeNextRun, now } from '@/utils/cron';
+import { occurrenceJobId } from '@/utils/job';
 import { tryLock } from '@/utils/locks';
 import { and, eq, lte } from 'drizzle-orm';
 
@@ -32,7 +33,6 @@ export async function tick() {
     const current = now();
     const next = computeNextRun(j.scheduleCron, j.timezone, current);
 
-    // 1) enqueue with colon-free jobId
     const payload = { jobId: j.id, scheduledForISO: j.nextRunAt.toISOString() };
     const customId = occurrenceJobId(j.id, payload.scheduledForISO);
 
@@ -58,9 +58,4 @@ export async function tick() {
     // optional: log slow ticks
     console.info(`Scheduler tick processed ${due.length} jobs in ${dt}ms`);
   }
-}
-
-function occurrenceJobId(jobId: string, scheduledISO: string) {
-  const safeISO = scheduledISO.replace(/[:.]/g, '');
-  return `run-${jobId}-${safeISO}`;
 }

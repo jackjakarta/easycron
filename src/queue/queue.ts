@@ -20,7 +20,7 @@ export function getRunQueue() {
     defaultJobOptions: {
       removeOnComplete: 1000,
       removeOnFail: 1000,
-    } as JobsOptions,
+    } satisfies JobsOptions,
   });
 }
 

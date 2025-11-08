@@ -10,7 +10,7 @@ import {
 } from '@/db/functions/job';
 import { dbDeleteProject, dbGetProjectById } from '@/db/functions/project';
 import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
-import { getRunQueue } from '@/queue/queue';
+import { getRunQueue, type RunJobPayload } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
 import { encryptSecret } from '@/utils/crypto';
 import { createHmacSigningKey } from '@/utils/hmac';
@@ -29,8 +29,8 @@ export async function runJobNowAction({ jobId }: { jobId: string }) {
   const q = getRunQueue();
   const iso = new Date().toISOString();
 
-  const payload = { jobId: job.id, scheduledForISO: iso };
-  const customId = occurrenceJobId(job.id, payload.scheduledForISO);
+  const payload: RunJobPayload = { jobId: job.id, scheduledForISO: iso };
+  const customId = occurrenceJobId(payload.jobId, payload.scheduledForISO);
 
   await q.add('run', payload, {
     jobId: customId,
@@ -38,8 +38,6 @@ export async function runJobNowAction({ jobId }: { jobId: string }) {
     removeOnFail: 1000,
     priority: 2,
   });
-
-  return;
 }
 
 export async function createJobAction({
@@ -52,7 +50,7 @@ export async function createJobAction({
   const user = await getUser();
   const { subscription } = user;
 
-  if (subscription.type === 'free') {
+  if (subscription.type === 'free' || subscription.type === 'hobby') {
     const jobsCount = await dbGetJobCountByUserId({ userId: user.id });
 
     if (jobsCount >= subscription.limits.jobsAmount) {
@@ -132,7 +130,7 @@ export async function createOrUpdateProjectSecretAction({ projectId }: { project
   });
 
   if (newSecret === undefined) {
-    throw new Error('Failed to create secret');
+    throw new Error('Failed to create or update secret');
   }
 
   return { ...newSecret, rawSecret };
