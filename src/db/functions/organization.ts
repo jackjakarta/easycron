@@ -1,7 +1,7 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { db } from '..';
-import { memberTable, type MemberModel } from '../schema';
+import { memberTable, organizationTable, type MemberModel } from '../schema';
 
 export async function dbGetOrganizationMember({
   userId,
@@ -16,4 +16,18 @@ export async function dbGetOrganizationMember({
     .where(and(eq(memberTable.userId, userId), eq(memberTable.organizationId, organizationId)));
 
   return member;
+}
+
+export async function dbGetUserOwnedOrganizationsCount({
+  userId,
+}: {
+  userId: string;
+}): Promise<number> {
+  const [result] = await db
+    .select({ count: sql<number>`count(distinct ${organizationTable.id})` })
+    .from(organizationTable)
+    .innerJoin(memberTable, eq(memberTable.organizationId, organizationTable.id))
+    .where(and(eq(memberTable.userId, userId), eq(memberTable.role, 'owner')));
+
+  return result?.count ?? 0;
 }

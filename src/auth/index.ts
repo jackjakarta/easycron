@@ -1,7 +1,9 @@
 import { ac, admin, member, owner } from '@/auth/permissions';
 import { db } from '@/db';
-import { dbGetOrganizationMember } from '@/db/functions/organization';
-import { dbGetUserById } from '@/db/functions/user';
+import {
+  dbGetOrganizationMember,
+  dbGetUserOwnedOrganizationsCount,
+} from '@/db/functions/organization';
 import {
   accountTable,
   apiKeyTable,
@@ -14,14 +16,13 @@ import {
   userTable,
   verificationTable,
 } from '@/db/schema';
-import { sendUserActionEmail, sendUserActionInformationEmail } from '@/email/send';
-import { type InformationEmailMetadata } from '@/email/types';
+import { sendSubscriptionInformationEmail, sendUserActionEmail } from '@/email/send';
 import { env } from '@/env';
 import { stripe as stripeClient } from '@/stripe';
 import { NUMBER_OF_TRIAL_DAYS } from '@/stripe/const';
 import { getUserActiveSubscription } from '@/stripe/subscription';
 import { getBaseUrlFromHeaders } from '@/utils/host';
-import { stripe, type Subscription } from '@better-auth/stripe';
+import { stripe } from '@better-auth/stripe';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
@@ -110,7 +111,7 @@ export const auth = betterAuth({
             priceId: 'price_1SOlbmE85tPzaCYUP5CichDd',
             annualDiscountPriceId: 'price_1SOlc5E85tPzaCYU567G2VsQ',
             freeTrial: {
-              days: 0,
+              days: NUMBER_OF_TRIAL_DAYS,
             },
           },
         ],
@@ -129,7 +130,11 @@ export const auth = betterAuth({
             organizationId: referenceId,
           });
 
-          return member?.role === 'owner' || member?.role === 'admin';
+          if (member === undefined) {
+            return false;
+          }
+
+          return member.role === 'owner';
         },
         onSubscriptionDeleted: async ({ subscription }) => {
           console.info(
@@ -159,8 +164,16 @@ export const auth = betterAuth({
       },
       requireEmailVerificationOnInvitation: true,
       allowUserToCreateOrganization: async (user) => {
-        const subscription = await getUserActiveSubscription({ referenceId: user.id });
-        return subscription.type === 'pro';
+        const [subscription, userOrganziationsCount] = await Promise.all([
+          getUserActiveSubscription({ referenceId: user.id }),
+          dbGetUserOwnedOrganizationsCount({ userId: user.id }),
+        ]);
+
+        if (userOrganziationsCount >= subscription.limits.organizations) {
+          return false;
+        }
+
+        return true;
       },
       async sendInvitationEmail(data) {
         const { organization, invitation } = data;
@@ -213,28 +226,3 @@ export const auth = betterAuth({
     },
   },
 });
-
-async function sendSubscriptionInformationEmail({
-  subscription,
-  informationType,
-}: {
-  subscription: Subscription;
-  informationType: InformationEmailMetadata['type'];
-}) {
-  try {
-    const user = await dbGetUserById({ userId: subscription.referenceId });
-
-    if (user === undefined) {
-      console.error(`User with ID ${subscription.referenceId} not found for email notification`);
-      return;
-    }
-
-    await sendUserActionInformationEmail({
-      to: user.email,
-      information: { type: informationType },
-    });
-  } catch (error) {
-    console.error('Error sending subscription purchased email:', error);
-    return;
-  }
-}

@@ -8,7 +8,7 @@ export function slugifyName({
   withNanoId?: boolean;
 }): string {
   if (withNanoId) {
-    return `${name} ${cnanoid(4)}`
+    return `${name} ${cnanoid(6)}`
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');

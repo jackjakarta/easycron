@@ -13,19 +13,23 @@ export function useKeyboardShortcut({
   withShift = false,
   enabled = true,
 }: UseKeyboardShortcutProps) {
+  const handleKeyEvent = React.useEffectEvent((e: KeyboardEvent) => {
+    if (e.key !== key) return;
+    if (!(e.metaKey || e.ctrlKey)) return;
+    if (withShift ? !e.shiftKey : e.shiftKey) return;
+
+    e.preventDefault();
+    callbackFn(e);
+  });
+
   React.useEffect(() => {
     if (!enabled) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key !== key) return;
-      if (!(e.metaKey || e.ctrlKey)) return;
-      if (withShift ? !e.shiftKey : e.shiftKey) return;
-
-      e.preventDefault();
-      callbackFn(e);
+      handleKeyEvent(e);
     }
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [key, callbackFn, withShift, enabled]);
+  }, [enabled, key, withShift]);
 }

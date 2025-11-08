@@ -9,7 +9,7 @@ type JobExecutionQueryOptions = QueryOptions<ExecutionModel[]> & { jobId: string
 export function useJobExecutionsQuery(options: JobExecutionQueryOptions) {
   return useQuery<ExecutionModel[]>({
     ...options,
-    queryKey: ['job-executions'],
+    queryKey: ['job-executions', options.jobId],
     queryFn: () => fetchJobExecutions(options.jobId),
   });
 }

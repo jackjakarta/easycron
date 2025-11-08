@@ -1,10 +1,37 @@
+import { dbGetUserById } from '@/db/functions/user';
 import { IS_DEV_MODE } from '@/utils/dev';
+import { type Subscription } from '@better-auth/stripe';
 
 import { createInformationMailTemplate, createUserActionMailTemplate } from './templates';
 import { type EmailAction, type EmailActionResult, type InformationEmailMetadata } from './types';
 import { mailjetSendEmail, sendTestEmail } from './utils';
 
 export type SendUserActionEmail = typeof sendUserActionEmail;
+
+export async function sendSubscriptionInformationEmail({
+  subscription,
+  informationType,
+}: {
+  subscription: Subscription;
+  informationType: InformationEmailMetadata['type'];
+}) {
+  try {
+    const user = await dbGetUserById({ userId: subscription.referenceId });
+
+    if (user === undefined) {
+      console.error(`User with ID ${subscription.referenceId} not found for email notification`);
+      return;
+    }
+
+    await sendUserActionInformationEmail({
+      to: user.email,
+      information: { type: informationType },
+    });
+  } catch (error) {
+    console.error('Error sending subscription purchased email:', error);
+    return;
+  }
+}
 
 /**
  * Sends emails to user with a specific user action to be executed by the user

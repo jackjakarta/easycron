@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { formatDateToDayMonthYear } from './date';
+import { formatDateToDayMonthYear, formatDateToDayMonthYearTime, getTimeAgo } from './date';
 
 describe('formatDateToDayMonthYear', () => {
   it('should format a Date object with default parameters', () => {
@@ -144,5 +144,80 @@ describe('formatDateToDayMonthYear', () => {
 
     expect(result1).toBe(result2);
     expect(result1).toBe('10.09.2023');
+  });
+});
+
+describe('formatDateToDayMonthYearTime', () => {
+  it('should format a Date object with date and time by default', () => {
+    const date = new Date('2023-12-25T10:30:00Z');
+    const result = formatDateToDayMonthYearTime(date);
+
+    expect(result).toBe('25.12.2023, 11:30');
+  });
+
+  it('should format a timestamp number with default parameters', () => {
+    const timestamp = new Date('2023-06-30T14:20:00Z').getTime();
+    const result = formatDateToDayMonthYearTime(timestamp);
+
+    expect(result).toBe('30.06.2023, 16:20');
+  });
+
+  it('should handle locale specific formatting', () => {
+    const date = new Date('2023-12-25T10:30:00Z');
+    const result = formatDateToDayMonthYearTime(date, 'Europe/Berlin', 'en-US');
+
+    expect(result).toBe('12/25/2023, 11:30 AM');
+  });
+
+  it('should format dates when timezone advances to next day', () => {
+    const result = formatDateToDayMonthYearTime('2023-12-31T23:30:00Z', 'Asia/Tokyo');
+
+    expect(result).toBe('01.01.2024, 08:30');
+  });
+
+  it('should format dates when timezone goes to previous day', () => {
+    const result = formatDateToDayMonthYearTime('2023-12-25T01:15:00Z', 'Pacific/Honolulu');
+
+    expect(result).toBe('24.12.2023, 15:15');
+  });
+});
+
+describe('getTimeAgo', () => {
+  const fakeNow = new Date('2024-01-10T12:00:00Z');
+  const subtractDays = (days: number) => new Date(fakeNow.getTime() - days * 24 * 60 * 60 * 1000);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(fakeNow);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns "Today" when the same day', () => {
+    const sameDay = new Date(fakeNow.getTime() - 60 * 60 * 1000);
+
+    expect(getTimeAgo(sameDay)).toBe('Today');
+  });
+
+  it('returns "Yesterday" when difference is exactly one day', () => {
+    expect(getTimeAgo(subtractDays(1))).toBe('Yesterday');
+  });
+
+  it('returns days when difference is less than a week', () => {
+    expect(getTimeAgo(subtractDays(3))).toBe('3 days ago');
+  });
+
+  it('returns weeks when difference is less than a month', () => {
+    expect(getTimeAgo(subtractDays(21))).toBe('3 weeks ago');
+  });
+
+  it('returns months when difference is less than a year', () => {
+    expect(getTimeAgo(subtractDays(120))).toBe('4 months ago');
+  });
+
+  it('returns years when difference is more than a year', () => {
+    expect(getTimeAgo(subtractDays(800))).toBe('2 years ago');
   });
 });

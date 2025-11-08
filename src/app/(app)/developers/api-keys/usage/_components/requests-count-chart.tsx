@@ -13,7 +13,7 @@ type RequestCountChartProps = {
 export default function RequestsCountChart({ initialApiKeys }: RequestCountChartProps) {
   const { data: apiKeys = [] } = useApiKeysQuery({
     initialData: initialApiKeys,
-    refetchInterval: 120000, // refetch every 2 minutes
+    refetchInterval: 60_000, // refetch every 1 minute
   });
 
   const topApiKeysByRequestCount = apiKeys

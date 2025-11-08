@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'uwebzphhvlaldbrycmbl.storage.supabase.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   allowedDevOrigins: ['jakarta.ngrok.app'],
 };
 

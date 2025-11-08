@@ -13,7 +13,7 @@ export function useApiKeysQuery(options?: QueryOptions<ApiKeyModel[]>) {
 }
 
 async function fetchApiKeys() {
-  const { data: apiKeys, error } = await betterFetch<ApiKeyModel[]>('/api/api-keys', {
+  const { data: apiKeys = [], error } = await betterFetch<ApiKeyModel[]>('/api/api-keys', {
     cache: 'no-store',
   });
 

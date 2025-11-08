@@ -11,9 +11,7 @@ export async function getUserActiveSubscription({
   referenceId: string;
 }): Promise<SubscriptionFeaturesAndLimits> {
   const subscriptions = await auth.api.listActiveSubscriptions({
-    query: {
-      referenceId,
-    },
+    query: { referenceId },
     headers: await headers(),
   });
 
@@ -49,6 +47,10 @@ export async function getUserActiveSubscriptionApi({
 
   if (activeSubscription === undefined) {
     return FREE_SUBSCRIPTION;
+  }
+
+  if (activeSubscription.plan === 'team') {
+    return TEAM_SUBSCRIPTION;
   }
 
   if (activeSubscription.plan === 'pro') {

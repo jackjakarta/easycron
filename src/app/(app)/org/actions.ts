@@ -3,7 +3,6 @@
 import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { slugifyName } from '@/utils/format';
-import { cnanoid } from '@/utils/nanoid';
 import { headers } from 'next/headers';
 
 export async function createOrganizationAction({
@@ -14,14 +13,16 @@ export async function createOrganizationAction({
   logoS3Key?: string;
 }) {
   const user = await getUser();
+
   const slugBase = slugifyName({ name });
+  const slugWithNanoId = slugifyName({ name, withNanoId: true });
 
   const isSlugAvailable = await checkOrganizationSlugAvailability(slugBase);
 
   const organization = await auth.api.createOrganization({
     body: {
       name,
-      slug: isSlugAvailable ? slugBase : slugifyName({ name, withNanoId: true }),
+      slug: isSlugAvailable ? slugBase : slugWithNanoId,
       logo: logoS3Key ?? 'assets/placeholder-organization-logo.png',
       userId: user.id,
       keepCurrentActiveOrganization: false,

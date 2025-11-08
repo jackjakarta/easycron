@@ -50,7 +50,7 @@ pnpm dev
 You can start the services individually:
 
 ```sh
-# run ts (no hot reload)
+# run ts
 
 pnpm dev:worker
 pnpm dev:scheduler

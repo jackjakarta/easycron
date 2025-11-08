@@ -61,6 +61,9 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
     const { error, data } = await authClient.apiKey.create({
       name,
       prefix: 'ec-',
+      rateLimitEnabled: true,
+      rateLimitMax: 1000,
+      rateLimitTimeWindow: 60 * 1000, // 1 minute
     });
 
     if (error !== null) {
