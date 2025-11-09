@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
-export function CTA() {
+export default function CTA() {
   return (
     <section className="container mx-auto px-4 py-24">
       <div className="border-border bg-card rounded-2xl border p-12 text-center md:p-16">

@@ -1,6 +1,6 @@
 import { BarChart3, Bell, Calendar, Code2, Shield, Zap } from 'lucide-react';
 
-export function Features() {
+export default function Features() {
   const features = [
     {
       icon: Calendar,

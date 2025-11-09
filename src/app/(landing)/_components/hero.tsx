@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play } from 'lucide-react';
 
-export function Hero() {
+export default function Hero() {
   return (
     <section className="container mx-auto px-4 py-24 md:py-32">
       <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
