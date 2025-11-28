@@ -8,18 +8,18 @@ import {
 } from '@/db/functions/project';
 import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { toErrorMessage } from '@/utils/error';
-import { NextRequest, NextResponse } from 'next/server';
+import { Context } from 'hono';
 import { z } from 'zod';
 
 import { postRequestSchema, putRequestSchema } from './schemas';
 
-export async function GET(req: NextRequest) {
+export async function getProjectHandler(ctx: Context<{}>) {
   try {
-    const maybeApiKey = req.headers.get('x-api-key');
-    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
+    const maybeApiKey = ctx.req.header('x-api-key');
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey ?? null });
 
     if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
@@ -28,36 +28,30 @@ export async function GET(req: NextRequest) {
     const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'User not found' }] },
-        { status: 404 },
-      );
+      return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
-    const { searchParams } = req.nextUrl;
+    const { searchParams } = new URL(ctx.req.url);
     const _projectId = searchParams.get('projectId');
     const parsedProjectId = z.uuid().safeParse(_projectId);
 
     if (!parsedProjectId.success) {
-      return NextResponse.json(
-        { success: false, errors: parsedProjectId.error.issues },
-        { status: 400 },
-      );
+      return ctx.json({ success: false, errors: parsedProjectId.error.issues }, { status: 400 });
     }
 
     const project = await dbGetProjectById({ projectId: parsedProjectId.data, userId: user.id });
 
     if (project === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Project not found or access denied' }] },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data: project }, { status: 200 });
+    return ctx.json({ success: true, data: project }, { status: 200 });
   } catch (error) {
     console.error({ error, errorMessage: toErrorMessage(error) });
-    return NextResponse.json(
+    return ctx.json(
       {
         success: false,
         errors: [{ message: 'Internal Server Error' }],
@@ -67,13 +61,13 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function insertProjectHandler(ctx: Context<{}>) {
   try {
-    const maybeApiKey = req.headers.get('x-api-key');
-    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
+    const maybeApiKey = ctx.req.header('x-api-key');
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey ?? null });
 
     if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
@@ -82,10 +76,7 @@ export async function POST(req: NextRequest) {
     const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'User not found' }] },
-        { status: 404 },
-      );
+      return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
     const [subscription, projectCount] = await Promise.all([
@@ -94,7 +85,7 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (projectCount >= subscription.limits.projectsAmount) {
-      return NextResponse.json(
+      return ctx.json(
         {
           success: false,
           errors: [
@@ -108,11 +99,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const json = await req.json();
+    const json = await ctx.req.json();
     const body = postRequestSchema.safeParse(json);
 
     if (!body.success) {
-      return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
+      return ctx.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
     const { name: _name, description } = body.data;
@@ -121,16 +112,16 @@ export async function POST(req: NextRequest) {
     const newProject = await dbInsertProject({ name, description, userId: user.id });
 
     if (newProject === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Failed to create project' }] },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ success: true, data: newProject }, { status: 201 });
+    return ctx.json({ success: true, data: newProject }, { status: 201 });
   } catch (error) {
     console.error({ error, errorMessage: toErrorMessage(error) });
-    return NextResponse.json(
+    return ctx.json(
       {
         success: false,
         errors: [{ message: 'Internal Server Error' }],
@@ -140,13 +131,13 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function updateProjectHandler(ctx: Context<{}>) {
   try {
-    const maybeApiKey = req.headers.get('x-api-key');
-    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
+    const maybeApiKey = ctx.req.header('x-api-key');
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey ?? null });
 
     if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
@@ -155,18 +146,15 @@ export async function PUT(req: NextRequest) {
     const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'User not found' }] },
-        { status: 404 },
-      );
+      return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
-    const json = await req.json();
+    const json = await ctx.req.json();
     const body = putRequestSchema.safeParse(json);
 
     if (!body.success) {
       console.error('Validation errors:', body.error.issues);
-      return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
+      return ctx.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
     const { name, description, projectId } = body.data;
@@ -178,16 +166,16 @@ export async function PUT(req: NextRequest) {
     });
 
     if (updated === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Project not found or access denied' }] },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data: updated }, { status: 200 });
+    return ctx.json({ success: true, data: updated }, { status: 200 });
   } catch (error) {
     console.error({ error, errorMessage: toErrorMessage(error) });
-    return NextResponse.json(
+    return ctx.json(
       {
         success: false,
         errors: [{ message: 'Internal Server Error' }],
@@ -197,13 +185,13 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-export async function DELETE(req: NextRequest) {
+export async function deleteProjectHandler(ctx: Context<{}>) {
   try {
-    const maybeApiKey = req.headers.get('x-api-key');
-    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
+    const maybeApiKey = ctx.req.header('x-api-key');
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey ?? null });
 
     if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
@@ -212,37 +200,31 @@ export async function DELETE(req: NextRequest) {
     const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'User not found' }] },
-        { status: 404 },
-      );
+      return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
-    const { searchParams } = req.nextUrl;
-    const _projectId = searchParams.get('projectId');
+    const { searchParams: _searchParams } = new URL(ctx.req.url);
+    const _projectId = _searchParams.get('projectId');
     const parsedProjectId = z.uuid().safeParse(_projectId);
 
     if (!parsedProjectId.success) {
-      return NextResponse.json(
-        { success: false, errors: parsedProjectId.error.issues },
-        { status: 400 },
-      );
+      return ctx.json({ success: false, errors: parsedProjectId.error.issues }, { status: 400 });
     }
 
     const projectId = parsedProjectId.data;
     const deleted = await dbDeleteProject({ projectId, userId: user.id });
 
     if (deleted === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Project not found or access denied' }] },
         { status: 404 },
       );
     }
 
-    return NextResponse.json({ success: true, data: deleted }, { status: 200 });
+    return ctx.json({ success: true, data: deleted }, { status: 200 });
   } catch (error) {
     console.error({ error: JSON.stringify(error), errorMessage: toErrorMessage(error) });
-    return NextResponse.json(
+    return ctx.json(
       { success: false, errors: [{ message: 'Internal Server Error' }] },
       { status: 500 },
     );

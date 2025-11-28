@@ -1,6 +1,5 @@
 'use client';
 
-import { authClient } from '@/auth/client';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -22,6 +21,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+
+import { createApiKeyAction } from './actions';
 
 const nameSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -55,26 +56,20 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
   });
 
   async function onSubmit(apiKeyFormData: NameFormData) {
-    const { name: _name } = apiKeyFormData;
-    const name = _name.trim();
+    try {
+      const { name: _name } = apiKeyFormData;
+      const name = _name.trim();
 
-    const { error, data } = await authClient.apiKey.create({
-      name,
-      prefix: 'ec-',
-      rateLimitEnabled: true,
-      rateLimitMax: 1000,
-      rateLimitTimeWindow: 60 * 1000, // 1 minute
-    });
+      const { key } = await createApiKeyAction({ name });
+      setRawKey(key);
 
-    if (error !== null) {
+      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      toast.success('API key created successfully!');
+    } catch (error) {
+      console.error('Error creating API key:', error);
       setError('root', { type: 'manual', message: 'The API key could not be created.' });
       toast.error('Error creating API key');
-      return;
     }
-
-    setRawKey(data.key);
-    queryClient.invalidateQueries({ queryKey: ['api-keys'] });
-    toast.success('API key created successfully!');
   }
 
   function handleCopyToClipboard(text: string) {

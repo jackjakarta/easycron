@@ -1,7 +1,9 @@
 'use server';
 
+import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { dbUpdateApiKey } from '@/db/functions/api-key';
+import { headers } from 'next/headers';
 
 export async function updateApiKeyEnabledAction({
   apiKeyId,
@@ -23,4 +25,16 @@ export async function updateApiKeyEnabledAction({
   }
 
   return updated;
+}
+
+export async function createApiKeyAction({ name }: { name: string }) {
+  const apiKey = await auth.api.createApiKey({
+    body: {
+      name,
+      prefix: 'ec-',
+    },
+    headers: await headers(),
+  });
+
+  return apiKey;
 }

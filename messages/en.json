@@ -42,6 +42,29 @@
     "view-all": "View all",
     "loading": "Loading..."
   },
+  "error-pages": {
+    "not-found": {
+      "heading": "Oops! Page not found.",
+      "title": "404 - Page Not Found",
+      "description": "Sorry, the page you are looking for does not exist.",
+      "sub-description": "Please check the URL or return to the homepage.",
+      "button": "Back to Home"
+    },
+    "server": {
+      "heading": "Oops! Something went wrong.",
+      "title": "500 - Internal Server Error",
+      "description": "Oops! Something went wrong on our end.",
+      "sub-description": "Our team has been notified and is working to fix the issue.",
+      "button": "Try again"
+    },
+    "forbidden": {
+      "heading": "Oops! Access denied.",
+      "title": "403 - Forbidden",
+      "description": "You do not have permission to access this page.",
+      "sub-description": "If you believe this is an error, please contact support.",
+      "button": "Back to Home"
+    }
+  },
   "dashboard": {
     "welcome": "Welcome to easyCron",
     "description": "Your reliable cron job service",

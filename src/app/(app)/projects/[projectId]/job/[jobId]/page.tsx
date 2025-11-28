@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { dbGetFinishedExecutionsByJobId } from '@/db/functions/execution';
 import { dbGetJobById } from '@/db/functions/job';
-import { getAsyncPageContext, PageContext } from '@/utils/context';
+import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 

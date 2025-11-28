@@ -1,12 +1,12 @@
 import { getUser } from '@/auth/utils';
 import { dbGetFinishedExecutionsByJobId } from '@/db/functions/execution';
 import { dbGetJobById } from '@/db/functions/job';
-import { NextRequest, NextResponse } from 'next/server';
+import { Context } from 'hono';
 import { z } from 'zod';
 
-export async function GET(req: NextRequest) {
+export async function getExecutionsHandler(ctx: Context<{}>) {
   const user = await getUser();
-  const { searchParams } = req.nextUrl;
+  const { searchParams } = new URL(ctx.req.url);
 
   try {
     const _jobId = searchParams.get('jobId');
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     if (!parsedJobId.success) {
       console.error({ error: parsedJobId.error.issues });
-      return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 });
+      return ctx.json({ error: 'Invalid jobId' }, { status: 400 });
     }
 
     const jobId = parsedJobId.data;
@@ -22,13 +22,13 @@ export async function GET(req: NextRequest) {
 
     if (job === undefined) {
       console.error({ error: 'Job not found' });
-      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+      return ctx.json({ error: 'Job not found' }, { status: 404 });
     }
 
     const jobExecutions = await dbGetFinishedExecutionsByJobId({ jobId: job.id });
-    return NextResponse.json(jobExecutions, { status: 200 });
+    return ctx.json(jobExecutions, { status: 200 });
   } catch (error) {
     console.error('Error fetching job executions:', error);
-    return NextResponse.json({ error: 'Failed to fetch job executions' }, { status: 500 });
+    return ctx.json({ error: 'Failed to fetch job executions' }, { status: 500 });
   }
 }

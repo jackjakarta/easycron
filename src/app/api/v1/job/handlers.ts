@@ -2,17 +2,17 @@ import { verifyApiKey } from '@/app/api/utils';
 import { dbGetJobCountByUserId, dbInsertJob } from '@/db/functions/job';
 import { dbGetProjectById } from '@/db/functions/project';
 import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
-import { NextRequest, NextResponse } from 'next/server';
+import { Context } from 'hono';
 
 import { requestBodySchema } from './schemas';
 
-export async function POST(req: NextRequest) {
+export async function insertJobHandler(ctx: Context<{}>) {
   try {
-    const maybeApiKey = req.headers.get('x-api-key');
-    const apiKeyResult = await verifyApiKey({ key: maybeApiKey });
+    const maybeApiKey = ctx.req.header('x-api-key');
+    const apiKeyResult = await verifyApiKey({ key: maybeApiKey ?? null });
 
     if (apiKeyResult.code >= 400 && apiKeyResult.code < 500) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Missing or invalid API key' }] },
         { status: 401 },
       );
@@ -21,10 +21,7 @@ export async function POST(req: NextRequest) {
     const { user } = apiKeyResult;
 
     if (user === undefined) {
-      return NextResponse.json(
-        { success: false, errors: [{ message: 'User not found' }] },
-        { status: 404 },
-      );
+      return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
     const [subscription, jobCount] = await Promise.all([
@@ -33,7 +30,7 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (jobCount >= subscription.limits.jobsAmount) {
-      return NextResponse.json(
+      return ctx.json(
         {
           success: false,
           errors: [
@@ -47,19 +44,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const json = await req.json();
+    const json = await ctx.req.json();
     const body = requestBodySchema.safeParse(json);
 
     if (!body.success) {
       console.error('Validation errors:', body.error.issues);
-      return NextResponse.json({ success: false, errors: body.error.issues }, { status: 400 });
+      return ctx.json({ success: false, errors: body.error.issues }, { status: 400 });
     }
 
     const { projectId } = body.data;
     const project = await dbGetProjectById({ projectId, userId: user.id });
 
     if (project === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Project not found or access denied' }] },
         { status: 404 },
       );
@@ -73,16 +70,16 @@ export async function POST(req: NextRequest) {
     });
 
     if (job === undefined) {
-      return NextResponse.json(
+      return ctx.json(
         { success: false, errors: [{ message: 'Failed to create job' }] },
         { status: 500 },
       );
     }
 
-    return NextResponse.json({ success: true, data: job }, { status: 201 });
+    return ctx.json({ success: true, data: job }, { status: 201 });
   } catch (error) {
     console.error({ error });
-    return NextResponse.json(
+    return ctx.json(
       { success: false, errors: [{ message: 'Internal Server Error' }] },
       { status: 500 },
     );

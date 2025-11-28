@@ -92,7 +92,7 @@ export default function NavMain() {
                       <SidebarMenuSubItem key={project.id} className="group/sub">
                         <SidebarMenuSubButton asChild>
                           <Link href={`/projects/${project.id}`}>
-                            <span>{project.name}</span>
+                            <span className="max-w-[85%] truncate">{project.name}</span>
                           </Link>
                         </SidebarMenuSubButton>
 

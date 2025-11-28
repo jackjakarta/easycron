@@ -16,14 +16,9 @@ import { z } from 'zod';
 
 import SocialAuthButton from '../_components/social-auth-button';
 
-const loginFormSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormData = z.infer<typeof loginFormSchema>;
-
 export default function LoginForm() {
+  const loginFormSchema = useLoginZodSchema();
+  type LoginFormData = z.infer<typeof loginFormSchema>;
   const router = useRouter();
 
   const t = useTranslations('auth.login');
@@ -170,4 +165,15 @@ export default function LoginForm() {
       </div>
     </div>
   );
+}
+
+function useLoginZodSchema() {
+  const t = useTranslations('auth.login');
+
+  const loginFormSchema = z.object({
+    email: z.email(t('form.email.error')),
+    password: z.string().min(1, t('form.password.error')),
+  });
+
+  return loginFormSchema;
 }

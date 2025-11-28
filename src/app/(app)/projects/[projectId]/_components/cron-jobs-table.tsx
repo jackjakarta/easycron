@@ -32,6 +32,7 @@ import {
   Play,
   Plus,
   RefreshCcw,
+  Split,
   Trash2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -39,6 +40,7 @@ import React from 'react';
 import { toast } from 'sonner';
 
 import { deleteJobAction, enableOrDisableJobAction, runJobNowAction } from '../actions';
+import { duplicateJobAction } from '../job/[jobId]/actions';
 import CreateJobDialog from './create-job-dialog';
 import EditJobSheet from './edit-job-sheet';
 
@@ -85,6 +87,17 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
       toast.error('Failed to delete job');
     } finally {
       setDeletingJobId(null);
+    }
+  }
+
+  async function handleDuplicateProject(jobId: string) {
+    try {
+      await duplicateJobAction({ jobId });
+      toast.success('Project duplicated successfully');
+      router.refresh();
+    } catch (error) {
+      console.error('Error duplicating project:', error);
+      toast.error('Failed to duplicate project');
     }
   }
 
@@ -280,6 +293,11 @@ export default function CronJobsTable({ cronJobs, project, secretEnabled }: Cron
                               Run Now
                             </DropdownMenuItem>
                           )}
+
+                          <DropdownMenuItem onSelect={() => handleDuplicateProject(job.id)}>
+                            <Split className="mr-1 size-4" />
+                            Duplicate
+                          </DropdownMenuItem>
 
                           <DropdownMenuItem
                             onSelect={() => router.push(`/projects/${project.id}/job/${job.id}`)}

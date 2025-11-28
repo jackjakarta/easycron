@@ -16,6 +16,12 @@ importers:
       '@better-fetch/fetch':
         specifier: 1.1.18
         version: 1.1.18
+      '@hono/standard-validator':
+        specifier: 0.1.5
+        version: 0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.5)
+      '@hono/zod-validator':
+        specifier: 0.7.4
+        version: 0.7.4(hono@4.10.5)(zod@4.1.11)
       '@hookform/resolvers':
         specifier: 5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.2.0))
@@ -100,6 +106,9 @@ importers:
       drizzle-orm:
         specifier: 0.44.4
         version: 0.44.4(@opentelemetry/api@1.9.0)(@types/pg@8.15.5)(kysely@0.28.8)(pg@8.16.3)
+      hono:
+        specifier: 4.10.5
+        version: 4.10.5
       ioredis:
         specifier: 5.8.0
         version: 5.8.0
@@ -1609,6 +1618,24 @@ packages:
       {
         integrity: sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw==,
       }
+
+  '@hono/standard-validator@0.1.5':
+    resolution:
+      {
+        integrity: sha512-EIyZPPwkyLn6XKwFj5NBEWHXhXbgmnVh2ceIFo5GO7gKI9WmzTjPDKnppQB0KrqKeAkq3kpoW4SIbu5X1dgx3w==,
+      }
+    peerDependencies:
+      '@standard-schema/spec': 1.0.0
+      hono: '>=3.9.0'
+
+  '@hono/zod-validator@0.7.4':
+    resolution:
+      {
+        integrity: sha512-biKGn3BRJVaftZlIPMyK+HCe/UHAjJ6sH0UyXe3+v0OcgVr9xfImDROTJFLtn9e3XEEAHGZIM9U6evu85abm8Q==,
+      }
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.25.0 || ^4.0.0
 
   '@hookform/resolvers@5.2.1':
     resolution:
@@ -6919,6 +6946,13 @@ packages:
       }
     hasBin: true
 
+  hono@4.10.5:
+    resolution:
+      {
+        integrity: sha512-h/MXuTkoAK8NG1EfDp0jI1YLf6yGdDnfkebRO2pwEh5+hE3RAJFXkCsnD0vamSiARK4ZrB6MY+o3E/hCnOyHrQ==,
+      }
+    engines: { node: '>=16.9.0' }
+
   html-encoding-sniffer@4.0.0:
     resolution:
       {
@@ -11377,6 +11411,16 @@ snapshots:
 
   '@hexagon/base64@1.1.28': {}
 
+  '@hono/standard-validator@0.1.5(@standard-schema/spec@1.0.0)(hono@4.10.5)':
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      hono: 4.10.5
+
+  '@hono/zod-validator@0.7.4(hono@4.10.5)(zod@4.1.11)':
+    dependencies:
+      hono: 4.10.5
+      zod: 4.1.11
+
   '@hookform/resolvers@5.2.1(react-hook-form@7.62.0(react@19.2.0))':
     dependencies:
       '@standard-schema/utils': 0.3.0
@@ -15044,6 +15088,8 @@ snapshots:
       function-bind: 1.1.2
 
   he@1.2.0: {}
+
+  hono@4.10.5: {}
 
   html-encoding-sniffer@4.0.0:
     dependencies:

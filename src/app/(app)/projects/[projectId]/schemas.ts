@@ -46,3 +46,14 @@ export const jobFormSchema = z.object({
 });
 
 export type JobFormData = z.infer<typeof jobFormSchema>;
+
+export function getPhoneNumberSchema(errorMessage?: string) {
+  const phoneNumberSchema = z
+    .string()
+    .transform((s) => s.trim())
+    .transform((s) => s.replace(/[()\-\s\.]/g, ''))
+    .refine((s) => /^\+?[1-9]\d{1,14}$/.test(s), { error: errorMessage })
+    .transform((s) => (s.startsWith('+') ? s : `+${s}`));
+
+  return phoneNumberSchema;
+}

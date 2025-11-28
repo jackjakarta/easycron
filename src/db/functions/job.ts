@@ -125,3 +125,29 @@ export async function dbGetJobForWorker({ jobId }: { jobId: string }) {
         : undefined,
   };
 }
+
+export async function dbDuplicateJob({
+  jobId,
+  userId,
+}: {
+  jobId: string;
+  userId: string;
+}): Promise<JobModel | undefined> {
+  const currentJob = await dbGetJobById({ jobId, userId });
+
+  if (currentJob === undefined) {
+    return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, createdAt, updatedAt, ...data } = currentJob;
+
+  const duplicateJob = await dbInsertJob({
+    ...data,
+    name: `${data.name} (Copy)`,
+    userId,
+    enabled: false,
+  });
+
+  return duplicateJob;
+}

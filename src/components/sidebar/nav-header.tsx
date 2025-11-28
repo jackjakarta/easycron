@@ -1,7 +1,5 @@
 'use client';
 
-import { Link } from 'lucide-react';
-
 import { ThemeToggle } from '../common/theme-toggle';
 import { SidebarMenu, SidebarMenuItem } from '../ui/sidebar';
 import OrganizationSelect from './organization-select';
