@@ -359,12 +359,18 @@ export type SubscriptionModel = typeof subscriptionTable.$inferSelect;
 export type InsertSubscriptionModel = typeof subscriptionTable.$inferInsert;
 export type UpdateSubscriptionModel = UpdateDbRow<SubscriptionModel>;
 
+export type OrganizationMetadata = {
+  website?: string;
+  description?: string;
+  email?: string;
+};
+
 export const organizationTable = appSchema.table('organization', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   logo: text('logo'),
-  metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
+  metadata: jsonb('metadata').$type<OrganizationMetadata>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()

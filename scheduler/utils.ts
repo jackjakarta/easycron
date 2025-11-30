@@ -49,7 +49,7 @@ export async function tick() {
 
     await db
       .update(jobTable)
-      .set({ lastRunAt: j.nextRunAt, nextRunAt: next, updatedAt: new Date() })
+      .set({ lastRunAt: j.nextRunAt, nextRunAt: next })
       .where(eq(jobTable.id, j.id));
   }
 
