@@ -6,7 +6,7 @@ import { getProjectsHandler } from './projects';
 import { getRecentExecutionsHandler } from './recent-executions';
 
 export const queryRouteGroup = new Hono()
-  .get('/api-keys', async (ctx) => {
+  .get('/apiKeys', async (ctx) => {
     return getApiKeysHandler(ctx);
   })
   .get('/executions', async (ctx) => {

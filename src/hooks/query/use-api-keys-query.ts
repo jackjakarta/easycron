@@ -13,12 +13,11 @@ export function useApiKeysQuery(options?: QueryOptions<ApiKeyModel[]>) {
 }
 
 async function fetchApiKeys() {
-  const { data: apiKeys = [], error } = await betterFetch<ApiKeyModel[]>('/api/api-keys', {
+  const { data: apiKeys = [], error } = await betterFetch<ApiKeyModel[]>('/api/apiKeys', {
     cache: 'no-store',
   });
 
   if (error !== null) {
-    console.error(`Failed to fetch API keys: ${error.message}`);
     throw new Error(`Failed to fetch API keys: ${error.message}`);
   }
 
