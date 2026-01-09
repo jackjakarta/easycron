@@ -43,13 +43,19 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 3
+      replicas: 4
       placement:
+        constraints:
+          - node.labels.easycron.role == app
         preferences:
           - spread: node.hostname
-        constraints:
-          - node.hostname != easycron-swarm-redis
-          - node.role == worker
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.15'
+          memory: 192M
       update_config:
         order: start-first
         parallelism: 1
@@ -79,13 +85,19 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 2
+      replicas: 4
       placement:
+        constraints:
+          - node.labels.easycron.role == app
         preferences:
           - spread: node.hostname
-        constraints:
-          - node.hostname != easycron-swarm-redis
-          - node.role == worker
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+        reservations:
+          cpus: '0.20'
+          memory: 256M
       update_config:
         order: stop-first
         parallelism: 1
@@ -94,13 +106,6 @@ services:
         delay: 5s
       restart_policy:
         condition: on-failure
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.10'
-          memory: 128M
       labels:
         - traefik.enable=false
     healthcheck:
@@ -119,13 +124,19 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
+        constraints:
+          - node.labels.easycron.role == app
         preferences:
           - spread: node.hostname
-        constraints:
-          - node.hostname != easycron-swarm-redis
-          - node.role == worker
+      resources:
+        limits:
+          cpus: '0.35'
+          memory: 384M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
       update_config:
         order: stop-first
         parallelism: 1
@@ -134,13 +145,6 @@ services:
         monitor: 10s
       restart_policy:
         condition: on-failure
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.05'
-          memory: 64M
       labels:
         - traefik.enable=false
     healthcheck:
@@ -161,7 +165,7 @@ services:
       replicas: 1
       placement:
         constraints:
-          - node.hostname == easycron-swarm-redis
+          - node.labels.easycron.role == redis
       restart_policy:
         condition: on-failure
       labels:
