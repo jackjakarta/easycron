@@ -15,6 +15,6 @@ export const queryRouteGroup = new Hono()
   .get('/projects', async (ctx) => {
     return getProjectsHandler(ctx);
   })
-  .get('/recent-executions', async (ctx) => {
+  .get('/recentExecutions', async (ctx) => {
     return getRecentExecutionsHandler(ctx);
   });

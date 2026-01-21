@@ -1,3 +1,4 @@
+import { honoClient } from '@/app/api/client';
 import { type ProjectModel } from '@/db/schema';
 import { betterFetch } from '@better-fetch/fetch';
 import { useQuery } from '@tanstack/react-query';
@@ -12,15 +13,21 @@ export function useProjectsQuery(options?: QueryOptions<ProjectModel[]>) {
   });
 }
 
-async function fetchProjects() {
-  const { data: projects, error } = await betterFetch<ProjectModel[]>('/api/projects', {
-    cache: 'no-store',
-  });
+async function fetchProjects(): Promise<ProjectModel[]> {
+  const response = await honoClient.api.projects.$get();
 
-  if (error !== null) {
-    console.error(`Failed to fetch projects: ${error.message}`);
-    throw new Error(`Failed to fetch projects: ${error.message}`);
+  if (!response.ok) {
+    console.error(`Failed to fetch projects: ${response.statusText}`);
+    throw new Error(`Failed to fetch projects: ${response.statusText}`);
   }
 
-  return Array.isArray(projects) ? projects : [];
+  const data = await response.json();
+
+  const formated = data.map((project) => ({
+    ...project,
+    createdAt: new Date(project.createdAt),
+    updatedAt: new Date(project.updatedAt),
+  }));
+
+  return formated;
 }

@@ -19,7 +19,7 @@ export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
     jobsAmount: 2,
     executionsPerMonth: 500,
     webhookEndpointsPerProject: 1,
-    organizationsAmount: 1,
+    organizationsAmount: 0,
   },
 };
 
@@ -31,7 +31,7 @@ export const HOBBY_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   },
   limits: {
     projectsAmount: 5,
-    jobsAmount: 50,
+    jobsAmount: 20,
     executionsPerMonth: 5000,
     webhookEndpointsPerProject: 2,
     organizationsAmount: 0,

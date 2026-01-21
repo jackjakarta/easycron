@@ -9,6 +9,6 @@ export const app = new Hono().basePath('/api');
 export const routes = app
   .route('/', queryRouteGroup)
   .route('/', utilityRouteGroup)
-  .route('/v1', v1RouteGroup);
+  .route('/', v1RouteGroup);
 
 export type AppType = typeof routes;
