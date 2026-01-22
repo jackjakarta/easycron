@@ -16,7 +16,6 @@ async function fetchApiKeys(): Promise<ApiKeyModel[]> {
   const response = await honoClient.api.apiKeys.$get();
 
   if (!response.ok) {
-    console.error(`Failed to fetch API keys: ${response.statusText}`);
     throw new Error(`Failed to fetch API keys: ${response.statusText}`);
   }
 
@@ -24,12 +23,16 @@ async function fetchApiKeys(): Promise<ApiKeyModel[]> {
 
   const formated = data.map((apiKey) => ({
     ...apiKey,
+    lastRefillAt: getDateOrNull(apiKey.lastRefillAt),
+    lastRequest: getDateOrNull(apiKey.lastRequest),
+    expiresAt: getDateOrNull(apiKey.expiresAt),
     createdAt: new Date(apiKey.createdAt),
     updatedAt: new Date(apiKey.updatedAt),
-    lastRefillAt: apiKey.lastRefillAt ? new Date(apiKey.lastRefillAt) : null,
-    lastRequest: apiKey.lastRequest ? new Date(apiKey.lastRequest) : null,
-    expiresAt: apiKey.expiresAt ? new Date(apiKey.expiresAt) : null,
   }));
 
   return formated;
+}
+
+function getDateOrNull(dateString: string | null): Date | null {
+  return dateString ? new Date(dateString) : null;
 }
