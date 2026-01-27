@@ -6,14 +6,26 @@ import bcrypt from 'bcrypt';
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 const ENCRYPTION_KEY = env.secretEncryptionKey;
 
-export async function hashString(input: string, saltRounds: number = 10): Promise<string> {
+export async function hashString({
+  input,
+  saltRounds = 10,
+}: {
+  input: string;
+  saltRounds?: number;
+}): Promise<string> {
   const salt = await bcrypt.genSalt(saltRounds);
   const hashedString = await bcrypt.hash(input, salt);
 
   return hashedString;
 }
 
-export async function verifyHash(input: string, hash: string): Promise<boolean> {
+export async function verifyHash({
+  input,
+  hash,
+}: {
+  input: string;
+  hash: string;
+}): Promise<boolean> {
   const isMatch = await bcrypt.compare(input, hash);
 
   return isMatch;
