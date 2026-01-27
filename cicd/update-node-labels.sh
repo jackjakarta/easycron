@@ -5,5 +5,5 @@
 
 docker node update --label-add easycron.role=redis easycron-swarm-redis
 docker node update --label-add easycron.role=app easycron-swarm-worker-1
-docker node update --label-add easycron.role=app easycron-swarm-worker-2
+# docker node update --label-add easycron.role=app easycron-swarm-worker-2
 # docker node update --label-add easycron.role=app easycron-swarm-worker-3

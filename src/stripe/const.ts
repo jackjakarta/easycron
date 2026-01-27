@@ -15,8 +15,8 @@ export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
     ai: false,
   },
   limits: {
-    projects: 1,
-    jobsTotal: 2,
+    projects: 5,
+    jobsTotal: 10,
     executionsPerMonth: 500,
   },
 };
