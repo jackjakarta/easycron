@@ -32,7 +32,7 @@ export const HOBBY_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   limits: {
     projectsAmount: 5,
     jobsAmount: 20,
-    executionsPerMonth: 5000,
+    executionsPerMonth: 1000,
     webhookEndpointsPerProject: 2,
     organizationsAmount: 0,
   },
@@ -46,8 +46,8 @@ export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   },
   limits: {
     projectsAmount: Infinity,
-    jobsAmount: Infinity,
-    executionsPerMonth: Infinity,
+    jobsAmount: 100,
+    executionsPerMonth: 50000,
     webhookEndpointsPerProject: 10,
     organizationsAmount: 0,
   },

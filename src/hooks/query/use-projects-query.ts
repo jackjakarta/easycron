@@ -1,14 +1,13 @@
 import { honoClient } from '@/app/api/client';
 import { type ProjectModel } from '@/db/schema';
-import { betterFetch } from '@better-fetch/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
 
-export function useProjectsQuery(options?: QueryOptions<ProjectModel[]>) {
+export function useProjectsQuery(options: QueryOptions<ProjectModel[]> & { userId: string }) {
   return useQuery<ProjectModel[]>({
     ...options,
-    queryKey: ['projects'],
+    queryKey: ['projects', options.userId],
     queryFn: fetchProjects,
   });
 }

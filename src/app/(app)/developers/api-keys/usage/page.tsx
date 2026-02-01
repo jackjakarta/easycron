@@ -48,7 +48,7 @@ export default async function Page() {
         <div className="grid gap-6 md:grid-cols-2">
           <RequestTimelineChart />
           <KeyStatusDistributionChart />
-          <RequestsCountChart initialApiKeys={apiKeys} />
+          <RequestsCountChart userId={user.id} initialApiKeys={apiKeys} />
           <RateLimitChart />
         </div>
       </PageContainer>

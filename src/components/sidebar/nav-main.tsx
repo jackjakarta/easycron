@@ -23,8 +23,12 @@ import React from 'react';
 
 import ProjectActionsDropdown from './project-actions-dropdown';
 
-export default function NavMain() {
-  const { data: projects = [], isLoading, isError } = useProjectsQuery();
+type NavMainProps = {
+  userId: string;
+};
+
+export default function NavMain({ userId }: NavMainProps) {
+  const { data: projects = [], isLoading, isError } = useProjectsQuery({ userId });
   const skeletonSeeds = useSidebarSkeletons(2, 8);
   const t = useTranslations('sidebar');
 

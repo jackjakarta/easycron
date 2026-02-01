@@ -47,8 +47,9 @@ jobs:
 
       - name: Build and push docker image
         run: |
-          docker build -t ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} . && \
-          docker push ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
+          docker build -t ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} -t ${{ env.DOCKER_USERNAME }}/easycron:latest . && \
+          docker push ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} && \
+          docker push ${{ env.DOCKER_USERNAME }}/easycron:latest
 
   deploy:
     runs-on: ubuntu-latest

@@ -15,7 +15,7 @@
     "dev": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- next dev --turbopack",
     "dev:email": "email dev --dir src/email/emails --port 3001",
     "dev:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx scheduler/index.ts",
-    "dev:services": "chmod +x $(git rev-parse --show-toplevel)/scripts/start-dev.sh && $(git rev-parse --show-toplevel)/scripts/start-dev.sh",
+    "dev:services": "chmod +x $(git rev-parse --show-toplevel)/scripts/start-services-dev.sh && $(git rev-parse --show-toplevel)/scripts/start-services-dev.sh",
     "dev:worker": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx worker/index.ts",
     "fetch:env": "ENVIRONMENT=development op inject -i .env.op -o .env",
     "format": "prettier --write .",

@@ -1,14 +1,16 @@
 import { honoClient } from '@/app/api/client';
+import { authClient } from '@/auth/client';
 import { type ApiKeyModel } from '@/db/schema';
 import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
 
-export function useApiKeysQuery(options?: QueryOptions<ApiKeyModel[]>) {
+export function useApiKeysQuery(options?: QueryOptions<ApiKeyModel[]> & { userId?: string }) {
   return useQuery<ApiKeyModel[]>({
     ...options,
-    queryKey: ['api-keys'],
+    queryKey: ['api-keys', options?.userId],
     queryFn: fetchApiKeys,
+    enabled: options?.userId !== undefined && (options?.enabled ?? true),
   });
 }
 
@@ -23,9 +25,9 @@ async function fetchApiKeys(): Promise<ApiKeyModel[]> {
 
   const formated = data.map((apiKey) => ({
     ...apiKey,
-    lastRefillAt: getDateOrNull(apiKey.lastRefillAt),
-    lastRequest: getDateOrNull(apiKey.lastRequest),
-    expiresAt: getDateOrNull(apiKey.expiresAt),
+    lastRefillAt: dateOrNull(apiKey.lastRefillAt),
+    lastRequest: dateOrNull(apiKey.lastRequest),
+    expiresAt: dateOrNull(apiKey.expiresAt),
     createdAt: new Date(apiKey.createdAt),
     updatedAt: new Date(apiKey.updatedAt),
   }));
@@ -33,6 +35,6 @@ async function fetchApiKeys(): Promise<ApiKeyModel[]> {
   return formated;
 }
 
-function getDateOrNull(dateString: string | null): Date | null {
-  return dateString ? new Date(dateString) : null;
+function dateOrNull(dateString: string | null): Date | null {
+  return dateString !== null ? new Date(dateString) : null;
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { authClient } from '@/auth/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,11 +35,16 @@ import CreateKeyDialog from './create-key-dialog';
 
 export default function ApiKeysTable() {
   const queryClient = useQueryClient();
+  const session = authClient.useSession();
 
   const [selectedKeys, setSelectedKeys] = React.useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = React.useState('');
 
-  const { data: apiKeys = [], isLoading, isError } = useApiKeysQuery();
+  const {
+    data: apiKeys = [],
+    isLoading,
+    isError,
+  } = useApiKeysQuery({ userId: session.data?.user.id });
 
   const filteredKeys = apiKeys.filter(
     (key) =>
@@ -49,7 +55,7 @@ export default function ApiKeysTable() {
   async function handleEnableOrDisableKey(keyId: string, enabled: boolean) {
     try {
       await updateApiKeyEnabledAction({ apiKeyId: keyId, enabled });
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['api-keys', session.data?.user.id] });
       toast.success(`API key ${enabled ? 'enabled' : 'disabled'} successfully`);
     } catch (error) {
       console.error('Failed to update API key status:', error);

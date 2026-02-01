@@ -7,8 +7,12 @@ import { User } from 'lucide-react';
 
 import ProjectCard from './project-card';
 
-export default function ProjectsDisplay() {
-  const { data: projects = [], isLoading, isError } = useProjectsQuery();
+type ProjectsDisplayProps = {
+  userId: string;
+};
+
+export default function ProjectsDisplay({ userId }: ProjectsDisplayProps) {
+  const { data: projects = [], isLoading, isError } = useProjectsQuery({ userId });
 
   if (isLoading) {
     return (

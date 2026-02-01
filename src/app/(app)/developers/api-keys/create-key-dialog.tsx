@@ -1,5 +1,6 @@
 'use client';
 
+import { authClient } from '@/auth/client';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -36,6 +37,7 @@ type CreateKeyDialogProps = {
 
 export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
   const queryClient = useQueryClient();
+  const session = authClient.useSession();
 
   const [isOpen, setIsOpen] = React.useState(false);
   const [showKey, setShowKey] = React.useState(false);
@@ -63,7 +65,7 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
       const { key } = await createApiKeyAction({ name });
       setRawKey(key);
 
-      queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+      queryClient.invalidateQueries({ queryKey: ['api-keys', session.data?.user.id] });
       toast.success('API key created successfully!');
     } catch (error) {
       console.error('Error creating API key:', error);
