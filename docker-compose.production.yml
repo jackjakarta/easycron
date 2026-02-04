@@ -34,12 +34,9 @@ services:
         condition: on-failure
 
   web:
-    image: jackjakarta/easycron:${TAG_VERSION}
+    image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
+    command: ['node', 'server.js']
     networks: [edge]
-    depends_on:
-      - redis
-      - worker
-      - scheduler
     env_file:
       - .env
     deploy:
@@ -77,11 +74,9 @@ services:
         - traefik.http.services.easycron.loadbalancer.server.port=3000
 
   worker:
-    image: jackjakarta/easycron:${TAG_VERSION}
+    image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
     command: ['node', 'dist/worker/index.js']
     networks: [edge]
-    depends_on:
-      - redis
     env_file:
       - .env
     deploy:
@@ -115,12 +110,9 @@ services:
       retries: 3
 
   scheduler:
-    image: jackjakarta/easycron:${TAG_VERSION}
+    image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
     command: ['node', 'dist/scheduler/index.js']
     networks: [edge]
-    depends_on:
-      - redis
-      - worker
     env_file:
       - .env
     deploy:
