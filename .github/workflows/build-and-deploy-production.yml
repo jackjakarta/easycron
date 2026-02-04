@@ -47,8 +47,9 @@ jobs:
 
       - name: Build and push docker image
         run: |
-          docker build -t ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} . && \
-          docker push ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
+          docker build -t ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} -t ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:latest . && \
+          docker push ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }} && \
+          docker push ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -90,7 +91,7 @@ jobs:
             ENVIRONMENT=production op inject -f -i .env.op -o .env
             echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
 
-            docker pull ${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
+            docker pull ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
 
             export $(grep -v '^#' .env | xargs) && \
             envsubst < docker-compose.production.yml | docker stack deploy --with-registry-auth -c - easycron && \
