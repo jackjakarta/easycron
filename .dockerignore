@@ -3,11 +3,15 @@ dist
 build
 tsconfig.tsbuildinfo
 next-env.d.ts
-.next
+.claude
+.gemini
 .github
-.git
+.next
 .vscode
+.git
 .env.op
+.env
 .DS_Store
 docker-compose.yml
 .env
+Dockerfile
