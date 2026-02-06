@@ -206,6 +206,7 @@ export const jobTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    organizationId: uuid('organization_id').references(() => organizationTable.id),
     metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })

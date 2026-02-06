@@ -1,0 +1,3 @@
+ALTER TABLE "app"."job" ADD COLUMN "organization_id" uuid;--> statement-breakpoint
+ALTER TABLE "app"."job" ADD CONSTRAINT "job_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "app"."organization"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "app"."account" ADD CONSTRAINT "account_provider_user_unique_idx" UNIQUE("provider_id","user_id");

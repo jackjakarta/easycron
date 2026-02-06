@@ -74,6 +74,7 @@
     "node-mailjet": "6.0.9",
     "nodemailer": "7.0.6",
     "pg": "8.16.3",
+    "radix-ui": "1.4.3",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "react-hook-form": "7.62.0",

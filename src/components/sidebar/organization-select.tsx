@@ -36,8 +36,8 @@ export default function OrganizationSelect() {
       }}
     >
       <SidebarMenuButton asChild size="lg" className="h-auto w-full justify-between">
-        <SelectTrigger className="border-none bg-red-500">
-          <div className="leading-tightb grid flex-1 text-left text-sm">
+        <SelectTrigger className="cursor-pointer border-none shadow-none">
+          <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">easyCron</span>
             <span className="text-muted-foreground truncate text-xs">
               {activeOrg?.name || 'Personal Account'}
@@ -47,11 +47,11 @@ export default function OrganizationSelect() {
       </SidebarMenuButton>
 
       <SelectContent>
-        <SelectItem value="personal">
+        <SelectItem value="personal" className="cursor-pointer">
           <span className="text-xs">Personal Account</span>
         </SelectItem>
         {organizations?.map((org) => (
-          <SelectItem key={org.id} value={org.id}>
+          <SelectItem key={org.id} value={org.id} className="cursor-pointer">
             <span className="text-xs">{org.name}</span>
           </SelectItem>
         ))}

@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { headers } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirect, RedirectType } from 'next/navigation';
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const member = await auth.api.getActiveMember({
@@ -8,8 +8,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   });
 
   if (member === null) {
-    console.error('No active member found in protected organization layout');
-    redirect('/dashboard');
+    redirect('/dashboard', RedirectType.replace);
   }
 
   return <>{children}</>;

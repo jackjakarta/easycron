@@ -1,8 +1,13 @@
 import { auth } from '@/auth';
+import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
+import Header from '@/components/common/header';
+import PageContainer from '@/components/layout/page-container';
 import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
+
+import OrganizationOverview from './_components/org-overview';
 
 const pageContextSchema = z.object({
   params: z.object({
@@ -29,20 +34,16 @@ export default async function Page(context: PageContext) {
   }
 
   return (
-    <div>
-      <h1>Organization Page</h1>
-      <div>
-        <h2>{organization.name}</h2>
-        <p>Slug: {organization.slug}</p>
-        <h3>Members:</h3>
-        <ul>
-          {organization.members.map((member) => (
-            <li key={member.id}>
-              {member.user.email} - Role: {member.role}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    <>
+      <Header>
+        <CustomBreadcrumbs
+          current={organization.name}
+          trail={[{ name: 'Organizations', href: '/org' }]}
+        />
+      </Header>
+      <PageContainer>
+        <OrganizationOverview org={organization} />
+      </PageContainer>
+    </>
   );
 }

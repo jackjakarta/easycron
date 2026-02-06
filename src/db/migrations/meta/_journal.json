@@ -36,6 +36,13 @@
       "when": 1762018661699,
       "tag": "0004_amazing_sinister_six",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1770331626294,
+      "tag": "0005_grey_white_tiger",
+      "breakpoints": true
     }
   ]
 }
