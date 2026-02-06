@@ -47,6 +47,6 @@ async function checkOrganizationSlugAvailability(slug: string): Promise<boolean>
 
     return status;
   } catch (error) {
-    return false;
+    throw error;
   }
 }
