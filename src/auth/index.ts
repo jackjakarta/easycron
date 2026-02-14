@@ -16,7 +16,7 @@ import { env } from '@/env';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
-import { apiKey, haveIBeenPwned, twoFactor } from 'better-auth/plugins';
+import { apiKey, haveIBeenPwned, magicLink, twoFactor } from 'better-auth/plugins';
 
 import { getOrganizationPlugin } from './plugins/organization';
 import { getStripePlugin } from './plugins/stripe';
@@ -75,6 +75,17 @@ export const auth = betterAuth({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',
     }),
     apiKey({ apiKeyHeaders: 'x-api-key' }),
+    magicLink({
+      sendMagicLink: async ({ email, url }) => {
+        console.debug({ email, url });
+
+        // await sendUserActionEmail({
+        //   to: email,
+        //   actionUrl: url,
+        //   action: 'magic-link',
+        // });
+      },
+    }),
     twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
@@ -96,6 +107,12 @@ export const auth = betterAuth({
   user: {
     modelName: 'user_entity',
   },
+  account: {
+    accountLinking: {
+      trustedProviders: ['google', 'github'],
+    },
+  },
+  trustedOrigins: ['http://localhost:3000', 'https://jakarta.ngrok.app'],
   advanced: {
     database: {
       generateId: false,
