@@ -3,6 +3,7 @@ services:
     image: traefik:v2.9
     command:
       - --api.insecure=false
+      - --api.dashboard=true
       - --providers.docker.swarmMode=true
       - --providers.docker.exposedbydefault=false
       - --providers.docker.endpoint=unix:///var/run/docker.sock
@@ -32,6 +33,15 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.dashboard.rule=Host(`traefik.easycron.dev`)
+        - traefik.http.routers.dashboard.entrypoints=websecure
+        - traefik.http.routers.dashboard.tls.certresolver=myresolver
+        - traefik.http.routers.dashboard.service=api@internal
+        - traefik.http.routers.dashboard.middlewares=auth
+        - traefik.http.middlewares.auth.basicauth.users=jack:$apr1$0Mo1yhib$GyuaS99Jg4hpXwzC9fe031
+        - traefik.http.services.dashboard.loadbalancer.server.port=8080
 
   web:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
