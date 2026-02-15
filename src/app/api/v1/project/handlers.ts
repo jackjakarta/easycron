@@ -2,10 +2,11 @@ import { verifyApiKey } from '@/app/api/utils';
 import {
   dbDeleteProject,
   dbGetProjectById,
-  dbGetProjectCountByUserId,
+  dbGetProjectCountByOrganizationId,
   dbInsertProject,
   dbUpdateProject,
 } from '@/db/functions/project';
+import { dbGetUserOwnedOrganizationId } from '@/db/functions/organization';
 import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { toErrorMessage } from '@/utils/error';
 import { Context } from 'hono';
@@ -31,6 +32,15 @@ export async function getProjectHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
+    const organizationId = await dbGetUserOwnedOrganizationId({ userId: user.id });
+
+    if (organizationId === undefined) {
+      return ctx.json(
+        { success: false, errors: [{ message: 'No organization found' }] },
+        { status: 404 },
+      );
+    }
+
     const { searchParams } = new URL(ctx.req.url);
     const _projectId = searchParams.get('projectId');
     const parsedProjectId = z.uuid().safeParse(_projectId);
@@ -39,7 +49,7 @@ export async function getProjectHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: parsedProjectId.error.issues }, { status: 400 });
     }
 
-    const project = await dbGetProjectById({ projectId: parsedProjectId.data, userId: user.id });
+    const project = await dbGetProjectById({ projectId: parsedProjectId.data, organizationId });
 
     if (project === undefined) {
       return ctx.json(
@@ -79,9 +89,18 @@ export async function insertProjectHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
+    const organizationId = await dbGetUserOwnedOrganizationId({ userId: user.id });
+
+    if (organizationId === undefined) {
+      return ctx.json(
+        { success: false, errors: [{ message: 'No organization found' }] },
+        { status: 404 },
+      );
+    }
+
     const [subscription, projectCount] = await Promise.all([
       getUserActiveSubscriptionApi({ userId: user.id }),
-      dbGetProjectCountByUserId({ userId: user.id }),
+      dbGetProjectCountByOrganizationId({ organizationId }),
     ]);
 
     if (projectCount >= subscription.limits.projectsAmount) {
@@ -109,7 +128,7 @@ export async function insertProjectHandler(ctx: Context<{}>) {
     const { name: _name, description } = body.data;
     const name = _name.trim();
 
-    const newProject = await dbInsertProject({ name, description, userId: user.id });
+    const newProject = await dbInsertProject({ name, description, userId: user.id, organizationId });
 
     if (newProject === undefined) {
       return ctx.json(
@@ -149,6 +168,15 @@ export async function updateProjectHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
+    const organizationId = await dbGetUserOwnedOrganizationId({ userId: user.id });
+
+    if (organizationId === undefined) {
+      return ctx.json(
+        { success: false, errors: [{ message: 'No organization found' }] },
+        { status: 404 },
+      );
+    }
+
     const json = await ctx.req.json();
     const body = putRequestSchema.safeParse(json);
 
@@ -161,7 +189,7 @@ export async function updateProjectHandler(ctx: Context<{}>) {
 
     const updated = await dbUpdateProject({
       projectId,
-      userId: user.id,
+      organizationId,
       data: { name, description },
     });
 
@@ -203,6 +231,15 @@ export async function deleteProjectHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
+    const organizationId = await dbGetUserOwnedOrganizationId({ userId: user.id });
+
+    if (organizationId === undefined) {
+      return ctx.json(
+        { success: false, errors: [{ message: 'No organization found' }] },
+        { status: 404 },
+      );
+    }
+
     const { searchParams: _searchParams } = new URL(ctx.req.url);
     const _projectId = _searchParams.get('projectId');
     const parsedProjectId = z.uuid().safeParse(_projectId);
@@ -212,7 +249,7 @@ export async function deleteProjectHandler(ctx: Context<{}>) {
     }
 
     const projectId = parsedProjectId.data;
-    const deleted = await dbDeleteProject({ projectId, userId: user.id });
+    const deleted = await dbDeleteProject({ projectId, organizationId });
 
     if (deleted === undefined) {
       return ctx.json(

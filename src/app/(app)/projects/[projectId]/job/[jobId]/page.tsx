@@ -32,7 +32,7 @@ export default async function Page(context: PageContext) {
   }
 
   const { jobId, projectId } = parsed.data.params;
-  const job = await dbGetJobById({ jobId, userId: user.id });
+  const job = await dbGetJobById({ jobId, organizationId: user.organizationId });
 
   if (job === undefined) {
     return notFound();

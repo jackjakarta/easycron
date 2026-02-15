@@ -1,5 +1,6 @@
 import { verifyApiKey } from '@/app/api/utils';
-import { dbGetJobCountByUserId, dbInsertJob } from '@/db/functions/job';
+import { dbGetJobCountByOrganizationId, dbInsertJob } from '@/db/functions/job';
+import { dbGetUserOwnedOrganizationId } from '@/db/functions/organization';
 import { dbGetProjectById } from '@/db/functions/project';
 import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { Context } from 'hono';
@@ -24,9 +25,18 @@ export async function insertJobHandler(ctx: Context<{}>) {
       return ctx.json({ success: false, errors: [{ message: 'User not found' }] }, { status: 404 });
     }
 
+    const organizationId = await dbGetUserOwnedOrganizationId({ userId: user.id });
+
+    if (organizationId === undefined) {
+      return ctx.json(
+        { success: false, errors: [{ message: 'No organization found' }] },
+        { status: 404 },
+      );
+    }
+
     const [subscription, jobCount] = await Promise.all([
       getUserActiveSubscriptionApi({ userId: user.id }),
-      dbGetJobCountByUserId({ userId: user.id }),
+      dbGetJobCountByOrganizationId({ organizationId }),
     ]);
 
     if (jobCount >= subscription.limits.jobsAmount) {
@@ -53,7 +63,7 @@ export async function insertJobHandler(ctx: Context<{}>) {
     }
 
     const { projectId } = body.data;
-    const project = await dbGetProjectById({ projectId, userId: user.id });
+    const project = await dbGetProjectById({ projectId, organizationId });
 
     if (project === undefined) {
       return ctx.json(
@@ -65,6 +75,7 @@ export async function insertJobHandler(ctx: Context<{}>) {
     const job = await dbInsertJob({
       ...body.data,
       userId: user.id,
+      organizationId,
       projectId: project.id,
       nextRunAt: new Date(),
     });

@@ -25,13 +25,16 @@ export default async function Page(context: PageContext) {
   }
 
   const { projectId } = parsed.data.params;
-  const project = await dbGetProjectById({ projectId, userId: user.id });
+  const project = await dbGetProjectById({ projectId, organizationId: user.organizationId });
 
   if (project === undefined) {
     return notFound();
   }
 
-  const secret = await dbGetSecretByProjectId({ projectId: project.id, userId: user.id });
+  const secret = await dbGetSecretByProjectId({
+    projectId: project.id,
+    organizationId: user.organizationId,
+  });
 
   return (
     <>

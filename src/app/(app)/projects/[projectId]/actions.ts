@@ -4,7 +4,7 @@ import { getUser } from '@/auth/utils';
 import {
   dbDeleteJob,
   dbGetJobById,
-  dbGetJobCountByUserId,
+  dbGetJobCountByOrganizationId,
   dbInsertJob,
   dbUpdateJob,
 } from '@/db/functions/job';
@@ -20,7 +20,7 @@ import { type JobFormData } from './schemas';
 
 export async function runJobNowAction({ jobId }: { jobId: string }) {
   const user = await getUser();
-  const job = await dbGetJobById({ jobId, userId: user.id });
+  const job = await dbGetJobById({ jobId, organizationId: user.organizationId });
 
   if (job === undefined) {
     throw new Error('Job not found');
@@ -48,10 +48,10 @@ export async function createJobAction({
   projectId: string;
 }) {
   const user = await getUser();
-  const { subscription } = user;
+  const { subscription, organizationId } = user;
 
   if (subscription.type === 'free' || subscription.type === 'hobby') {
-    const jobsCount = await dbGetJobCountByUserId({ userId: user.id });
+    const jobsCount = await dbGetJobCountByOrganizationId({ organizationId });
 
     if (jobsCount >= subscription.limits.jobsAmount) {
       return { success: false, error: 'Job limit reached for free plan', code: 402 };
@@ -62,6 +62,7 @@ export async function createJobAction({
     ...data,
     projectId,
     userId: user.id,
+    organizationId,
     nextRunAt: new Date(),
   });
 
@@ -80,7 +81,11 @@ export async function enableOrDisableJobAction({
   enabled: boolean;
 }) {
   const user = await getUser();
-  const updatedJob = await dbUpdateJob({ jobId, userId: user.id, data: { enabled } });
+  const updatedJob = await dbUpdateJob({
+    jobId,
+    organizationId: user.organizationId,
+    data: { enabled },
+  });
 
   if (updatedJob === undefined) {
     throw new Error('Failed to update job');
@@ -91,7 +96,7 @@ export async function enableOrDisableJobAction({
 
 export async function deleteJobAction({ jobId }: { jobId: string }) {
   const user = await getUser();
-  const deletedJob = await dbDeleteJob({ jobId, userId: user.id });
+  const deletedJob = await dbDeleteJob({ jobId, organizationId: user.organizationId });
 
   if (deletedJob === undefined) {
     throw new Error('Failed to delete job');
@@ -102,7 +107,7 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
 
 export async function updateJobAction({ jobId, data }: { jobId: string; data: JobFormData }) {
   const user = await getUser();
-  const updatedJob = await dbUpdateJob({ jobId, userId: user.id, data });
+  const updatedJob = await dbUpdateJob({ jobId, organizationId: user.organizationId, data });
 
   if (updatedJob === undefined) {
     throw new Error('Failed to update job');
@@ -113,7 +118,8 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
 
 export async function createOrUpdateProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
-  const project = await dbGetProjectById({ projectId, userId: user.id });
+  const { organizationId } = user;
+  const project = await dbGetProjectById({ projectId, organizationId });
 
   if (project === undefined) {
     throw new Error('Unauthorized');
@@ -127,6 +133,7 @@ export async function createOrUpdateProjectSecretAction({ projectId }: { project
     value: encryptedSecret,
     projectId: project.id,
     userId: user.id,
+    organizationId,
   });
 
   if (newSecret === undefined) {
@@ -145,7 +152,10 @@ export async function generateCronExpressionAction({ prompt }: { prompt: string 
 
 export async function deleteProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
-  const deletedSecret = await dbDeleteSecret({ projectId, userId: user.id });
+  const deletedSecret = await dbDeleteSecret({
+    projectId,
+    organizationId: user.organizationId,
+  });
 
   if (deletedSecret === undefined) {
     throw new Error('Failed to delete secret');
@@ -156,7 +166,10 @@ export async function deleteProjectSecretAction({ projectId }: { projectId: stri
 
 export async function deleteProjectAction({ projectId }: { projectId: string }) {
   const user = await getUser();
-  const deletedProject = await dbDeleteProject({ projectId, userId: user.id });
+  const deletedProject = await dbDeleteProject({
+    projectId,
+    organizationId: user.organizationId,
+  });
 
   if (deletedProject === undefined) {
     throw new Error('Failed to delete project');

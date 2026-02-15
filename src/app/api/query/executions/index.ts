@@ -18,7 +18,7 @@ export async function getExecutionsHandler(ctx: Context<{}>) {
     }
 
     const jobId = parsedJobId.data;
-    const job = await dbGetJobById({ jobId, userId: user.id });
+    const job = await dbGetJobById({ jobId, organizationId: user.organizationId });
 
     if (job === undefined) {
       console.error({ error: 'Job not found' });

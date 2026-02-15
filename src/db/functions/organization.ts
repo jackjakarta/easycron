@@ -18,6 +18,32 @@ export async function dbGetOrganizationMember({
   return member;
 }
 
+export async function dbGetUserOwnedOrganizationId({
+  userId,
+}: {
+  userId: string;
+}): Promise<string | undefined> {
+  const [result] = await db
+    .select({ organizationId: memberTable.organizationId })
+    .from(memberTable)
+    .where(and(eq(memberTable.userId, userId), eq(memberTable.role, 'owner')));
+
+  return result?.organizationId;
+}
+
+export async function dbGetOrganizationOwnerId({
+  organizationId,
+}: {
+  organizationId: string;
+}): Promise<string | undefined> {
+  const [result] = await db
+    .select({ userId: memberTable.userId })
+    .from(memberTable)
+    .where(and(eq(memberTable.organizationId, organizationId), eq(memberTable.role, 'owner')));
+
+  return result?.userId;
+}
+
 export async function dbGetUserOwnedOrganizationsCount({
   userId,
 }: {

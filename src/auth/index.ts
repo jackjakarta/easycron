@@ -13,10 +13,12 @@ import {
 } from '@/db/schema';
 import { sendUserActionEmail } from '@/email/send';
 import { env } from '@/env';
+import { slugifyName } from '@/utils/format';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { apiKey, haveIBeenPwned, magicLink, twoFactor } from 'better-auth/plugins';
+import { eq } from 'drizzle-orm';
 
 import { getOrganizationPlugin } from './plugins/organization';
 import { getStripePlugin } from './plugins/stripe';
@@ -104,6 +106,54 @@ export const auth = betterAuth({
       invitation: invitationTable,
     },
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            const orgName = `${user.name}'s Organization`;
+            const slug = slugifyName({ name: orgName, withNanoId: true });
+
+            const [org] = await db
+              .insert(organizationTable)
+              .values({ name: orgName, slug })
+              .returning({ id: organizationTable.id });
+
+            if (!org) {
+              throw new Error('Failed to insert organization');
+            }
+
+            await db.insert(memberTable).values({
+              userId: user.id,
+              organizationId: org.id,
+              role: 'owner',
+            });
+          } catch (error) {
+            console.error('Failed to create default organization for user:', user.id, error);
+          }
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          if (session.activeOrganizationId) {
+            return;
+          }
+
+          const [membership] = await db
+            .select({ organizationId: memberTable.organizationId })
+            .from(memberTable)
+            .where(eq(memberTable.userId, session.userId))
+            .limit(1);
+
+          if (membership) {
+            return { data: { ...session, activeOrganizationId: membership.organizationId } };
+          }
+        },
+      },
+    },
+  },
   user: {
     modelName: 'user_entity',
   },

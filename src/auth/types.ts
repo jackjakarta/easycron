@@ -15,4 +15,5 @@ export type UserAnd<T> = UserModel & T;
 export type BetterAuthSession = Awaited<ReturnType<typeof getValidSession>>;
 
 type Subscription = { subscription: SubscriptionFeaturesAndLimits };
-export type UserAndContext = UserAnd<Subscription>;
+type OrganizationContext = { organizationId: string };
+export type UserAndContext = UserAnd<Subscription & OrganizationContext>;

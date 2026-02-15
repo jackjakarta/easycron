@@ -14,7 +14,7 @@ export default async function Page() {
         <CustomBreadcrumbs current="Projects" />
       </Header>
       <PageContainer wide>
-        <ProjectsDisplay userId={user.id} />
+        <ProjectsDisplay organizationId={user.organizationId} />
       </PageContainer>
     </>
   );

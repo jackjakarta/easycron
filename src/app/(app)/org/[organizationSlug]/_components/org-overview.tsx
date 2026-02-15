@@ -6,21 +6,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Mail, Shield, Users } from 'lucide-react';
 
 import { type BetterAuthOrganization } from '../types';
+import InviteMemberDialog from './invite-member-dialog';
 import OrgHeader from './org-header';
 import OrgInvitationsTable from './org-invitations-table';
 import OrgMembersTable from './org-members-table';
 
 export default function OrganizationOverview({
   org,
+  currentUserId,
 }: {
   org: NonNullable<BetterAuthOrganization>;
+  currentUserId: string;
 }) {
   const pendingInvitations = org.invitations.filter((i) => i.status === 'pending');
   const adminAndOwners = org.members.filter((m) => m.role === 'admin' || m.role === 'owner');
 
+  const currentMember = org.members.find((m) => m.userId === currentUserId);
+  const currentUserRole = currentMember?.role ?? 'member';
+  const canManageMembers = currentUserRole === 'owner' || currentUserRole === 'admin';
+
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 p-6 sm:p-8">
-      <OrgHeader org={org} />
+      <div className="flex items-start justify-between gap-4">
+        <OrgHeader org={org} />
+        {canManageMembers && <InviteMemberDialog organizationId={org.id} />}
+      </div>
 
       <Separator />
 
@@ -46,7 +56,11 @@ export default function OrganizationOverview({
               <CardTitle className="text-base">Organization Members</CardTitle>
             </CardHeader>
             <CardContent>
-              <OrgMembersTable members={org.members} />
+              <OrgMembersTable
+                members={org.members}
+                currentUserId={currentUserId}
+                currentUserRole={currentUserRole}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -57,7 +71,11 @@ export default function OrganizationOverview({
               <CardTitle className="text-base">Invitations</CardTitle>
             </CardHeader>
             <CardContent>
-              <OrgInvitationsTable invitations={org.invitations} />
+              <OrgInvitationsTable
+                invitations={org.invitations}
+                canManageMembers={canManageMembers}
+                organizationId={org.id}
+              />
             </CardContent>
           </Card>
         </TabsContent>

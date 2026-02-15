@@ -4,10 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
 
-export function useProjectsQuery(options: QueryOptions<ProjectModel[]> & { userId: string }) {
+export function useProjectsQuery(
+  options: QueryOptions<ProjectModel[]> & { organizationId: string },
+) {
   return useQuery<ProjectModel[]>({
     ...options,
-    queryKey: ['projects', options.userId],
+    queryKey: ['projects', options.organizationId],
     queryFn: fetchProjects,
   });
 }

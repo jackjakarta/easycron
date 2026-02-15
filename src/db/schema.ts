@@ -157,6 +157,9 @@ export const projectTable = appSchema.table('project', {
   userId: uuid('user_id')
     .notNull()
     .references(() => userTable.id),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   name: text('name').notNull(),
   description: text('description'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -206,7 +209,9 @@ export const jobTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
-    organizationId: uuid('organization_id').references(() => organizationTable.id),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizationTable.id),
     metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -215,12 +220,12 @@ export const jobTable = appSchema.table(
       .$onUpdate(() => new Date()),
   },
   (table) => [
-    index('jobs_project_id_user_id_next_run_at_idx').on(
+    index('jobs_project_id_org_id_next_run_at_idx').on(
       table.nextRunAt,
       table.projectId,
-      table.userId,
+      table.organizationId,
     ),
-    index('jobs_project_id_user_id_idx').on(table.projectId, table.userId),
+    index('jobs_project_id_org_id_idx').on(table.projectId, table.organizationId),
   ],
 );
 
@@ -274,6 +279,9 @@ export const secretTable = appSchema.table('secret', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -298,6 +306,9 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -324,6 +335,9 @@ export const webhookEventTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizationTable.id),
     deliveredAt: timestamp('delivered_at', { withTimezone: true }),
     success: boolean('success').notNull().default(false),
     errorMessage: text('error_message'),

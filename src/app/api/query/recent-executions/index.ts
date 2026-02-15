@@ -6,7 +6,7 @@ export async function getRecentExecutionsHandler(ctx: Context<{}>) {
   const user = await getUser();
 
   try {
-    const recentExecutions = await dbGetRecentExecutions({ userId: user.id });
+    const recentExecutions = await dbGetRecentExecutions({ organizationId: user.organizationId });
     return ctx.json(recentExecutions, { status: 200 });
   } catch (error) {
     console.error('Error fetching job executions:', error);

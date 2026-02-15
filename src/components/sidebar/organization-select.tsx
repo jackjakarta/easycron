@@ -8,9 +8,9 @@ import { SidebarMenuButton, useSidebar } from '../ui/sidebar';
 export default function OrganizationSelect() {
   const { open: isSidebarOpen } = useSidebar();
   const { data: activeOrg } = authClient.useActiveOrganization();
-  const { data: organizations = [] } = authClient.useListOrganizations();
+  const { data: organizations } = authClient.useListOrganizations();
 
-  async function handleOrgClick(organizationId: string | null) {
+  async function handleOrgChange(organizationId: string) {
     const { data, error } = await authClient.organization.setActive({
       organizationId,
     });
@@ -27,30 +27,25 @@ export default function OrganizationSelect() {
     return null;
   }
 
+  if (!organizations || organizations.length === 0) {
+    return null;
+  }
+
+  const currentOrg = activeOrg ?? organizations[0]!;
+
   return (
-    <Select
-      value={activeOrg?.id || 'personal'}
-      onValueChange={(value) => {
-        const organizationId = value === 'personal' ? null : value;
-        handleOrgClick(organizationId);
-      }}
-    >
+    <Select value={currentOrg.id} onValueChange={handleOrgChange}>
       <SidebarMenuButton asChild size="lg" className="h-auto w-full justify-between">
         <SelectTrigger className="cursor-pointer border-none shadow-none">
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">easyCron</span>
-            <span className="text-muted-foreground truncate text-xs">
-              {activeOrg?.name || 'Personal Account'}
-            </span>
+            <span className="text-muted-foreground truncate text-xs">{currentOrg.name}</span>
           </div>
         </SelectTrigger>
       </SidebarMenuButton>
 
       <SelectContent>
-        <SelectItem value="personal" className="cursor-pointer">
-          <span className="text-xs">Personal Account</span>
-        </SelectItem>
-        {organizations?.map((org) => (
+        {organizations.map((org) => (
           <SelectItem key={org.id} value={org.id} className="cursor-pointer">
             <span className="text-xs">{org.name}</span>
           </SelectItem>

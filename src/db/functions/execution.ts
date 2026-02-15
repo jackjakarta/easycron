@@ -45,9 +45,9 @@ export type ExecutionWithDetails = Pick<
 };
 
 export async function dbGetRecentExecutions({
-  userId,
+  organizationId,
 }: {
-  userId: string;
+  organizationId: string;
 }): Promise<ExecutionWithDetails[]> {
   const recentExecutions = await db
     .select({
@@ -64,14 +64,18 @@ export async function dbGetRecentExecutions({
     .from(executionTable)
     .innerJoin(jobTable, eq(executionTable.jobId, jobTable.id))
     .innerJoin(projectTable, eq(jobTable.projectId, projectTable.id))
-    .where(eq(jobTable.userId, userId))
+    .where(eq(jobTable.organizationId, organizationId))
     .orderBy(desc(executionTable.finishedAt))
     .limit(5);
 
   return recentExecutions;
 }
 
-export async function dbGetJobsExecutionsSuccessRate({ userId }: { userId: string }) {
+export async function dbGetJobsExecutionsSuccessRate({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const [result] = await db
     .select({
       successRate: sql<number>`
@@ -82,7 +86,7 @@ export async function dbGetJobsExecutionsSuccessRate({ userId }: { userId: strin
     })
     .from(executionTable)
     .innerJoin(jobTable, eq(executionTable.jobId, jobTable.id))
-    .where(eq(jobTable.userId, userId));
+    .where(eq(jobTable.organizationId, organizationId));
 
   return {
     successRate: result?.successRate ?? 0,

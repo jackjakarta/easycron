@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { getValidSession } from '@/auth/utils';
 import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
 import Header from '@/components/common/header';
 import PageContainer from '@/components/layout/page-container';
@@ -24,10 +25,13 @@ export default async function Page(context: PageContext) {
 
   const { organizationSlug } = pageContext.data.params;
 
-  const organization = await auth.api.getFullOrganization({
-    query: { organizationSlug },
-    headers: await headers(),
-  });
+  const [session, organization] = await Promise.all([
+    getValidSession(),
+    auth.api.getFullOrganization({
+      query: { organizationSlug },
+      headers: await headers(),
+    }),
+  ]);
 
   if (organization === null) {
     return notFound();
@@ -42,7 +46,7 @@ export default async function Page(context: PageContext) {
         />
       </Header>
       <PageContainer>
-        <OrganizationOverview org={organization} />
+        <OrganizationOverview org={organization} currentUserId={session.user.id} />
       </PageContainer>
     </>
   );

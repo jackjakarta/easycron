@@ -28,10 +28,13 @@ export function getOrganizationPlugin() {
     },
     async sendInvitationEmail(data) {
       const { organization, invitation } = data;
-      const searchParams = new URLSearchParams({ inviteId: invitation.id });
+      const searchParams = new URLSearchParams({
+        inviteId: invitation.id,
+        slug: organization.slug,
+      });
 
       const baseUrl = await getBaseUrlFromHeaders();
-      const inviteLink = `${baseUrl}/org/${organization.slug}/accept-invitation?${searchParams.toString()}`;
+      const inviteLink = `${baseUrl}/org/accept-invitation?${searchParams.toString()}`;
 
       const result = await sendUserActionEmail({
         to: invitation.email,

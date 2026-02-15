@@ -6,7 +6,7 @@ export async function getProjectsHandler(ctx: Context<{}>) {
   const user = await getUser();
 
   try {
-    const projects = await dbGetProjects({ userId: user.id });
+    const projects = await dbGetProjects({ organizationId: user.organizationId });
     return ctx.json(projects, { status: 200 });
   } catch (error) {
     console.error('Error fetching projects:', error);
