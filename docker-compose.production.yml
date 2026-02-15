@@ -40,7 +40,7 @@ services:
         - traefik.http.routers.dashboard.tls.certresolver=myresolver
         - traefik.http.routers.dashboard.service=api@internal
         - traefik.http.routers.dashboard.middlewares=auth
-        - traefik.http.middlewares.auth.basicauth.users=jack:$apr1$0Mo1yhib$GyuaS99Jg4hpXwzC9fe031
+        - traefik.http.middlewares.auth.basicauth.users=jack:$$apr1$$0Mo1yhib$$GyuaS99Jg4hpXwzC9fe031
         - traefik.http.services.dashboard.loadbalancer.server.port=8080
 
   web:
