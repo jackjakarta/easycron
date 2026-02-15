@@ -16,8 +16,6 @@ services:
       - --certificatesresolvers.myresolver.acme.email=alextermure@protonmail.com
       - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
     networks: [edge]
-    env_file:
-      - .env
     ports:
       - target: 80
         published: 80
