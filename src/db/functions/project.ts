@@ -124,9 +124,7 @@ export async function dbDeleteProject({
     const projectJobs = await tx
       .select()
       .from(jobTable)
-      .where(
-        and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)),
-      );
+      .where(and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)));
 
     if (projectJobs.length > 0) {
       const jobIds = projectJobs.map((job) => job.id);
@@ -134,9 +132,7 @@ export async function dbDeleteProject({
 
       await tx
         .delete(jobTable)
-        .where(
-          and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)),
-        );
+        .where(and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)));
     }
 
     await tx

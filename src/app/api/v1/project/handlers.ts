@@ -1,4 +1,5 @@
 import { verifyApiKey } from '@/app/api/utils';
+import { dbGetUserOwnedOrganizationId } from '@/db/functions/organization';
 import {
   dbDeleteProject,
   dbGetProjectById,
@@ -6,7 +7,6 @@ import {
   dbInsertProject,
   dbUpdateProject,
 } from '@/db/functions/project';
-import { dbGetUserOwnedOrganizationId } from '@/db/functions/organization';
 import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
 import { toErrorMessage } from '@/utils/error';
 import { Context } from 'hono';
@@ -128,7 +128,12 @@ export async function insertProjectHandler(ctx: Context<{}>) {
     const { name: _name, description } = body.data;
     const name = _name.trim();
 
-    const newProject = await dbInsertProject({ name, description, userId: user.id, organizationId });
+    const newProject = await dbInsertProject({
+      name,
+      description,
+      userId: user.id,
+      organizationId,
+    });
 
     if (newProject === undefined) {
       return ctx.json(

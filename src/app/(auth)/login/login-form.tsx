@@ -41,22 +41,22 @@ export default function LoginForm() {
     },
   });
 
-  async function onSubmitLink(data: LoginFormData) {
-    const { email: _email } = data;
-    const email = _email.trim().toLowerCase();
+  // async function onSubmitLink(data: LoginFormData) {
+  //   const { email: _email } = data;
+  //   const email = _email.trim().toLowerCase();
 
-    const { error } = await authClient.signIn.magicLink({
-      email,
-      callbackURL: '/',
-      newUserCallbackURL: '/',
-      // errorCallbackURL: '/error',
-    });
+  //   const { error } = await authClient.signIn.magicLink({
+  //     email,
+  //     callbackURL: '/',
+  //     newUserCallbackURL: '/',
+  //     // errorCallbackURL: '/error',
+  //   });
 
-    if (error !== null) {
-      setError('root', { type: 'manual', message: error.message });
-      return;
-    }
-  }
+  //   if (error !== null) {
+  //     setError('root', { type: 'manual', message: error.message });
+  //     return;
+  //   }
+  // }
 
   async function onSubmit(loginData: LoginFormData) {
     const { email: _email, password } = loginData;

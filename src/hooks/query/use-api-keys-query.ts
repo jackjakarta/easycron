@@ -1,5 +1,4 @@
 import { honoClient } from '@/app/api/client';
-import { authClient } from '@/auth/client';
 import { type ApiKeyModel } from '@/db/schema';
 import { useQuery } from '@tanstack/react-query';
 
