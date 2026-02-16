@@ -6,11 +6,11 @@ This document explains the full lifecycle of an HTTP cron job execution in easyC
 
 easyCron runs as three separate processes:
 
-| Process       | Entry point           | Role                                                           |
-| ------------- | --------------------- | -------------------------------------------------------------- |
-| **Next.js**   | `src/app/`            | Web UI and API routes (CRUD for jobs, projects, orgs, etc.)    |
-| **Scheduler** | `scheduler/index.ts`  | Polls the database every 1 s for due jobs and enqueues them    |
-| **Worker**    | `worker/index.ts`     | BullMQ consumer that executes the HTTP requests (20 concurrency) |
+| Process       | Entry point          | Role                                                             |
+| ------------- | -------------------- | ---------------------------------------------------------------- |
+| **Next.js**   | `src/app/`           | Web UI and API routes (CRUD for jobs, projects, orgs, etc.)      |
+| **Scheduler** | `scheduler/index.ts` | Polls the database every 1 s for due jobs and enqueues them      |
+| **Worker**    | `worker/index.ts`    | BullMQ consumer that executes the HTTP requests (20 concurrency) |
 
 The scheduler and worker communicate exclusively through a Redis-backed BullMQ queue (`easycron-runs`). They never call each other directly.
 
@@ -36,9 +36,11 @@ Each `tick()` performs the following:
 2. **Acquire a distributed lock** - For each due job, attempts a Redis `SET NX` lock with key `lock:sched:<jobId>:<nextRunAt ISO>` and a **15 s TTL** (`src/utils/locks.ts:tryLock`). This prevents duplicate enqueues when multiple scheduler instances run.
 
 3. **Enqueue to BullMQ** - Adds a `run` job to the `easycron-runs` queue with the payload:
+
    ```ts
    { jobId: string, scheduledForISO: string }
    ```
+
    The BullMQ job ID is a deterministic string: `run-<jobId>-<ISO without colons/dots>` (via `occurrenceJobId` in `src/utils/job.ts`), which provides natural deduplication.
 
 4. **Compute next run** - Uses `computeNextRun()` (`src/utils/cron.ts`) which delegates to `cron-parser` with the job's cron expression and timezone to determine the next occurrence.
@@ -175,20 +177,20 @@ sleepMs = min(sleepMs, 60000)  // capped at 60 seconds
 
 **Default values** (from the `job` table schema):
 
-| Parameter          | Default  |
-| ------------------ | -------- |
-| `maxRetries`       | 2        |
-| `backoffInitialMs` | 5000 ms  |
-| `backoffFactor`    | 2.0      |
-| `jitterMs`         | 500 ms   |
+| Parameter          | Default |
+| ------------------ | ------- |
+| `maxRetries`       | 2       |
+| `backoffInitialMs` | 5000 ms |
+| `backoffFactor`    | 2.0     |
+| `jitterMs`         | 500 ms  |
 
 This means with defaults, the delays are approximately:
 
-| Attempt | Delay before attempt               |
-| ------- | ---------------------------------- |
-| 1       | (none - immediate)                 |
-| 2       | ~5 s + jitter (0-500 ms)           |
-| 3       | ~10 s + jitter (0-500 ms)          |
+| Attempt | Delay before attempt      |
+| ------- | ------------------------- |
+| 1       | (none - immediate)        |
+| 2       | ~5 s + jitter (0-500 ms)  |
+| 3       | ~10 s + jitter (0-500 ms) |
 
 ---
 
@@ -223,15 +225,15 @@ This means with defaults, the delays are approximately:
 
 ## 7. Key Files Reference
 
-| File                      | Purpose                                       |
-| ------------------------- | --------------------------------------------- |
-| `scheduler/index.ts`      | Scheduler process entry point and loop         |
-| `scheduler/utils.ts`      | `tick()` function (poll + enqueue logic)        |
-| `worker/index.ts`         | Worker process entry point (BullMQ Worker)     |
-| `worker/run.ts`           | `runOnce()` - full execution pipeline          |
-| `src/utils/http.ts`       | `executeHttp()` - outbound HTTP via undici     |
-| `src/queue/queue.ts`      | BullMQ queue config and connection             |
-| `src/utils/cron.ts`       | `computeNextRun()` and `now()`                 |
-| `src/utils/locks.ts`      | `tryLock()` Redis distributed lock             |
-| `src/utils/job.ts`        | `occurrenceJobId()` dedup key generation       |
-| `src/db/schema.ts`        | `jobTable`, `executionTable` definitions       |
+| File                 | Purpose                                    |
+| -------------------- | ------------------------------------------ |
+| `scheduler/index.ts` | Scheduler process entry point and loop     |
+| `scheduler/utils.ts` | `tick()` function (poll + enqueue logic)   |
+| `worker/index.ts`    | Worker process entry point (BullMQ Worker) |
+| `worker/run.ts`      | `runOnce()` - full execution pipeline      |
+| `src/utils/http.ts`  | `executeHttp()` - outbound HTTP via undici |
+| `src/queue/queue.ts` | BullMQ queue config and connection         |
+| `src/utils/cron.ts`  | `computeNextRun()` and `now()`             |
+| `src/utils/locks.ts` | `tryLock()` Redis distributed lock         |
+| `src/utils/job.ts`   | `occurrenceJobId()` dedup key generation   |
+| `src/db/schema.ts`   | `jobTable`, `executionTable` definitions   |

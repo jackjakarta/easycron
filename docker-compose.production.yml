@@ -178,6 +178,45 @@ services:
       timeout: 3s
       retries: 3
 
+  # docs:
+  #   image: ghcr.io/jackjakarta/easycron-docs:0.1.0
+  #   networks: [edge]
+  #   env_file:
+  #     - .env
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.labels.easycron.role == app
+  #       preferences:
+  #         - spread: node.hostname
+  #     resources:
+  #       limits:
+  #         cpus: '0.50'
+  #         memory: 512M
+  #       reservations:
+  #         cpus: '0.15'
+  #         memory: 192M
+  #     update_config:
+  #       order: start-first
+  #       parallelism: 1
+  #       delay: 10s
+  #       failure_action: rollback
+  #       monitor: 15s
+  #       max_failure_ratio: 0.4
+  #     rollback_config:
+  #       order: stop-first
+  #     restart_policy:
+  #       condition: on-failure
+  #     labels:
+  #       - traefik.enable=true
+  #       - traefik.docker.network=easycron_edge
+  #       - traefik.http.routers.easycron.rule=Host(`docs.easycron.dev`)
+  #       - traefik.http.routers.easycron.entrypoints=websecure
+  #       - traefik.http.routers.easycron.tls=true
+  #       - traefik.http.routers.easycron.tls.certresolver=myresolver
+  #       - traefik.http.services.easycron.loadbalancer.server.port=3002
+
 networks:
   edge:
     driver: overlay
