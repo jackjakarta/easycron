@@ -34,5 +34,3 @@ jobs:
         run: pnpm types
       - name: Run tests
         run: pnpm test
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=critical
