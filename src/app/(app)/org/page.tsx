@@ -1,7 +1,9 @@
 import { auth } from '@/auth';
+import CustomBreadcrumbs from '@/components/common/custom-breadcrumbs';
+import Header from '@/components/common/header';
 import { headers } from 'next/headers';
 
-import CreateOrganizationDialog from './create-organization-dialog';
+import Page2 from './page2';
 
 export default async function Page() {
   const organizations = await auth.api.listOrganizations({
@@ -9,20 +11,11 @@ export default async function Page() {
   });
 
   return (
-    <div>
-      <h1>Organization Page</h1>
-      <CreateOrganizationDialog />
-      {organizations.length === 0 ? (
-        <p>No organizations found.</p>
-      ) : (
-        <ul>
-          {organizations.map((org) => (
-            <li key={org.id}>
-              {org.name} (Slug: {org.slug})
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <Header>
+        <CustomBreadcrumbs current="Organizations" />
+      </Header>
+      <Page2 organizations={organizations} />
+    </>
   );
 }

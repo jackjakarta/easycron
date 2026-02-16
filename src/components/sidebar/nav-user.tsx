@@ -17,7 +17,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import {
+  BadgeCheck,
+  Building2,
+  ChevronsUpDown,
+  Code,
+  CreditCard,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -32,6 +40,7 @@ export default function NavUser({ user }: { user: UserAndContext }) {
     ...(user.subscription.type !== 'free'
       ? [{ label: t('billing'), icon: CreditCard, href: '/settings/billing' }]
       : []),
+    { label: t('organizations'), icon: Building2, href: '/org' },
     { label: t('developers'), icon: Code, href: '/developers' },
   ];
 

@@ -124,6 +124,7 @@
     "logout": "Logout",
     "upgrade": "Upgrade to Pro",
     "account": "Account",
+    "organizations": "Organizations",
     "developers": "Developers"
   }
 }
