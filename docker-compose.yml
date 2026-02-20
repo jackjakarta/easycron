@@ -29,7 +29,7 @@ services:
       - redis_data:/data
 
   mailhog:
-    image: mailhog/mailhog:v1.0.1
+    image: jcalonso/mailhog:v1.0.1
     container_name: mailhog
     restart: unless-stopped
     ports:
