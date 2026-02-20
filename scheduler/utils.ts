@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs';
+
 import { db } from '@/db';
 import { jobTable } from '@/db/schema';
 import { getRunQueue } from '@/queue/queue';
@@ -25,32 +27,36 @@ export async function tick() {
   if (due.length === 0) return;
 
   for (const j of due) {
-    const lockKey = `lock:sched:${j.id}:${j.nextRunAt.toISOString()}`;
-    const got = await tryLock(lockKey, 15_000);
-    if (!got) continue;
+    try {
+      const lockKey = `lock:sched:${j.id}:${j.nextRunAt.toISOString()}`;
+      const got = await tryLock(lockKey, 15_000);
+      if (!got) continue;
 
-    const current = now();
-    const next = computeNextRun(j.scheduleCron, j.timezone, current);
+      const current = now();
+      const next = computeNextRun(j.scheduleCron, j.timezone, current);
 
-    // 1) enqueue with colon-free jobId
-    const payload = { jobId: j.id, scheduledForISO: j.nextRunAt.toISOString() };
-    const customId = occurrenceJobId(j.id, payload.scheduledForISO);
+      // 1) enqueue with colon-free jobId
+      const payload = { jobId: j.id, scheduledForISO: j.nextRunAt.toISOString() };
+      const customId = occurrenceJobId(j.id, payload.scheduledForISO);
 
-    await q.add('run', payload, {
-      jobId: customId,
-      removeOnComplete: 1000,
-      removeOnFail: 1000,
-      priority: 2,
-    });
+      await q.add('run', payload, {
+        jobId: customId,
+        removeOnComplete: 1000,
+        removeOnFail: 1000,
+        priority: 2,
+      });
 
-    console.info(
-      `Scheduler picked up job: ${j.id} (scheduled for ${j.nextRunAt.toISOString()}, next run: ${next?.toISOString() || 'none'})`,
-    );
+      console.info(
+        `Scheduler picked up job: ${j.id} (scheduled for ${j.nextRunAt.toISOString()}, next run: ${next?.toISOString() || 'none'})`,
+      );
 
-    await db
-      .update(jobTable)
-      .set({ lastRunAt: j.nextRunAt, nextRunAt: next, updatedAt: new Date() })
-      .where(eq(jobTable.id, j.id));
+      await db
+        .update(jobTable)
+        .set({ lastRunAt: j.nextRunAt, nextRunAt: next, updatedAt: new Date() })
+        .where(eq(jobTable.id, j.id));
+    } catch (e) {
+      console.warn(`Scheduler: error processing job ${j.id}, skipping`, e);
+    }
   }
 
   const dt = Date.now() - t0;
@@ -58,6 +64,8 @@ export async function tick() {
     // optional: log slow ticks
     console.info(`Scheduler tick processed ${due.length} jobs in ${dt}ms`);
   }
+
+  writeFileSync('/tmp/scheduler-heartbeat', Date.now().toString());
 }
 
 function occurrenceJobId(jobId: string, scheduledISO: string) {
