@@ -151,16 +151,6 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=false
-    healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          '[ -f /tmp/scheduler-heartbeat ] && [ $$(( $(date +%s) - $(cat /tmp/scheduler-heartbeat | cut -c1-10) )) -lt 60 ]',
-        ]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 15s
 
   redis:
     image: redis:7-alpine
