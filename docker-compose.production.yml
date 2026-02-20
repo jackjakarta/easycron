@@ -125,6 +125,8 @@ services:
     networks: [edge]
     env_file:
       - .env
+    environment:
+      NODE_OPTIONS: '--max-old-space-size=384'
     deploy:
       replicas: 1
       placement:
@@ -135,7 +137,7 @@ services:
       resources:
         limits:
           cpus: '0.35'
-          memory: 384M
+          memory: 512M
         reservations:
           cpus: '0.10'
           memory: 128M
@@ -150,10 +152,11 @@ services:
       labels:
         - traefik.enable=false
     healthcheck:
-      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      test: ['CMD-SHELL', '[ -f /tmp/scheduler-heartbeat ] && [ $$(( $(date +%s) - $(cat /tmp/scheduler-heartbeat | cut -c1-10) )) -lt 60 ]']
       interval: 30s
       timeout: 3s
       retries: 3
+      start_period: 15s
 
   redis:
     image: redis:7-alpine

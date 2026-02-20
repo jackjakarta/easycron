@@ -24,3 +24,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export const db = drizzle({ client: pool, casing: 'snake_case' });
+
+export async function closeDbPool() {
+  await pool.end();
+}
