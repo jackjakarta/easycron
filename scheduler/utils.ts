@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs';
 
 import { db } from '@/db';
+import { dbRefreshExecutionAnalytics } from '@/db/functions/execution-analytics';
 import { jobTable } from '@/db/schema';
 import { getRunQueue } from '@/queue/queue';
 import { computeNextRun, now } from '@/utils/cron';
@@ -8,6 +9,8 @@ import { tryLock } from '@/utils/locks';
 import { and, eq, lte } from 'drizzle-orm';
 
 const BATCH_SIZE = 500;
+const MV_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+let lastMvRefresh = 0;
 
 export function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
@@ -15,6 +18,16 @@ export function sleep(ms: number) {
 
 export async function tick() {
   const t0 = Date.now();
+
+  if (t0 - lastMvRefresh >= MV_REFRESH_INTERVAL_MS) {
+    try {
+      await dbRefreshExecutionAnalytics();
+      lastMvRefresh = t0;
+      console.info('Scheduler: refreshed execution_hourly_stats materialized view');
+    } catch (e) {
+      console.warn('Scheduler: failed to refresh execution_hourly_stats', e);
+    }
+  }
   const q = getRunQueue();
   const current = now();
 
