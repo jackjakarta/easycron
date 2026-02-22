@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 type BuySubscriptionButtonProps = {
   plan?: 'pro';
   annual?: boolean;
+  organizationId: string;
 };
 
 export default function BuySubscriptionButton({
   plan = 'pro',
   annual = false,
+  organizationId,
 }: BuySubscriptionButtonProps) {
   async function handleSubscribe() {
     const { error } = await authClient.subscription.upgrade({
@@ -18,6 +20,8 @@ export default function BuySubscriptionButton({
       successUrl: '/dashboard',
       cancelUrl: '/pricing',
       annual,
+      referenceId: organizationId,
+      seats: 1,
     });
 
     if (error !== null) {

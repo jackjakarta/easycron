@@ -1,3 +1,4 @@
+import { dbGetOrganizationOwnerId } from '@/db/functions/organization';
 import { dbGetUserById } from '@/db/functions/user';
 import { IS_DEV_MODE } from '@/utils/dev';
 import { type Subscription } from '@better-auth/stripe';
@@ -16,10 +17,21 @@ export async function sendSubscriptionInformationEmail({
   informationType: InformationEmailMetadata['type'];
 }) {
   try {
-    const user = await dbGetUserById({ userId: subscription.referenceId });
+    const ownerId = await dbGetOrganizationOwnerId({
+      organizationId: subscription.referenceId,
+    });
+
+    if (ownerId === undefined) {
+      console.error(
+        `Owner not found for organization ${subscription.referenceId} for email notification`,
+      );
+      return;
+    }
+
+    const user = await dbGetUserById({ userId: ownerId });
 
     if (user === undefined) {
-      console.error(`User with ID ${subscription.referenceId} not found for email notification`);
+      console.error(`User with ID ${ownerId} not found for email notification`);
       return;
     }
 

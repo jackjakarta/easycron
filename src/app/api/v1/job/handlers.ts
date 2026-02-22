@@ -2,7 +2,7 @@ import { verifyApiKey } from '@/app/api/utils';
 import { dbGetJobCountByOrganizationId, dbInsertJob } from '@/db/functions/job';
 import { dbGetUserOwnedOrganizationId } from '@/db/functions/organization';
 import { dbGetProjectById } from '@/db/functions/project';
-import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
+import { getOrgActiveSubscriptionApi } from '@/stripe/subscription';
 import { Context } from 'hono';
 
 import { requestBodySchema } from './schemas';
@@ -35,7 +35,7 @@ export async function insertJobHandler(ctx: Context<{}>) {
     }
 
     const [subscription, jobCount] = await Promise.all([
-      getUserActiveSubscriptionApi({ userId: user.id }),
+      getOrgActiveSubscriptionApi({ organizationId }),
       dbGetJobCountByOrganizationId({ organizationId }),
     ]);
 

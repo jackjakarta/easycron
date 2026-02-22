@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { dbGetUserById } from '@/db/functions/user';
-import { getUserActiveSubscription } from '@/stripe/subscription';
+import { getOrgActiveSubscription } from '@/stripe/subscription';
 import { headers } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
@@ -38,7 +38,7 @@ export async function getUser(): Promise<UserAndContext> {
     redirect('/login', RedirectType.replace);
   }
 
-  const subscription = await getUserActiveSubscription({ referenceId: user.id });
+  const subscription = await getOrgActiveSubscription({ referenceId: organizationId });
 
   return {
     ...user,

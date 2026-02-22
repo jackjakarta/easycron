@@ -28,9 +28,8 @@ type PricingCardProps = {
   highlighted?: boolean;
   plan?: SubscriptionType;
   annual?: boolean;
-  organizationSlug?: string;
   isLoggedIn?: boolean;
-  userId?: string;
+  organizationId?: string;
 };
 
 export function PricingCard({
@@ -43,15 +42,19 @@ export function PricingCard({
   buttonVariant = 'default',
   highlighted = false,
   plan = 'pro',
-  organizationSlug,
   annual = false,
   isLoggedIn = false,
-  userId,
+  organizationId,
 }: PricingCardProps) {
   async function handleSubscribe() {
+    if (organizationId === undefined) {
+      toast.error('No active organization found. Please log in first.');
+      return;
+    }
+
     const { data: subscriptions } = await authClient.subscription.list({
       query: {
-        referenceId: userId,
+        referenceId: organizationId,
       },
     });
 
@@ -60,16 +63,17 @@ export function PricingCard({
     );
 
     if (activeSubscription !== undefined) {
-      toast.error('You already have an active subscription.');
+      toast.error('Your organization already has an active subscription.');
       return;
     }
 
     const { error } = await authClient.subscription.upgrade({
-      plan: plan === 'team' ? 'team' : 'pro',
-      successUrl: plan === 'team' ? `/dashboard/org/${organizationSlug}` : '/dashboard',
+      plan: 'pro',
+      successUrl: '/dashboard',
       cancelUrl: '/pricing',
-      seats: plan === 'team' ? 10 : undefined,
       annual,
+      referenceId: organizationId,
+      seats: 1,
     });
 
     if (error !== null) {
@@ -89,7 +93,7 @@ export function PricingCard({
         <CardTitle className="text-card-foreground flex items-center gap-1 text-2xl font-bold">
           {name}
 
-          {annual && (plan === 'pro' || plan === 'team') && (
+          {annual && plan === 'pro' && (
             <Badge
               variant="secondary"
               className="ml-2 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
@@ -115,7 +119,7 @@ export function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        {(plan === 'pro' || plan === 'team') && isLoggedIn ? (
+        {plan === 'pro' && isLoggedIn ? (
           <Button
             size="lg"
             variant={buttonVariant}

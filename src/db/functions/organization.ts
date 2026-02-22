@@ -44,6 +44,19 @@ export async function dbGetOrganizationOwnerId({
   return result?.userId;
 }
 
+export async function dbGetOrganizationMemberCount({
+  organizationId,
+}: {
+  organizationId: string;
+}): Promise<number> {
+  const [result] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(memberTable)
+    .where(eq(memberTable.organizationId, organizationId));
+
+  return result?.count ?? 0;
+}
+
 export async function dbGetUserOwnedOrganizationsCount({
   userId,
 }: {

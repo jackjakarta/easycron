@@ -7,7 +7,7 @@ import {
   dbInsertProject,
   dbUpdateProject,
 } from '@/db/functions/project';
-import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
+import { getOrgActiveSubscriptionApi } from '@/stripe/subscription';
 import { toErrorMessage } from '@/utils/error';
 import { Context } from 'hono';
 import { z } from 'zod';
@@ -99,7 +99,7 @@ export async function insertProjectHandler(ctx: Context<{}>) {
     }
 
     const [subscription, projectCount] = await Promise.all([
-      getUserActiveSubscriptionApi({ userId: user.id }),
+      getOrgActiveSubscriptionApi({ organizationId }),
       dbGetProjectCountByOrganizationId({ organizationId }),
     ]);
 

@@ -50,7 +50,7 @@ export async function createJobAction({
   const user = await getUser();
   const { subscription, organizationId } = user;
 
-  if (subscription.type === 'free' || subscription.type === 'hobby') {
+  if (subscription.type === 'free') {
     const jobsCount = await dbGetJobCountByOrganizationId({ organizationId });
 
     if (jobsCount >= subscription.limits.jobsAmount) {

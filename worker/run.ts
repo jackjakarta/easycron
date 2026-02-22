@@ -3,12 +3,11 @@ import crypto from 'crypto';
 import { db } from '@/db';
 import { dbGetAmountOfExecutionsThisMonth } from '@/db/functions/execution';
 import { dbGetJobForWorker, dbUpdateJob } from '@/db/functions/job';
-import { dbGetOrganizationOwnerId } from '@/db/functions/organization';
 import { dbGetHmacSecretForWorker } from '@/db/functions/secret';
 import { dbGetWebhookEndpointsForEvent, dbInsertWebhookEvent } from '@/db/functions/webhook';
 import { executionTable, type ExecutionStatus } from '@/db/schema';
 import { type RunJobPayload } from '@/queue/queue';
-import { getUserActiveSubscriptionApi } from '@/stripe/subscription';
+import { getOrgActiveSubscriptionApi } from '@/stripe/subscription';
 import { executeHttp } from '@/utils/http';
 import { betterFetch } from '@better-fetch/fetch';
 import { Job } from 'bullmq';
@@ -25,12 +24,8 @@ export async function runOnce(bull: Job<RunJobPayload>) {
   if (jobRow === undefined) return;
   if (!jobRow.enabled) return;
 
-  const ownerId = await dbGetOrganizationOwnerId({ organizationId: jobRow.organizationId });
-
-  if (ownerId === undefined) return;
-
   const [subscription, executionsThisMonth] = await Promise.all([
-    getUserActiveSubscriptionApi({ userId: ownerId }),
+    getOrgActiveSubscriptionApi({ organizationId: jobRow.organizationId }),
     dbGetAmountOfExecutionsThisMonth({ jobId: jobRow.id }),
   ]);
 

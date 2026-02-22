@@ -1,7 +1,9 @@
 'use server';
 
+import { auth } from '@/auth';
 import { getUser } from '@/auth/utils';
 import { dbGetProjectCountByOrganizationId, dbInsertProject } from '@/db/functions/project';
+import { headers } from 'next/headers';
 
 export async function createProjectAction({
   name,
@@ -12,6 +14,23 @@ export async function createProjectAction({
 }) {
   const user = await getUser();
   const { subscription, organizationId } = user;
+
+  const { success: hasPermission } = await auth.api.hasPermission({
+    headers: await headers(),
+    body: {
+      permissions: {
+        project: ['view', 'create'],
+      },
+    },
+  });
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission.',
+      code: 403,
+    };
+  }
 
   if (subscription.type === 'free') {
     const projectCount = await dbGetProjectCountByOrganizationId({ organizationId });

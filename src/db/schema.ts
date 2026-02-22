@@ -433,6 +433,7 @@ export const invitationTable = appSchema.table('invitation', {
   role: text('role').notNull(),
   status: text('status').notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export type InvitationModel = typeof invitationTable.$inferSelect;

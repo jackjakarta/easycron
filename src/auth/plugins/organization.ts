@@ -1,7 +1,8 @@
 import { ac, admin, member, owner } from '@/auth/permissions';
-import { dbGetUserOwnedOrganizationsCount } from '@/db/functions/organization';
+import { dbGetOrganizationMemberCount } from '@/db/functions/organization';
+import { dbGetOrganizationSubscriptions } from '@/db/functions/subscription';
 import { sendUserActionEmail } from '@/email/send';
-import { getUserActiveSubscription } from '@/stripe/subscription';
+import { updateStripeSubscriptionSeats } from '@/stripe/seats';
 import { getBaseUrlFromHeaders } from '@/utils/host';
 import { organization } from 'better-auth/plugins';
 
@@ -14,17 +15,63 @@ export function getOrganizationPlugin() {
       member,
     },
     requireEmailVerificationOnInvitation: true,
-    allowUserToCreateOrganization: async (user) => {
-      const [subscription, userOrganziationsCount] = await Promise.all([
-        getUserActiveSubscription({ referenceId: user.id }),
-        dbGetUserOwnedOrganizationsCount({ userId: user.id }),
-      ]);
-
-      if (userOrganziationsCount >= subscription.limits.organizationsAmount) {
-        return false;
-      }
-
+    allowUserToCreateOrganization: async (_user) => {
       return true;
+    },
+    organizationHooks: {
+      beforeCreateInvitation: async ({ organization }) => {
+        const subscriptions = await dbGetOrganizationSubscriptions({
+          organizationId: organization.id,
+        });
+
+        const activeSubscription = subscriptions.find(
+          (sub) => sub.status === 'active' || sub.status === 'trialing',
+        );
+
+        if (activeSubscription === undefined || activeSubscription.plan !== 'pro') {
+          throw new Error('Upgrade to Pro to invite members.');
+        }
+      },
+      afterAcceptInvitation: async ({ organization }) => {
+        const subscriptions = await dbGetOrganizationSubscriptions({
+          organizationId: organization.id,
+        });
+
+        const activeSubscription = subscriptions.find(
+          (sub) => sub.status === 'active' || sub.status === 'trialing',
+        );
+
+        if (activeSubscription?.stripeSubscriptionId) {
+          const memberCount = await dbGetOrganizationMemberCount({
+            organizationId: organization.id,
+          });
+
+          await updateStripeSubscriptionSeats({
+            stripeSubscriptionId: activeSubscription.stripeSubscriptionId,
+            newSeatCount: memberCount,
+          });
+        }
+      },
+      afterRemoveMember: async ({ organization }) => {
+        const subscriptions = await dbGetOrganizationSubscriptions({
+          organizationId: organization.id,
+        });
+
+        const activeSubscription = subscriptions.find(
+          (sub) => sub.status === 'active' || sub.status === 'trialing',
+        );
+
+        if (activeSubscription?.stripeSubscriptionId) {
+          const memberCount = await dbGetOrganizationMemberCount({
+            organizationId: organization.id,
+          });
+
+          await updateStripeSubscriptionSeats({
+            stripeSubscriptionId: activeSubscription.stripeSubscriptionId,
+            newSeatCount: memberCount,
+          });
+        }
+      },
     },
     async sendInvitationEmail(data) {
       const { organization, invitation } = data;

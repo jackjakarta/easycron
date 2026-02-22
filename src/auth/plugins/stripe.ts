@@ -9,9 +9,9 @@ export function getStripePlugin() {
   return stripe({
     stripeClient,
     stripeWebhookSecret: env.stripeWebhookSecret,
-    createCustomerOnSignUp: true,
-    onCustomerCreate: async ({ stripeCustomer, user }) => {
-      console.debug(`Customer ${stripeCustomer.id} created for user ${user.id}`);
+    createCustomerOnSignUp: false,
+    organization: {
+      enabled: true,
     },
     subscription: {
       enabled: true,
@@ -20,26 +20,6 @@ export function getStripePlugin() {
           name: 'pro',
           priceId: env.monthlyPriceId,
           annualDiscountPriceId: env.yearlyPriceId,
-          freeTrial: {
-            days: NUMBER_OF_TRIAL_DAYS,
-            onTrialEnd: async ({ subscription }) => {
-              await sendSubscriptionInformationEmail({
-                subscription,
-                informationType: 'trial-ended',
-              });
-            },
-            onTrialExpired: async (subscription) => {
-              await sendSubscriptionInformationEmail({
-                subscription,
-                informationType: 'trial-expired',
-              });
-            },
-          },
-        },
-        {
-          name: 'team',
-          priceId: 'price_1SOlbmE85tPzaCYUP5CichDd',
-          annualDiscountPriceId: 'price_1SOlc5E85tPzaCYU567G2VsQ',
           freeTrial: {
             days: NUMBER_OF_TRIAL_DAYS,
             onTrialEnd: async ({ subscription }) => {
@@ -80,7 +60,7 @@ export function getStripePlugin() {
       },
       onSubscriptionDeleted: async ({ subscription }) => {
         console.info(
-          `Subscription ${subscription.id} deleted for user ${subscription.referenceId}`,
+          `Subscription ${subscription.id} deleted for organization ${subscription.referenceId}`,
         );
       },
       onSubscriptionCancel: async ({ subscription }) => {

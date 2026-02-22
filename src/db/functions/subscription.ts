@@ -3,11 +3,15 @@ import { eq } from 'drizzle-orm';
 import { db } from '..';
 import { subscriptionTable } from '../schema';
 
-export async function dbGetUserSubscriptions({ userId }: { userId: string }) {
+export async function dbGetOrganizationSubscriptions({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const subscriptions = await db
     .select()
     .from(subscriptionTable)
-    .where(eq(subscriptionTable.referenceId, userId));
+    .where(eq(subscriptionTable.referenceId, organizationId));
 
   return subscriptions;
 }

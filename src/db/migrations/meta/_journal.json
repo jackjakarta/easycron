@@ -43,6 +43,13 @@
       "when": 1771738921312,
       "tag": "0005_slow_baron_strucker",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771755598722,
+      "tag": "0006_volatile_ironclad",
+      "breakpoints": true
     }
   ]
 }

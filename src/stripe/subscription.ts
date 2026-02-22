@@ -1,16 +1,11 @@
 import { auth } from '@/auth';
-import { dbGetUserSubscriptions } from '@/db/functions/subscription';
+import { dbGetOrganizationSubscriptions } from '@/db/functions/subscription';
 import { headers } from 'next/headers';
 
-import {
-  FREE_SUBSCRIPTION,
-  HOBBY_SUBSCRIPTION,
-  PRO_SUBSCRIPTION,
-  TEAM_SUBSCRIPTION,
-} from './const';
+import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION } from './const';
 import { type SubscriptionFeaturesAndLimits } from './types';
 
-export async function getUserActiveSubscription({
+export async function getOrgActiveSubscription({
   referenceId,
 }: {
   referenceId: string;
@@ -28,27 +23,19 @@ export async function getUserActiveSubscription({
     return FREE_SUBSCRIPTION;
   }
 
-  if (activeSubscription.plan === 'team') {
-    return TEAM_SUBSCRIPTION;
-  }
-
   if (activeSubscription.plan === 'pro') {
     return PRO_SUBSCRIPTION;
-  }
-
-  if (activeSubscription.plan === 'hobby') {
-    return HOBBY_SUBSCRIPTION;
   }
 
   return FREE_SUBSCRIPTION;
 }
 
-export async function getUserActiveSubscriptionApi({
-  userId,
+export async function getOrgActiveSubscriptionApi({
+  organizationId,
 }: {
-  userId: string;
+  organizationId: string;
 }): Promise<SubscriptionFeaturesAndLimits> {
-  const subscriptions = await dbGetUserSubscriptions({ userId });
+  const subscriptions = await dbGetOrganizationSubscriptions({ organizationId });
 
   const activeSubscription = subscriptions.find(
     (sub) => sub.status === 'active' || sub.status === 'trialing',
@@ -56,10 +43,6 @@ export async function getUserActiveSubscriptionApi({
 
   if (activeSubscription === undefined) {
     return FREE_SUBSCRIPTION;
-  }
-
-  if (activeSubscription.plan === 'team') {
-    return TEAM_SUBSCRIPTION;
   }
 
   if (activeSubscription.plan === 'pro') {

@@ -29,6 +29,7 @@ export async function tick() {
       console.warn('Scheduler: failed to refresh execution_hourly_stats', e);
     }
   }
+
   const q = getRunQueue();
   const current = now();
 
