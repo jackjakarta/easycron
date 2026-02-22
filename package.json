@@ -12,7 +12,7 @@
     "db:migrate": "ENVIRONMENT=development op run --env-file=\".env.op\" -- drizzle-kit migrate --config=./src/db/drizzle.config.ts",
     "db:studio": "ENVIRONMENT=development op run --env-file=\".env.op\" -- drizzle-kit studio --config=src/db/drizzle.config.ts",
     "decrypt:secrets": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx src/db/scripts/encrypt-decrypt-secrets.ts",
-    "dev": "ENVIRONMENT=production op run --env-file=\".env.op\" --no-masking -- next dev --turbopack",
+    "dev": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- next dev --turbopack",
     "dev:email": "email dev --dir src/email/emails --port 3001",
     "dev:scheduler": "ENVIRONMENT=development op run --env-file=\".env.op\" --no-masking -- tsx scheduler/index.ts",
     "dev:services": "chmod +x $(git rev-parse --show-toplevel)/scripts/start-dev.sh && $(git rev-parse --show-toplevel)/scripts/start-dev.sh",

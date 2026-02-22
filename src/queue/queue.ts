@@ -2,10 +2,20 @@ import { env } from '@/env';
 import { JobsOptions, Queue, QueueEvents } from 'bullmq';
 import IORedis from 'ioredis';
 
-export const connection = new IORedis(env.redisUrl, {
-  maxRetriesPerRequest: null,
-  enableReadyCheck: false,
-});
+let connection: IORedis | null = null;
+
+export function getConnection(): IORedis {
+  if (!connection) {
+    connection = new IORedis(env.redisUrl, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    });
+    connection.on('error', (err) => {
+      console.error('[queue] Redis connection error:', err.message);
+    });
+  }
+  return connection;
+}
 
 export type RunJobPayload = {
   jobId: string;
@@ -19,7 +29,7 @@ let runQueue: Queue<RunJobPayload> | null = null;
 export function getRunQueue() {
   if (!runQueue) {
     runQueue = new Queue<RunJobPayload>(RUN_QUEUE_NAME, {
-      connection,
+      connection: getConnection(),
       defaultJobOptions: {
         removeOnComplete: 1000,
         removeOnFail: 1000,
@@ -37,10 +47,13 @@ export async function closeRunQueue() {
 }
 
 export function createQueueEvents() {
-  return new QueueEvents(RUN_QUEUE_NAME, { connection });
+  return new QueueEvents(RUN_QUEUE_NAME, { connection: getConnection() });
 }
 
 export async function closeQueueResources() {
   await closeRunQueue();
-  await connection.quit();
+  if (connection) {
+    await connection.quit();
+    connection = null;
+  }
 }
