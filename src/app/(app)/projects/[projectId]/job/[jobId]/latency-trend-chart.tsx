@@ -26,10 +26,10 @@ function formatBucket(bucket: Date) {
 
 export default function LatencyTrendChart({ data }: LatencyTrendChartProps) {
   const chartData = [...data]
-    .sort((a, b) => a.bucket.getTime() - b.bucket.getTime())
+    .sort((a, b) => new Date(a.bucket).getTime() - new Date(b.bucket).getTime())
     .filter((row) => row.avgLatencyMs !== null)
     .map((row) => ({
-      bucket: formatBucket(row.bucket),
+      bucket: formatBucket(new Date(row.bucket)),
       avg: row.avgLatencyMs,
       p95: row.p95LatencyMs,
     }));

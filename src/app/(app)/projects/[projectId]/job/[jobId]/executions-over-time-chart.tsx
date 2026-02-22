@@ -28,9 +28,9 @@ function formatBucket(bucket: Date) {
 
 export default function ExecutionsOverTimeChart({ data }: ExecutionsOverTimeChartProps) {
   const chartData = [...data]
-    .sort((a, b) => a.bucket.getTime() - b.bucket.getTime())
+    .sort((a, b) => new Date(a.bucket).getTime() - new Date(b.bucket).getTime())
     .map((row) => ({
-      bucket: formatBucket(row.bucket),
+      bucket: formatBucket(new Date(row.bucket)),
       succeeded: row.succeededCount,
       failed: row.failedCount,
       timedOut: row.timedOutCount,
