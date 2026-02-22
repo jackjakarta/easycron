@@ -9,11 +9,13 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { dbGetFinishedExecutionsByJobId } from '@/db/functions/execution';
+import { dbGetExecutionAnalytics } from '@/db/functions/execution-analytics';
 import { dbGetJobById } from '@/db/functions/job';
 import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 
+import ExecutionAnalytics from './execution-analytics';
 import ExecutionsTable from './executions-table';
 
 const pageContextSchema = z.object({
@@ -38,7 +40,10 @@ export default async function Page(context: PageContext) {
     return notFound();
   }
 
-  const jobExecutions = await dbGetFinishedExecutionsByJobId({ jobId: job.id });
+  const [jobExecutions, analytics] = await Promise.all([
+    dbGetFinishedExecutionsByJobId({ jobId: job.id }),
+    dbGetExecutionAnalytics({ jobId: job.id }),
+  ]);
 
   return (
     <>
@@ -60,6 +65,7 @@ export default async function Page(context: PageContext) {
         </Breadcrumb>
       </Header>
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <ExecutionAnalytics jobId={job.id} initialData={analytics} />
         <ExecutionsTable executions={jobExecutions} jobId={job.id} jobName={job.name} />
       </div>
     </>

@@ -18,3 +18,10 @@ export async function tryLock(key: string, ttlMs: number): Promise<boolean> {
 
   return r === 'OK';
 }
+
+export async function disconnectRedis() {
+  if (connected) {
+    client.destroy();
+    connected = false;
+  }
+}

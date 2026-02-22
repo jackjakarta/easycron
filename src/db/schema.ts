@@ -438,3 +438,21 @@ export const invitationTable = appSchema.table('invitation', {
 export type InvitationModel = typeof invitationTable.$inferSelect;
 export type InsertInvitationModel = typeof invitationTable.$inferInsert;
 export type UpdateInvitationModel = UpdateDbRow<InvitationModel>;
+
+export const executionHourlyStatsView = appSchema
+  .materializedView('execution_hourly_stats', {
+    jobId: uuid('job_id').notNull(),
+    bucket: timestamp('bucket', { withTimezone: true }).notNull(),
+    totalCount: integer('total_count').notNull(),
+    succeededCount: integer('succeeded_count').notNull(),
+    failedCount: integer('failed_count').notNull(),
+    timedOutCount: integer('timed_out_count').notNull(),
+    skippedCount: integer('skipped_count').notNull(),
+    avgLatencyMs: real('avg_latency_ms'),
+    p95LatencyMs: real('p95_latency_ms'),
+    p99LatencyMs: real('p99_latency_ms'),
+    minLatencyMs: integer('min_latency_ms'),
+    maxLatencyMs: integer('max_latency_ms'),
+    avgResponseSize: real('avg_response_size'),
+  })
+  .existing();

@@ -34,9 +34,17 @@ export async function dbUpdateJob({
   organizationId: string;
   data: UpdateJobModel;
 }): Promise<JobModel | undefined> {
+  const authorizationHeader =
+    data.authorizationHeader?.k?.trim() && data.authorizationHeader?.v?.trim()
+      ? {
+          k: data.authorizationHeader.k.trim(),
+          v: encryptSecret(data.authorizationHeader.v.trim()),
+        }
+      : null;
+
   const [updatedJob] = await db
     .update(jobTable)
-    .set(data)
+    .set({ ...data, authorizationHeader })
     .where(and(eq(jobTable.id, jobId), eq(jobTable.organizationId, organizationId)))
     .returning();
 
@@ -69,12 +77,13 @@ export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | unde
     .insert(jobTable)
     .values({
       ...data,
-      authorizationHeader: data.authorizationHeader
-        ? {
-            k: data.authorizationHeader.k,
-            v: encryptSecret(data.authorizationHeader.v),
-          }
-        : undefined,
+      authorizationHeader:
+        data.authorizationHeader?.k?.trim() && data.authorizationHeader?.v?.trim()
+          ? {
+              k: data.authorizationHeader.k.trim(),
+              v: encryptSecret(data.authorizationHeader.v.trim()),
+            }
+          : undefined,
     })
     .returning();
 

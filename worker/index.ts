@@ -1,4 +1,4 @@
-import { connection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
+import { getConnection, RUN_QUEUE_NAME, type RunJobPayload } from '@/queue/queue';
 import { Worker } from 'bullmq';
 
 import { runOnce } from './run';
@@ -7,6 +7,7 @@ const WORKER_CONCURRENCY = 20;
 
 async function main() {
   console.info('Worker starting…');
+  const connection = getConnection();
   const concurrency = WORKER_CONCURRENCY;
 
   const worker = new Worker<RunJobPayload>(RUN_QUEUE_NAME, async (bullJob) => runOnce(bullJob), {

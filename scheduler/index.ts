@@ -1,9 +1,13 @@
 import { setTimeout as sleep } from 'timers/promises';
 
+import { closeDbPool } from '@/db';
+import { closeQueueResources } from '@/queue/queue';
+import { disconnectRedis } from '@/utils/locks';
+
 import { tick } from './utils';
 
 const POLL_INTERVAL_MS = 1000;
-const FORCE_EXIT_MS = 3000;
+const FORCE_EXIT_MS = 5000;
 
 async function main() {
   console.info('Scheduler started');
@@ -48,16 +52,7 @@ async function main() {
       await sleep(POLL_INTERVAL_MS, { signal: ac.signal }).catch(() => {});
     }
 
-    const handles = process.getActiveResourcesInfo();
-    const requests = process.getActiveResourcesInfo();
-    console.debug(
-      'Active handles after shutdown:',
-      handles.map((h) => h.constructor?.name ?? typeof h),
-    );
-    console.debug(
-      'Active requests after shutdown:',
-      requests.map((r) => r.constructor?.name ?? typeof r),
-    );
+    await Promise.allSettled([closeQueueResources(), disconnectRedis(), closeDbPool()]);
 
     console.info('Scheduler stopped');
   } finally {
