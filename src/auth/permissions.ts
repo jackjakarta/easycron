@@ -2,8 +2,11 @@ import { createAccessControl } from 'better-auth/plugins/access';
 import { adminAc, defaultStatements, ownerAc } from 'better-auth/plugins/organization/access';
 import { z } from 'zod';
 
-export const permissionActionSchema = z.enum(['view', 'create', 'update', 'delete']);
+export const permissionActionSchema = z.enum(['read', 'create', 'update', 'delete']);
 export type PermissionAction = z.infer<typeof permissionActionSchema>;
+
+type DefaultResource = keyof typeof statement;
+export type PermissionResource = 'project' | 'job' | 'apiKeys';
 
 const statement = {
   ...defaultStatements,
@@ -29,7 +32,7 @@ export const admin = ac.newRole({
 });
 
 export const member = ac.newRole({
-  project: ['view'],
-  job: ['view', 'create'],
-  apiKeys: ['view', 'create', 'update'],
+  project: ['read'],
+  job: ['read', 'create'],
+  apiKeys: ['read', 'create', 'update'],
 });

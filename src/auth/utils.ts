@@ -4,6 +4,7 @@ import { getOrgActiveSubscription } from '@/stripe/subscription';
 import { headers } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
+import { type PermissionAction, type PermissionResource } from './permissions';
 import { type UserAndContext } from './types';
 
 export async function getMaybeSession() {
@@ -45,4 +46,26 @@ export async function getUser(): Promise<UserAndContext> {
     organizationId,
     subscription,
   };
+}
+
+type PermissionSet = {
+  resource: PermissionResource;
+  permissions: PermissionAction[];
+};
+
+export async function checkPermissions(permissionSet: PermissionSet[]) {
+  const permissions = permissionSet.reduce(
+    (acc, { resource, permissions }) => {
+      acc[resource] = permissions;
+      return acc;
+    },
+    {} as Partial<Record<PermissionResource, PermissionAction[]>>,
+  );
+
+  const { success: hasPermission } = await auth.api.hasPermission({
+    headers: await headers(),
+    body: { permissions },
+  });
+
+  return hasPermission;
 }

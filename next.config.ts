@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['bullmq', 'ioredis'],
   images: {
     remotePatterns: [
       {
