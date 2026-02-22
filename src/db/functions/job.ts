@@ -36,7 +36,10 @@ export async function dbUpdateJob({
 }): Promise<JobModel | undefined> {
   const authorizationHeader =
     data.authorizationHeader?.k?.trim() && data.authorizationHeader?.v?.trim()
-      ? { k: data.authorizationHeader.k.trim(), v: encryptSecret(data.authorizationHeader.v.trim()) }
+      ? {
+          k: data.authorizationHeader.k.trim(),
+          v: encryptSecret(data.authorizationHeader.v.trim()),
+        }
       : null;
 
   const [updatedJob] = await db
