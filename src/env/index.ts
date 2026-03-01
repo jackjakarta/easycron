@@ -5,6 +5,7 @@ export const env = createEnv({
   server: {
     databaseUrl: z.url(),
     redisUrl: z.url(),
+    betterAuthUrl: z.url(),
     betterAuthSecret: z.string().min(1),
     googleClientId: z.string().min(1),
     googleClientSecret: z.string().min(1),
@@ -19,12 +20,15 @@ export const env = createEnv({
     monthlyPriceId: z.string().min(1),
     yearlyPriceId: z.string().min(1),
     easyCronWebhookSecret: z.string().min(1),
+    nextServerActionEncryptionKey: z.string().min(1),
+    sentryAuthToken: z.string().min(1),
     devMode: z.enum(['true', 'false']).default('false'),
   },
   client: {},
   runtimeEnv: {
     databaseUrl: process.env.DATABASE_URL,
     redisUrl: process.env.REDIS_URL,
+    betterAuthUrl: process.env.BETTER_AUTH_URL,
     betterAuthSecret: process.env.BETTER_AUTH_SECRET,
     googleClientId: process.env.GOOGLE_CLIENT_ID,
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -39,6 +43,8 @@ export const env = createEnv({
     monthlyPriceId: process.env.MONTHLY_PRICE_ID,
     yearlyPriceId: process.env.YEARLY_PRICE_ID,
     easyCronWebhookSecret: process.env.EASY_CRON_WEBHOOK_SECRET,
+    sentryAuthToken: process.env.SENTRY_AUTH_TOKEN,
+    nextServerActionEncryptionKey: process.env.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY,
     devMode: process.env.DEV_MODE,
   },
 });

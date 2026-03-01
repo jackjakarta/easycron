@@ -162,7 +162,7 @@ export const auth = betterAuth({
       trustedProviders: ['google', 'github'],
     },
   },
-  trustedOrigins: ['http://localhost:3000', 'https://jakarta.ngrok.app'],
+  trustedOrigins: ['http://localhost:3000', 'https://jakarta.ngrok.app', 'https://easycron.dev'],
   advanced: {
     database: {
       generateId: false,
