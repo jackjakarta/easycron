@@ -25,12 +25,14 @@ export async function createJobInOrganizationAction({
       throw new Error('No active organization found');
     }
 
-    const hasPermission = await checkPermissions([
-      {
-        resource: 'job',
-        permissions: ['create'],
-      },
-    ]);
+    const hasPermission = await checkPermissions({
+      permissionSets: [
+        {
+          resource: 'job',
+          permissions: ['create'],
+        },
+      ],
+    });
 
     if (!hasPermission) {
       throw new Error('You do not have permission to create a job in this organization');

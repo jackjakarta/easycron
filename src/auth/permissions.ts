@@ -7,6 +7,11 @@ export type PermissionAction = z.infer<typeof permissionActionSchema>;
 
 export type PermissionResource = 'project' | 'job' | 'apiKeys' | 'webHooks';
 
+export type PermissionSet = {
+  resource: PermissionResource;
+  permissions: PermissionAction[];
+};
+
 const statement = {
   ...defaultStatements,
   project: permissionActionSchema.options,
@@ -36,6 +41,7 @@ export const admin = ac.newRole({
 export const member = ac.newRole({
   project: ['read'],
   job: ['read', 'create'],
-  apiKeys: ['read', 'create'],
+  apiKeys: ['read'],
   webHooks: ['read', 'create', 'update'],
+  invitation: ['create'],
 });

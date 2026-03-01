@@ -9,12 +9,14 @@ export async function createWebhookEndpointAction(
 ) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'webHooks',
-      permissions: ['create'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'webHooks',
+        permissions: ['create'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     throw new Error('You do not have permission to create a job in this organization');

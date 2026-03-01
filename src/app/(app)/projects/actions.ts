@@ -13,12 +13,14 @@ export async function createProjectAction({
   const user = await getUser();
   const { subscription, organizationId } = user;
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'project',
-      permissions: ['create'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'project',
+        permissions: ['create'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {

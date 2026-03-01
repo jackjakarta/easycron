@@ -70,7 +70,9 @@ export default function CreateKeyDialog({ trigger }: CreateKeyDialogProps) {
     } catch (error) {
       console.error('Error creating API key:', error);
       setError('root', { type: 'manual', message: 'The API key could not be created.' });
-      toast.error('Error creating API key');
+
+      const errorMessage = error instanceof Error ? error.message : 'API key could not be created';
+      toast.error(errorMessage);
     }
   }
 

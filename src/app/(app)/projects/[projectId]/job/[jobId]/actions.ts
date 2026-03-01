@@ -6,12 +6,14 @@ import { dbDuplicateJob } from '@/db/functions/job';
 export async function duplicateJobAction({ jobId }: { jobId: string }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'job',
-      permissions: ['create', 'update'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'job',
+        permissions: ['create', 'update'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {

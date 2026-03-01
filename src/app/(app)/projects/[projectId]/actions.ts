@@ -50,12 +50,14 @@ export async function createJobAction({
   const user = await getUser();
   const { subscription, organizationId } = user;
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'job',
-      permissions: ['create'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'job',
+        permissions: ['create'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {
@@ -112,12 +114,14 @@ export async function enableOrDisableJobAction({
 export async function deleteJobAction({ jobId }: { jobId: string }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'job',
-      permissions: ['delete'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'job',
+        permissions: ['delete'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {
@@ -139,12 +143,14 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
 export async function updateJobAction({ jobId, data }: { jobId: string; data: JobFormData }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'job',
-      permissions: ['update'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'job',
+        permissions: ['update'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {
@@ -167,19 +173,17 @@ export async function createOrUpdateProjectSecretAction({ projectId }: { project
   const user = await getUser();
   const { organizationId } = user;
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'project',
-      permissions: ['update'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'project',
+        permissions: ['update'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
-    return {
-      success: false,
-      error: 'You do not have permission to create a job in this organization',
-      code: 403,
-    };
+    throw new Error('Unauthorized');
   }
 
   const project = await dbGetProjectById({ projectId, organizationId });
@@ -216,12 +220,14 @@ export async function generateCronExpressionAction({ prompt }: { prompt: string 
 export async function deleteProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'project',
-      permissions: ['update'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'project',
+        permissions: ['update'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {
@@ -246,12 +252,14 @@ export async function deleteProjectSecretAction({ projectId }: { projectId: stri
 export async function deleteProjectAction({ projectId }: { projectId: string }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'project',
-      permissions: ['delete'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'project',
+        permissions: ['delete'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     return {

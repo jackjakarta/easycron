@@ -14,12 +14,14 @@ export async function updateApiKeyEnabledAction({
 }) {
   const user = await getUser();
 
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'apiKeys',
-      permissions: ['update'],
-    },
-  ]);
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'apiKeys',
+        permissions: ['update'],
+      },
+    ],
+  });
 
   if (!hasPermission) {
     throw new Error('You do not have permission to create update api keys in this organization');
@@ -39,15 +41,20 @@ export async function updateApiKeyEnabledAction({
 }
 
 export async function createApiKeyAction({ name }: { name: string }) {
-  const hasPermission = await checkPermissions([
-    {
-      resource: 'apiKeys',
-      permissions: ['create'],
-    },
-  ]);
+  const _headers = await headers();
+
+  const hasPermission = await checkPermissions({
+    permissionSets: [
+      {
+        resource: 'apiKeys',
+        permissions: ['create'],
+      },
+    ],
+    _headers,
+  });
 
   if (!hasPermission) {
-    throw new Error('You do not have permission to create a job in this organization');
+    throw new Error('You do not have permission to create api keys in this organization');
   }
 
   const apiKey = await auth.api.createApiKey({
@@ -55,7 +62,7 @@ export async function createApiKeyAction({ name }: { name: string }) {
       name,
       prefix: 'ec-',
     },
-    headers: await headers(),
+    headers: _headers,
   });
 
   return apiKey;
