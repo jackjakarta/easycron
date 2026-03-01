@@ -1,7 +1,7 @@
 import { stripeClient } from '@better-auth/stripe/client';
 import {
   apiKeyClient,
-  magicLinkClient,
+  // magicLinkClient,
   organizationClient,
   twoFactorClient,
 } from 'better-auth/client/plugins';
@@ -14,7 +14,7 @@ export const authClient = createAuthClient({
     }),
     organizationClient(),
     apiKeyClient(),
-    magicLinkClient(),
+    // magicLinkClient(),
     twoFactorClient(),
   ],
 });

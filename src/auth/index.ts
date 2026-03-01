@@ -17,7 +17,7 @@ import { slugifyName } from '@/utils/format';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
-import { apiKey, haveIBeenPwned, magicLink, twoFactor } from 'better-auth/plugins';
+import { apiKey, haveIBeenPwned, twoFactor } from 'better-auth/plugins';
 import { eq } from 'drizzle-orm';
 
 import { getOrganizationPlugin } from './plugins/organization';
@@ -77,17 +77,17 @@ export const auth = betterAuth({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',
     }),
     apiKey({ apiKeyHeaders: 'x-api-key' }),
-    magicLink({
-      sendMagicLink: async ({ email, url }) => {
-        console.debug({ email, url });
+    // magicLink({
+    //   sendMagicLink: async ({ email, url }) => {
+    //     console.debug({ email, url });
 
-        // await sendUserActionEmail({
-        //   to: email,
-        //   actionUrl: url,
-        //   action: 'magic-link',
-        // });
-      },
-    }),
+    //     // await sendUserActionEmail({
+    //     //   to: email,
+    //     //   actionUrl: url,
+    //     //   action: 'magic-link',
+    //     // });
+    //   },
+    // }),
     twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
