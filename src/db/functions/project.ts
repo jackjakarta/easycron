@@ -17,16 +17,19 @@ export type ProjectWithJobs = ProjectModel & { jobs: JobModel[] };
 
 export async function dbGetProjectById({
   projectId,
-  userId,
+  organizationId,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<ProjectWithJobs | undefined> {
   const rows = await db
     .select()
     .from(projectTable)
-    .leftJoin(jobTable, and(eq(jobTable.projectId, projectTable.id), eq(jobTable.userId, userId)))
-    .where(and(eq(projectTable.id, projectId), eq(projectTable.userId, userId)));
+    .leftJoin(
+      jobTable,
+      and(eq(jobTable.projectId, projectTable.id), eq(jobTable.organizationId, organizationId)),
+    )
+    .where(and(eq(projectTable.id, projectId), eq(projectTable.organizationId, organizationId)));
 
   if (rows.length === 0) {
     return undefined;
@@ -40,26 +43,29 @@ export async function dbGetProjectById({
   return projectWithJobs;
 }
 
-export async function dbGetProjects({ userId }: { userId: string }) {
+export async function dbGetProjects({ organizationId }: { organizationId: string }) {
   const projects = await db
     .select()
     .from(projectTable)
-    .where(eq(projectTable.userId, userId))
+    .where(eq(projectTable.organizationId, organizationId))
     .orderBy(desc(projectTable.createdAt));
 
   return projects;
 }
 
-export async function dbGetProjectsAndJobsByUserId({
-  userId,
+export async function dbGetProjectsAndJobsByOrganizationId({
+  organizationId,
 }: {
-  userId: string;
+  organizationId: string;
 }): Promise<ProjectWithJobs[]> {
   const rows = await db
     .select()
     .from(projectTable)
-    .leftJoin(jobTable, and(eq(jobTable.projectId, projectTable.id), eq(jobTable.userId, userId)))
-    .where(eq(projectTable.userId, userId))
+    .leftJoin(
+      jobTable,
+      and(eq(jobTable.projectId, projectTable.id), eq(jobTable.organizationId, organizationId)),
+    )
+    .where(eq(projectTable.organizationId, organizationId))
     .orderBy(desc(projectTable.updatedAt));
 
   const projectsMap = new Map<string, ProjectModel & { jobs: JobModel[] }>();
@@ -91,17 +97,17 @@ export async function dbInsertProject(data: InsertProjectModel): Promise<Project
 
 export async function dbUpdateProject({
   projectId,
-  userId,
+  organizationId,
   data,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
   data: UpdateProjectModel;
 }): Promise<ProjectModel | undefined> {
   const [project] = await db
     .update(projectTable)
     .set(data)
-    .where(and(eq(projectTable.id, projectId), eq(projectTable.userId, userId)))
+    .where(and(eq(projectTable.id, projectId), eq(projectTable.organizationId, organizationId)))
     .returning();
 
   return project;
@@ -109,16 +115,16 @@ export async function dbUpdateProject({
 
 export async function dbDeleteProject({
   projectId,
-  userId,
+  organizationId,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<ProjectModel | undefined> {
   const deleted = await db.transaction(async (tx) => {
     const projectJobs = await tx
       .select()
       .from(jobTable)
-      .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)));
+      .where(and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)));
 
     if (projectJobs.length > 0) {
       const jobIds = projectJobs.map((job) => job.id);
@@ -126,22 +132,27 @@ export async function dbDeleteProject({
 
       await tx
         .delete(jobTable)
-        .where(and(eq(jobTable.projectId, projectId), eq(jobTable.userId, userId)));
+        .where(and(eq(jobTable.projectId, projectId), eq(jobTable.organizationId, organizationId)));
     }
 
     await tx
       .delete(secretTable)
-      .where(and(eq(secretTable.projectId, projectId), eq(secretTable.userId, userId)));
+      .where(
+        and(eq(secretTable.projectId, projectId), eq(secretTable.organizationId, organizationId)),
+      );
 
     await tx
       .delete(webhookEndpointTable)
       .where(
-        and(eq(webhookEndpointTable.projectId, projectId), eq(webhookEndpointTable.userId, userId)),
+        and(
+          eq(webhookEndpointTable.projectId, projectId),
+          eq(webhookEndpointTable.organizationId, organizationId),
+        ),
       );
 
     const [deletedProject] = await tx
       .delete(projectTable)
-      .where(and(eq(projectTable.id, projectId), eq(projectTable.userId, userId)))
+      .where(and(eq(projectTable.id, projectId), eq(projectTable.organizationId, organizationId)))
       .returning();
 
     return deletedProject;
@@ -150,11 +161,15 @@ export async function dbDeleteProject({
   return deleted;
 }
 
-export async function dbGetProjectCountByUserId({ userId }: { userId: string }): Promise<number> {
+export async function dbGetProjectCountByOrganizationId({
+  organizationId,
+}: {
+  organizationId: string;
+}): Promise<number> {
   const [result] = await db
     .select({ count: sql<number>`count(*)` })
     .from(projectTable)
-    .where(eq(projectTable.userId, userId));
+    .where(eq(projectTable.organizationId, organizationId));
 
   const count = result?.count ?? 0;
 

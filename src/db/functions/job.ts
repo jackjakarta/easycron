@@ -12,26 +12,26 @@ import {
 
 export async function dbGetJobById({
   jobId,
-  userId,
+  organizationId,
 }: {
   jobId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<JobModel | undefined> {
   const [job] = await db
     .select()
     .from(jobTable)
-    .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)));
+    .where(and(eq(jobTable.id, jobId), eq(jobTable.organizationId, organizationId)));
 
   return job;
 }
 
 export async function dbUpdateJob({
   jobId,
-  userId,
+  organizationId,
   data,
 }: {
   jobId: string;
-  userId: string;
+  organizationId: string;
   data: UpdateJobModel;
 }): Promise<JobModel | undefined> {
   const authorizationHeader =
@@ -45,7 +45,7 @@ export async function dbUpdateJob({
   const [updatedJob] = await db
     .update(jobTable)
     .set({ ...data, authorizationHeader })
-    .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)))
+    .where(and(eq(jobTable.id, jobId), eq(jobTable.organizationId, organizationId)))
     .returning();
 
   return updatedJob;
@@ -53,17 +53,17 @@ export async function dbUpdateJob({
 
 export async function dbDeleteJob({
   jobId,
-  userId,
+  organizationId,
 }: {
   jobId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<JobModel | undefined> {
   const deleted = await db.transaction(async (tx) => {
     await tx.delete(executionTable).where(eq(executionTable.jobId, jobId));
 
     const [deleted] = await tx
       .delete(jobTable)
-      .where(and(eq(jobTable.id, jobId), eq(jobTable.userId, userId)))
+      .where(and(eq(jobTable.id, jobId), eq(jobTable.organizationId, organizationId)))
       .returning();
 
     return deleted;
@@ -90,26 +90,30 @@ export async function dbInsertJob(data: InsertJobModel): Promise<JobModel | unde
   return insertedJob;
 }
 
-export async function dbGetJobCountByUserId({ userId }: { userId: string }): Promise<number> {
+export async function dbGetJobCountByOrganizationId({
+  organizationId,
+}: {
+  organizationId: string;
+}): Promise<number> {
   const [result] = await db
     .select({ count: sql<number>`count(*)` })
     .from(jobTable)
-    .where(eq(jobTable.userId, userId));
+    .where(eq(jobTable.organizationId, organizationId));
 
   const count = result?.count ?? 0;
 
   return count;
 }
 
-export async function dbGetEnabledJobCountByUserId({
-  userId,
+export async function dbGetEnabledJobCountByOrganizationId({
+  organizationId,
 }: {
-  userId: string;
+  organizationId: string;
 }): Promise<number> {
   const [result] = await db
     .select({ count: sql<number>`count(*)` })
     .from(jobTable)
-    .where(and(eq(jobTable.userId, userId), eq(jobTable.enabled, true)));
+    .where(and(eq(jobTable.organizationId, organizationId), eq(jobTable.enabled, true)));
 
   const count = result?.count ?? 0;
 
@@ -133,4 +137,33 @@ export async function dbGetJobForWorker({ jobId }: { jobId: string }) {
           }
         : undefined,
   };
+}
+
+export async function dbDuplicateJob({
+  jobId,
+  organizationId,
+  userId,
+}: {
+  jobId: string;
+  organizationId: string;
+  userId: string;
+}): Promise<JobModel | undefined> {
+  const currentJob = await dbGetJobById({ jobId, organizationId });
+
+  if (currentJob === undefined) {
+    return undefined;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, createdAt, updatedAt, ...data } = currentJob;
+
+  const duplicateJob = await dbInsertJob({
+    ...data,
+    name: `${data.name} (Copy)`,
+    userId,
+    organizationId,
+    enabled: false,
+  });
+
+  return duplicateJob;
 }

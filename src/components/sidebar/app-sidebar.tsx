@@ -19,7 +19,7 @@ export default function AppSidebar({ user, ...props }: AppSidebarProps) {
         <NavHeader />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain />
+        <NavMain organizationId={user.organizationId} />
         <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

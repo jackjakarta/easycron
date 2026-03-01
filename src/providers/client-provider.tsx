@@ -9,7 +9,7 @@ import React from 'react';
 
 const queryClient = new QueryClient();
 
-export function ClientProvider({
+export default function ClientProvider({
   children,
   sidebarState,
 }: {

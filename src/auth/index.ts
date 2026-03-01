@@ -1,24 +1,27 @@
 import { db } from '@/db';
-import { dbGetUserById } from '@/db/functions/user';
 import {
   accountTable,
   apiKeyTable,
+  invitationTable,
+  memberTable,
+  organizationTable,
   sessionTable,
   subscriptionTable,
   twoFactorTable,
   userTable,
   verificationTable,
 } from '@/db/schema';
-import { sendUserActionEmail, sendUserActionInformationEmail } from '@/email/send';
-import { type InformationEmailMetadata } from '@/email/types';
+import { sendUserActionEmail } from '@/email/send';
 import { env } from '@/env';
-import { stripe as stripeClient } from '@/stripe';
-import { NUMBER_OF_TRIAL_DAYS } from '@/stripe/const';
-import { stripe, type Subscription } from '@better-auth/stripe';
+import { slugifyName } from '@/utils/format';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { nextCookies } from 'better-auth/next-js';
 import { apiKey, haveIBeenPwned, twoFactor } from 'better-auth/plugins';
+import { eq } from 'drizzle-orm';
+
+import { getOrganizationPlugin } from './plugins/organization';
+import { getStripePlugin } from './plugins/stripe';
 
 export const auth = betterAuth({
   appName: 'easyCron',
@@ -35,6 +38,7 @@ export const auth = betterAuth({
 
       if (!result.success) {
         console.error('Error sending password reset email:', result.error);
+        throw new Error('Could not send password reset email');
       }
     },
   },
@@ -48,6 +52,7 @@ export const auth = betterAuth({
 
       if (!result.success) {
         console.error('Error sending email verification email:', result.error);
+        throw new Error('Could not send email verification email');
       }
     },
     sendOnSignUp: true,
@@ -66,73 +71,26 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    stripe({
-      stripeClient,
-      stripeWebhookSecret: env.stripeWebhookSecret,
-      createCustomerOnSignUp: true,
-      onCustomerCreate: async ({ stripeCustomer, user }) => {
-        console.debug(`Customer ${stripeCustomer.id} created for user ${user.id}`);
-      },
-      subscription: {
-        enabled: true,
-        plans: [
-          {
-            name: 'pro',
-            priceId: env.monthlyPriceId,
-            annualDiscountPriceId: env.yearlyPriceId,
-            freeTrial: {
-              days: NUMBER_OF_TRIAL_DAYS,
-              onTrialEnd: async ({ subscription }) => {
-                await sendSubscriptionInformationEmail({
-                  subscription,
-                  informationType: 'trial-ended',
-                });
-              },
-              onTrialExpired: async (subscription) => {
-                await sendSubscriptionInformationEmail({
-                  subscription,
-                  informationType: 'trial-expired',
-                });
-              },
-            },
-          },
-        ],
-        getCheckoutSessionParams: async () => {
-          return {
-            params: {
-              automatic_tax: {
-                enabled: true,
-              },
-            },
-          };
-        },
-        onSubscriptionDeleted: async ({ subscription }) => {
-          console.info(
-            `Subscription ${subscription.id} deleted for user ${subscription.referenceId}`,
-          );
-        },
-        onSubscriptionCancel: async ({ subscription }) => {
-          await sendSubscriptionInformationEmail({
-            subscription,
-            informationType: 'subscription-canceled',
-          });
-        },
-        onSubscriptionComplete: async ({ subscription }) => {
-          await sendSubscriptionInformationEmail({
-            subscription,
-            informationType: 'subscription-purchased',
-          });
-        },
-      },
-    }),
+    getStripePlugin(),
+    getOrganizationPlugin(),
     haveIBeenPwned({
       customPasswordCompromisedMessage: 'Please choose a more secure password.',
     }),
     apiKey({ apiKeyHeaders: 'x-api-key' }),
+    // magicLink({
+    //   sendMagicLink: async ({ email, url }) => {
+    //     console.debug({ email, url });
+
+    //     // await sendUserActionEmail({
+    //     //   to: email,
+    //     //   actionUrl: url,
+    //     //   action: 'magic-link',
+    //     // });
+    //   },
+    // }),
     twoFactor(),
     nextCookies(), // this must be the last plugin in the array
   ],
-
   database: drizzleAdapter(db, {
     provider: 'pg',
     schema: {
@@ -143,39 +101,71 @@ export const auth = betterAuth({
       twoFactor: twoFactorTable,
       apikey: apiKeyTable,
       subscription: subscriptionTable,
+      organization: organizationTable,
+      member: memberTable,
+      invitation: invitationTable,
     },
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          try {
+            const orgName = `${user.name}'s Organization`;
+            const slug = slugifyName({ name: orgName, withNanoId: true });
+
+            const [org] = await db
+              .insert(organizationTable)
+              .values({ name: orgName, slug })
+              .returning({ id: organizationTable.id });
+
+            if (!org) {
+              throw new Error('Failed to insert organization');
+            }
+
+            await db.insert(memberTable).values({
+              userId: user.id,
+              organizationId: org.id,
+              role: 'owner',
+            });
+          } catch (error) {
+            console.error('Failed to create default organization for user:', user.id, error);
+          }
+        },
+      },
+    },
+    session: {
+      create: {
+        before: async (session) => {
+          if (session.activeOrganizationId) {
+            return;
+          }
+
+          const [membership] = await db
+            .select({ organizationId: memberTable.organizationId })
+            .from(memberTable)
+            .where(eq(memberTable.userId, session.userId))
+            .limit(1);
+
+          if (membership) {
+            return { data: { ...session, activeOrganizationId: membership.organizationId } };
+          }
+        },
+      },
+    },
+  },
   user: {
     modelName: 'user_entity',
   },
+  account: {
+    accountLinking: {
+      trustedProviders: ['google', 'github'],
+    },
+  },
+  trustedOrigins: ['http://localhost:3000', 'https://jakarta.ngrok.app'],
   advanced: {
     database: {
       generateId: false,
     },
   },
 });
-
-async function sendSubscriptionInformationEmail({
-  subscription,
-  informationType,
-}: {
-  subscription: Subscription;
-  informationType: InformationEmailMetadata['type'];
-}) {
-  try {
-    const user = await dbGetUserById({ userId: subscription.referenceId });
-
-    if (user === undefined) {
-      console.error(`User with ID ${subscription.referenceId} not found for email notification`);
-      return;
-    }
-
-    await sendUserActionInformationEmail({
-      to: user.email,
-      information: { type: informationType },
-    });
-  } catch (error) {
-    console.error('Error sending subscription purchased email:', error);
-    return;
-  }
-}

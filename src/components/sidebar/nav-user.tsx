@@ -17,7 +17,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { BadgeCheck, ChevronsUpDown, Code, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import {
+  BadgeCheck,
+  Building2,
+  ChevronsUpDown,
+  Code,
+  CreditCard,
+  LogOut,
+  Sparkles,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -27,11 +35,12 @@ export default function NavUser({ user }: { user: UserAndContext }) {
   const t = useTranslations('sidebar');
   const tAuth = useTranslations('auth');
 
-  const MENU_ITEMS = [
+  const menuItems = [
     { label: t('account'), icon: BadgeCheck, href: '/settings/account' },
-    ...(user.subscription.type === 'pro'
+    ...(user.subscription.type !== 'free'
       ? [{ label: t('billing'), icon: CreditCard, href: '/settings/billing' }]
       : []),
+    { label: t('organizations'), icon: Building2, href: '/org' },
     { label: t('developers'), icon: Code, href: '/developers' },
   ];
 
@@ -55,6 +64,7 @@ export default function NavUser({ user }: { user: UserAndContext }) {
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             align="end"
@@ -73,7 +83,9 @@ export default function NavUser({ user }: { user: UserAndContext }) {
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             {user.subscription.type === 'free' && (
               <>
                 <DropdownMenuGroup>
@@ -84,11 +96,13 @@ export default function NavUser({ user }: { user: UserAndContext }) {
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
+
                 <DropdownMenuSeparator />
               </>
             )}
+
             <DropdownMenuGroup>
-              {MENU_ITEMS.map((item) => (
+              {menuItems.map((item) => (
                 <DropdownMenuItem asChild key={item.href}>
                   <Link href={item.href}>
                     <item.icon />
@@ -97,7 +111,9 @@ export default function NavUser({ user }: { user: UserAndContext }) {
                 </DropdownMenuItem>
               ))}
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem asChild>
               <Link href="/logout">
                 <LogOut />

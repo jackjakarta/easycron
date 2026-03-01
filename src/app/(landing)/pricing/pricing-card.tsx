@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { type SubscriptionType } from '@/stripe/types';
 import { cn } from '@/utils/tailwind';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
@@ -25,10 +26,10 @@ type PricingCardProps = {
   buttonText: string;
   buttonVariant?: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive';
   highlighted?: boolean;
-  plan?: 'pro' | 'free';
+  plan?: SubscriptionType;
   annual?: boolean;
   isLoggedIn?: boolean;
-  userId?: string;
+  organizationId?: string;
 };
 
 export function PricingCard({
@@ -43,12 +44,17 @@ export function PricingCard({
   plan = 'pro',
   annual = false,
   isLoggedIn = false,
-  userId,
+  organizationId,
 }: PricingCardProps) {
   async function handleSubscribe() {
+    if (organizationId === undefined) {
+      toast.error('No active organization found. Please log in first.');
+      return;
+    }
+
     const { data: subscriptions } = await authClient.subscription.list({
       query: {
-        referenceId: userId,
+        referenceId: organizationId,
       },
     });
 
@@ -57,15 +63,17 @@ export function PricingCard({
     );
 
     if (activeSubscription !== undefined) {
-      toast.error('You already have an active subscription.');
+      toast.error('Your organization already has an active subscription.');
       return;
     }
 
     const { error } = await authClient.subscription.upgrade({
-      plan,
+      plan: 'pro',
       successUrl: '/dashboard',
       cancelUrl: '/pricing',
       annual,
+      referenceId: organizationId,
+      seats: 1,
     });
 
     if (error !== null) {

@@ -23,8 +23,12 @@ import React from 'react';
 
 import ProjectActionsDropdown from './project-actions-dropdown';
 
-export default function NavMain() {
-  const { data: projects = [], isLoading, isError } = useProjectsQuery();
+type NavMainProps = {
+  organizationId: string;
+};
+
+export default function NavMain({ organizationId }: NavMainProps) {
+  const { data: projects = [], isLoading, isError } = useProjectsQuery({ organizationId });
   const skeletonSeeds = useSidebarSkeletons(2, 8);
   const t = useTranslations('sidebar');
 
@@ -92,7 +96,7 @@ export default function NavMain() {
                       <SidebarMenuSubItem key={project.id} className="group/sub">
                         <SidebarMenuSubButton asChild>
                           <Link href={`/projects/${project.id}`}>
-                            <span>{project.name}</span>
+                            <span className="max-w-[85%] truncate">{project.name}</span>
                           </Link>
                         </SidebarMenuSubButton>
 

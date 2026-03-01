@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
 
-export function Header() {
+export default function Header() {
   const { data: session } = authClient.useSession();
 
   return (

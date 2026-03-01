@@ -61,7 +61,7 @@ export default function ProjectActionsDropdown({
     }
   }
 
-  async function copyProjectIdToClipboard() {
+  async function handleCopyProjectIdToClipboard() {
     try {
       await navigator.clipboard.writeText(project.id);
       toast.success('Project ID copied to clipboard');
@@ -77,7 +77,7 @@ export default function ProjectActionsDropdown({
         {trigger}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={copyProjectIdToClipboard}>
+        <DropdownMenuItem onSelect={handleCopyProjectIdToClipboard}>
           <Copy className="size-4" />
           Project ID
         </DropdownMenuItem>

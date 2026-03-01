@@ -5,6 +5,7 @@ import { dbRefreshExecutionAnalytics } from '@/db/functions/execution-analytics'
 import { jobTable } from '@/db/schema';
 import { getRunQueue } from '@/queue/queue';
 import { computeNextRun, now } from '@/utils/cron';
+import { occurrenceJobId } from '@/utils/job';
 import { tryLock } from '@/utils/locks';
 import { and, eq, lte } from 'drizzle-orm';
 
@@ -28,6 +29,7 @@ export async function tick() {
       console.warn('Scheduler: failed to refresh execution_hourly_stats', e);
     }
   }
+
   const q = getRunQueue();
   const current = now();
 
@@ -79,9 +81,4 @@ export async function tick() {
   }
 
   writeFileSync('/tmp/scheduler-heartbeat', Date.now().toString());
-}
-
-function occurrenceJobId(jobId: string, scheduledISO: string) {
-  const safeISO = scheduledISO.replace(/[:.]/g, '');
-  return `run-${jobId}-${safeISO}`;
 }

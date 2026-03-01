@@ -12,12 +12,12 @@ export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   type: 'free',
   features: {
     analytics: false,
-    ai: false,
   },
   limits: {
-    projects: 5,
-    jobsTotal: 10,
+    projectsAmount: 2,
+    jobsAmount: 5,
     executionsPerMonth: 500,
+    webhookEndpointsPerProject: 1,
   },
 };
 
@@ -25,11 +25,11 @@ export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   type: 'pro',
   features: {
     analytics: true,
-    ai: true,
   },
   limits: {
-    projects: Infinity,
-    jobsTotal: Infinity,
-    executionsPerMonth: Infinity,
+    projectsAmount: Infinity,
+    jobsAmount: 500,
+    executionsPerMonth: 250_000,
+    webhookEndpointsPerProject: 10,
   },
 };

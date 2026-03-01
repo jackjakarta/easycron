@@ -21,9 +21,8 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'easyCron - Free and Open Source Cron Job Manager',
-    description:
-      'A free and open source cron job manager to schedule and manage your cron jobs with ease.',
+    title: 'easyCron - Cron Job Scheduler',
+    description: 'A cron job scheduler to schedule and manage your cron jobs with ease.',
     icons: { icon: '/favicon.png' },
   };
 }

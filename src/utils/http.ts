@@ -49,7 +49,6 @@ export async function executeHttp(req: OutboundRequest): Promise<OutboundRespons
   try {
     if (req.authorizationHeader !== undefined) {
       headers[req.authorizationHeader.k] = req.authorizationHeader.v;
-      // console.debug({ headersAfter: headers });
     }
 
     const res = await request(req.url, {
@@ -59,7 +58,6 @@ export async function executeHttp(req: OutboundRequest): Promise<OutboundRespons
       bodyTimeout: req.timeoutMs || RUN_DEFAULT_TIMEOUT_MS,
       headersTimeout: req.timeoutMs || RUN_DEFAULT_TIMEOUT_MS,
       signal: controller.signal,
-      // maxRedirections: 3,
     });
 
     const chunks: Buffer[] = [];

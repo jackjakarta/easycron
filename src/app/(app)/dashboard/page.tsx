@@ -4,7 +4,10 @@ import Header from '@/components/common/header';
 import PageContainer from '@/components/layout/page-container';
 import { TypographyH3 } from '@/components/ui/typography';
 import { dbGetJobsExecutionsSuccessRate } from '@/db/functions/execution';
-import { dbGetEnabledJobCountByUserId, dbGetJobCountByUserId } from '@/db/functions/job';
+import {
+  dbGetEnabledJobCountByOrganizationId,
+  dbGetJobCountByOrganizationId,
+} from '@/db/functions/job';
 import { getTimeBasedGreeting } from '@/utils/greeting';
 import React from 'react';
 
@@ -14,10 +17,12 @@ import RecentExecutions from './recent-executions';
 export default async function Page() {
   const user = await getUser();
 
+  const { organizationId } = user;
+
   const [jobsCount, enabledJobsCount, stats] = await Promise.all([
-    dbGetJobCountByUserId({ userId: user.id }),
-    dbGetEnabledJobCountByUserId({ userId: user.id }),
-    dbGetJobsExecutionsSuccessRate({ userId: user.id }),
+    dbGetJobCountByOrganizationId({ organizationId }),
+    dbGetEnabledJobCountByOrganizationId({ organizationId }),
+    dbGetJobsExecutionsSuccessRate({ organizationId }),
   ]);
 
   const [firstName] = user.name.split(' ');

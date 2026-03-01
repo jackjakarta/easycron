@@ -12,7 +12,6 @@ next-env.d.ts
 .env.op
 .env
 .DS_Store
-docker-compose.local.yml
 docker-compose.yml
 .env
 Dockerfile

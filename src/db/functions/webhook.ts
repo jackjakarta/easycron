@@ -10,11 +10,15 @@ import {
   type WebhookEndpointModel,
 } from '../schema';
 
-export async function dbGetUserWebhookEndpoints({ userId }: { userId: string }) {
+export async function dbGetOrganizationWebhookEndpoints({
+  organizationId,
+}: {
+  organizationId: string;
+}) {
   const endpoints = await db
     .select()
     .from(webhookEndpointTable)
-    .where(eq(webhookEndpointTable.userId, userId))
+    .where(eq(webhookEndpointTable.organizationId, organizationId))
     .orderBy(desc(webhookEndpointTable.isActive), desc(webhookEndpointTable.updatedAt));
 
   return endpoints;
@@ -41,11 +45,11 @@ export async function dbInsertWebhookEvent(event: InsertWebhookEventModel) {
 
 export async function dbGetWebhookEndpointsForEvent({
   projectId,
-  userId,
+  organizationId,
   eventType,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
   eventType: EventType;
 }) {
   const endpoints = await db
@@ -54,7 +58,7 @@ export async function dbGetWebhookEndpointsForEvent({
     .where(
       and(
         eq(webhookEndpointTable.projectId, projectId),
-        eq(webhookEndpointTable.userId, userId),
+        eq(webhookEndpointTable.organizationId, organizationId),
         sql`${webhookEndpointTable.enabledEventTypes} @> ${JSON.stringify([eventType])}`,
       ),
     );

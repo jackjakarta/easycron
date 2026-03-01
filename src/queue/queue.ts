@@ -1,5 +1,5 @@
 import { env } from '@/env';
-import { JobsOptions, Queue, QueueEvents } from 'bullmq';
+import { Queue, QueueEvents, type JobsOptions } from 'bullmq';
 import IORedis from 'ioredis';
 
 let connection: IORedis | null = null;

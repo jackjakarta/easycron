@@ -8,6 +8,7 @@ import {
   real,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { z } from 'zod';
@@ -44,6 +45,8 @@ export const sessionTable = appSchema.table('session', {
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
+  activeOrganizationId: uuid('active_organization_id'),
+  activeTeamId: uuid('active_team_id'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -54,26 +57,30 @@ export const sessionTable = appSchema.table('session', {
 export type SessionModel = typeof sessionTable.$inferSelect;
 export type InsertSessionModel = typeof sessionTable.$inferInsert;
 
-export const accountTable = appSchema.table('account', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => userTable.id),
-  accountId: text('account_id').notNull(),
-  providerId: text('provider_id').$type<AuthProvider>().notNull(),
-  accessToken: text('access_token'),
-  refreshToken: text('refresh_token'),
-  accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
-  scope: text('scope'),
-  idToken: text('id_token'),
-  password: text('password'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
+export const accountTable = appSchema.table(
+  'account',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => userTable.id),
+    accountId: text('account_id').notNull(),
+    providerId: text('provider_id').$type<AuthProvider>().notNull(),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+    refreshTokenExpiresAt: timestamp('refresh_token_expires_at', { withTimezone: true }),
+    scope: text('scope'),
+    idToken: text('id_token'),
+    password: text('password'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [unique('account_provider_user_unique_idx').on(table.providerId, table.userId)],
+);
 
 export type AccountModel = typeof accountTable.$inferSelect;
 export type InsertAccountModel = typeof accountTable.$inferInsert;
@@ -150,6 +157,9 @@ export const projectTable = appSchema.table('project', {
   userId: uuid('user_id')
     .notNull()
     .references(() => userTable.id),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   name: text('name').notNull(),
   description: text('description'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -199,6 +209,9 @@ export const jobTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizationTable.id),
     metadata: jsonb('metadata').$type<MetadataColumn>().notNull().default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -207,12 +220,12 @@ export const jobTable = appSchema.table(
       .$onUpdate(() => new Date()),
   },
   (table) => [
-    index('jobs_project_id_user_id_next_run_at_idx').on(
+    index('jobs_project_id_org_id_next_run_at_idx').on(
       table.nextRunAt,
       table.projectId,
-      table.userId,
+      table.organizationId,
     ),
-    index('jobs_project_id_user_id_idx').on(table.projectId, table.userId),
+    index('jobs_project_id_org_id_idx').on(table.projectId, table.organizationId),
   ],
 );
 
@@ -266,6 +279,9 @@ export const secretTable = appSchema.table('secret', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -290,6 +306,9 @@ export const webhookEndpointTable = appSchema.table('webhook_endpoint', {
   userId: uuid('user_id')
     .references(() => userTable.id)
     .notNull(),
+  organizationId: uuid('organization_id')
+    .notNull()
+    .references(() => organizationTable.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .defaultNow()
@@ -316,6 +335,9 @@ export const webhookEventTable = appSchema.table(
     userId: uuid('user_id')
       .references(() => userTable.id)
       .notNull(),
+    organizationId: uuid('organization_id')
+      .notNull()
+      .references(() => organizationTable.id),
     deliveredAt: timestamp('delivered_at', { withTimezone: true }),
     success: boolean('success').notNull().default(false),
     errorMessage: text('error_message'),
@@ -351,6 +373,72 @@ export const subscriptionTable = appSchema.table('subscription', {
 export type SubscriptionModel = typeof subscriptionTable.$inferSelect;
 export type InsertSubscriptionModel = typeof subscriptionTable.$inferInsert;
 export type UpdateSubscriptionModel = UpdateDbRow<SubscriptionModel>;
+
+export type OrganizationMetadata = {
+  website?: string;
+  description?: string;
+  email?: string;
+};
+
+export const organizationTable = appSchema.table('organization', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  logo: text('logo'),
+  metadata: jsonb('metadata').$type<OrganizationMetadata>().notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type OrganizationModel = typeof organizationTable.$inferSelect;
+export type InsertOrganizationModel = typeof organizationTable.$inferInsert;
+export type UpdateOrganizationModel = UpdateDbRow<OrganizationModel>;
+
+export const organizationMemberRoleSchema = z.enum(['owner', 'admin', 'member']);
+export type OrganizationMemberRole = z.infer<typeof organizationMemberRoleSchema>;
+
+export const memberTable = appSchema.table('member', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .references(() => userTable.id)
+    .notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizationTable.id)
+    .notNull(),
+  role: text('role').$type<OrganizationMemberRole>().notNull(),
+  joinedAt: timestamp('joined_at', { withTimezone: true }).defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export type MemberModel = typeof memberTable.$inferSelect;
+export type InsertMemberModel = typeof memberTable.$inferInsert;
+export type UpdateMemberModel = UpdateDbRow<MemberModel>;
+
+export const invitationTable = appSchema.table('invitation', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull(),
+  inviterId: uuid('inviter_id')
+    .references(() => userTable.id)
+    .notNull(),
+  organizationId: uuid('organization_id')
+    .references(() => organizationTable.id)
+    .notNull(),
+  role: text('role').notNull(),
+  status: text('status').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type InvitationModel = typeof invitationTable.$inferSelect;
+export type InsertInvitationModel = typeof invitationTable.$inferInsert;
+export type UpdateInvitationModel = UpdateDbRow<InvitationModel>;
 
 export const executionHourlyStatsView = appSchema
   .materializedView('execution_hourly_stats', {

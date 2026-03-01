@@ -41,14 +41,14 @@ export default async function Page() {
           </TypographyP>
         </div>
         <TopStats
-          totalRequests={totalRequests}
+          totalRequests={totalRequests ?? 0}
           activeKeys={noOfEnabledApiKeys}
           totalKeys={noOfApiKeys}
         />
         <div className="grid gap-6 md:grid-cols-2">
           <RequestTimelineChart />
           <KeyStatusDistributionChart />
-          <RequestsCountChart initialApiKeys={apiKeys} />
+          <RequestsCountChart userId={user.id} initialApiKeys={apiKeys} />
           <RateLimitChart />
         </div>
       </PageContainer>

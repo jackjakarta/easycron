@@ -26,8 +26,6 @@ export const jobFormSchema = z.object({
       k: z.string().max(200, 'Header name must be at most 200 characters'),
       v: z.string().max(1000, 'Header value must be at most 1000 characters'),
     })
-    .nullable()
-    .optional()
     .superRefine((val, ctx) => {
       // If one field is filled but not the other, add error
       if (val && ((val.k?.trim() && !val.v?.trim()) || (!val.k?.trim() && val.v?.trim()))) {
@@ -42,7 +40,20 @@ export const jobFormSchema = z.object({
           path: ['v'],
         });
       }
-    }),
+    })
+    .nullable()
+    .optional(),
 });
 
 export type JobFormData = z.infer<typeof jobFormSchema>;
+
+export function getPhoneNumberSchema(errorMessage?: string) {
+  const phoneNumberSchema = z
+    .string()
+    .transform((s) => s.trim())
+    .transform((s) => s.replace(/[()\-\s\.]/g, ''))
+    .refine((s) => /^\+?[1-9]\d{1,14}$/.test(s), { error: errorMessage })
+    .transform((s) => (s.startsWith('+') ? s : `+${s}`));
+
+  return phoneNumberSchema;
+}

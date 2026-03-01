@@ -321,14 +321,14 @@ export default function CreateJobDialog({ trigger, projectId }: CreateJobDialogP
               </div>
             </div>
 
-            {(httpMethodValue === 'POST' || httpMethodValue === 'PUT') && (
+            {httpMethodValue !== 'GET' && httpMethodValue !== 'DELETE' && (
               <div className="space-y-4">
                 <Label htmlFor="body">Request Body (Optional)</Label>
                 <Textarea
                   id="body"
                   {...register('body')}
                   rows={4}
-                  placeholder="JSON payload for POST/PUT requests"
+                  placeholder="JSON payload for POST/PUT/PATCH requests"
                   className={cn(errors.body && 'border-destructive')}
                 />
                 {errors.body && (

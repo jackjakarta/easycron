@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TypographyP } from '@/components/ui/typography';
 import { Clipboard, Eye, EyeOff } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
@@ -124,10 +125,10 @@ export default function SecretDialog({ trigger, projectId, regenerate }: SecretD
                 </div>
               </div>
               <div className="bg-muted rounded-md p-3">
-                <p className="text-muted-foreground text-sm">
+                <TypographyP className="text-muted-foreground text-sm">
                   <span className="font-semibold">Important:</span> This is the only time you will
                   see this secret. Make sure to copy it and store it securely.
-                </p>
+                </TypographyP>
               </div>
             </div>
             <DialogFooter>

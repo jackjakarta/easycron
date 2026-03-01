@@ -11,7 +11,7 @@ import {
 import { dbGetFinishedExecutionsByJobId } from '@/db/functions/execution';
 import { dbGetExecutionAnalytics } from '@/db/functions/execution-analytics';
 import { dbGetJobById } from '@/db/functions/job';
-import { getAsyncPageContext, PageContext } from '@/utils/context';
+import { getAsyncPageContext, type PageContext } from '@/utils/context';
 import { notFound } from 'next/navigation';
 import { z } from 'zod';
 
@@ -34,7 +34,7 @@ export default async function Page(context: PageContext) {
   }
 
   const { jobId, projectId } = parsed.data.params;
-  const job = await dbGetJobById({ jobId, userId: user.id });
+  const job = await dbGetJobById({ jobId, organizationId: user.organizationId });
 
   if (job === undefined) {
     return notFound();

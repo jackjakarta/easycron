@@ -1,42 +1,40 @@
 import { BarChart3, Bell, Calendar, Code2, Shield, Zap } from 'lucide-react';
 
-export function Features() {
-  const features = [
-    {
-      icon: Calendar,
-      title: 'Flexible Scheduling',
-      description:
-        'Use cron expressions or simple intervals. Schedule jobs with precision down to the second.',
-    },
-    {
-      icon: Bell,
-      title: 'Real-time Monitoring',
-      description: 'Track job execution in real-time with detailed logs and performance metrics.',
-    },
-    {
-      icon: BarChart3,
-      title: 'Advanced Analytics',
-      description: 'Visualize job performance, success rates, and execution patterns over time.',
-    },
-    {
-      icon: Shield,
-      title: 'Enterprise Security',
-      description:
-        'End-to-end encryption, role-based access control, and audit logs for compliance.',
-    },
-    {
-      icon: Zap,
-      title: 'Instant Alerts',
-      description:
-        'Get notified via email, Slack, or webhooks when jobs fail or exceed thresholds.',
-    },
-    {
-      icon: Code2,
-      title: 'Developer-First API',
-      description: 'RESTful API with SDKs for Node.js, Python, Go, and more. Integrate in minutes.',
-    },
-  ];
+const features = [
+  {
+    icon: Calendar,
+    title: 'Flexible Scheduling',
+    description:
+      'Use cron expressions or simple intervals. Schedule jobs with precision down to the second.',
+  },
+  {
+    icon: Bell,
+    title: 'Real-time Monitoring',
+    description: 'Track job execution in real-time with detailed logs and performance metrics.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Advanced Analytics',
+    description: 'Visualize job performance, success rates, and execution patterns over time.',
+  },
+  {
+    icon: Shield,
+    title: 'Enterprise Security',
+    description: 'End-to-end encryption, role-based access control, and audit logs for compliance.',
+  },
+  {
+    icon: Zap,
+    title: 'Instant Alerts',
+    description: 'Get notified via email, Slack, or webhooks when jobs fail or exceed thresholds.',
+  },
+  {
+    icon: Code2,
+    title: 'Developer-First API',
+    description: 'RESTful API with SDKs for Node.js, Python, Go, and more. Integrate in minutes.',
+  },
+];
 
+export default function Features() {
   return (
     <section id="features" className="container mx-auto px-4 py-24">
       <div className="mb-16 space-y-4 text-center">

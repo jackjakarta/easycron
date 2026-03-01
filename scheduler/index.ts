@@ -15,7 +15,7 @@ async function main() {
   const ac = new AbortController();
   let stopping = false;
 
-  const stop = () => {
+  function stop() {
     if (!stopping) {
       console.info('\nGraceful shutdown requested...');
       stopping = true;
@@ -26,7 +26,7 @@ async function main() {
         process.exit(0);
       }, FORCE_EXIT_MS).unref();
     }
-  };
+  }
 
   process.on('SIGINT', stop);
   process.on('SIGTERM', stop);

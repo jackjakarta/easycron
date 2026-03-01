@@ -48,6 +48,7 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
     setValue,
+    watch,
   } = useForm<JobFormData>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
@@ -95,6 +96,8 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
       toast.error('Failed to update job');
     }
   }
+
+  const httpMethodValue = watch('httpMethod');
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -281,17 +284,19 @@ export default function EditJobSheet({ trigger, job }: EditJobDialogProps) {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="body">Request Body (Optional)</Label>
-              <Textarea
-                id="body"
-                placeholder="JSON payload for POST/PUT requests"
-                rows={4}
-                {...register('body')}
-                className={errors.body ? 'border-destructive' : ''}
-              />
-              {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
-            </div>
+            {httpMethodValue !== 'GET' && httpMethodValue !== 'DELETE' && (
+              <div className="space-y-2">
+                <Label htmlFor="body">Request Body (Optional)</Label>
+                <Textarea
+                  id="body"
+                  placeholder="JSON payload for POST/PUT requests"
+                  rows={4}
+                  {...register('body')}
+                  className={errors.body ? 'border-destructive' : ''}
+                />
+                {errors.body && <p className="text-destructive text-sm">{errors.body.message}</p>}
+              </div>
+            )}
           </div>
 
           <SheetFooter>

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     const jobId = parsedJobId.data;
-    const job = await dbGetJobById({ jobId, userId: user.id });
+    const job = await dbGetJobById({ jobId, organizationId: user.organizationId });
 
     if (job === undefined) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 });

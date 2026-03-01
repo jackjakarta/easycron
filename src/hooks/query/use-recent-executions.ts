@@ -1,5 +1,5 @@
+import { honoClient } from '@/app/api/client';
 import { type ExecutionWithDetails } from '@/db/functions/execution';
-import { betterFetch } from '@better-fetch/fetch';
 import { useQuery } from '@tanstack/react-query';
 
 import { type QueryOptions } from './types';
@@ -13,17 +13,20 @@ export function useRecentJobExecutionsQuery(options?: QueryOptions<ExecutionWith
 }
 
 async function fetchRecentExecutions(): Promise<ExecutionWithDetails[]> {
-  const { data: jobExecutions, error } = await betterFetch<ExecutionWithDetails[]>(
-    '/api/recent-executions',
-    {
-      cache: 'no-store',
-    },
-  );
+  const response = await honoClient.api.recentExecutions.$get();
 
-  if (error !== null) {
-    console.error(`Failed to fetch job executions: ${error.message}`);
-    throw new Error(`Failed to fetch job executions: ${error.message}`);
+  if (!response.ok) {
+    console.error(`Failed to fetch recent executions: ${response.statusText}`);
+    throw new Error(`Failed to fetch recent executions: ${response.statusText}`);
   }
 
-  return Array.isArray(jobExecutions) ? jobExecutions : [];
+  const data = await response.json();
+
+  const formated = data.map((execution) => ({
+    ...execution,
+    startedAt: new Date(execution.startedAt),
+    finishedAt: execution.finishedAt ? new Date(execution.finishedAt) : null,
+  }));
+
+  return formated;
 }

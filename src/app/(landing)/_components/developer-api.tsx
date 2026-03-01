@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { BookOpen, Code2, Terminal, Webhook } from 'lucide-react';
 
-export function DeveloperAPI() {
+export default function DeveloperAPI() {
   return (
     <section className="px-6 py-24">
       <div className="mx-auto max-w-7xl">

@@ -61,25 +61,26 @@ export default function Page2({ session }: { session: BetterAuthSession | null }
           buttonVariant="secondary"
           annual={isAnnual}
           isLoggedIn={session !== null}
-          userId={session?.user.id}
+          organizationId={session?.session.activeOrganizationId ?? undefined}
         />
 
         <PricingCard
           name="Pro"
           price={isAnnual ? '€180' : '€19'}
           period={isAnnual ? '/year' : '/month'}
-          description="For higher limits and power users."
+          description="For teams and power users. Per-seat billing with team invitations."
           features={[
             'Unlimited projects',
             'Unlimited jobs per project',
             'Unlimited job runs per month',
+            'Invite team members',
           ]}
           buttonText={session !== null ? 'Upgrade to Pro' : 'Buy Pro Plan'}
           buttonVariant="default"
           plan="pro"
           annual={isAnnual}
           isLoggedIn={session !== null}
-          userId={session?.user.id}
+          organizationId={session?.session.activeOrganizationId ?? undefined}
           highlighted
         />
       </div>

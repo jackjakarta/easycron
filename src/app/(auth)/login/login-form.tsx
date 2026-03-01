@@ -16,14 +16,10 @@ import { z } from 'zod';
 
 import SocialAuthButton from '../_components/social-auth-button';
 
-const loginFormSchema = z.object({
-  email: z.email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginFormData = z.infer<typeof loginFormSchema>;
+type LoginFormData = z.infer<ReturnType<typeof useLoginZodSchema>>;
 
 export default function LoginForm() {
+  const loginFormSchema = useLoginZodSchema();
   const router = useRouter();
 
   const t = useTranslations('auth.login');
@@ -44,6 +40,23 @@ export default function LoginForm() {
       password: '',
     },
   });
+
+  // async function onSubmitLink(data: LoginFormData) {
+  //   const { email: _email } = data;
+  //   const email = _email.trim().toLowerCase();
+
+  //   const { error } = await authClient.signIn.magicLink({
+  //     email,
+  //     callbackURL: '/',
+  //     newUserCallbackURL: '/',
+  //     // errorCallbackURL: '/error',
+  //   });
+
+  //   if (error !== null) {
+  //     setError('root', { type: 'manual', message: error.message });
+  //     return;
+  //   }
+  // }
 
   async function onSubmit(loginData: LoginFormData) {
     const { email: _email, password } = loginData;
@@ -170,4 +183,15 @@ export default function LoginForm() {
       </div>
     </div>
   );
+}
+
+function useLoginZodSchema() {
+  const t = useTranslations('auth.login');
+
+  const loginFormSchema = z.object({
+    email: z.email(t('form.email.error')),
+    password: z.string().min(1, t('form.password.error')),
+  });
+
+  return loginFormSchema;
 }

@@ -1,4 +1,4 @@
-export function Stats() {
+export default function Stats() {
   const stats = [
     {
       value: '99.9%',

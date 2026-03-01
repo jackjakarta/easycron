@@ -1,10 +1,49 @@
+import { dbGetOrganizationOwnerId } from '@/db/functions/organization';
+import { dbGetUserById } from '@/db/functions/user';
 import { IS_DEV_MODE } from '@/utils/dev';
+import { type Subscription } from '@better-auth/stripe';
 
 import { createInformationMailTemplate, createUserActionMailTemplate } from './templates';
 import { type EmailAction, type EmailActionResult, type InformationEmailMetadata } from './types';
 import { mailjetSendEmail, sendTestEmail } from './utils';
 
 export type SendUserActionEmail = typeof sendUserActionEmail;
+
+export async function sendSubscriptionInformationEmail({
+  subscription,
+  informationType,
+}: {
+  subscription: Subscription;
+  informationType: InformationEmailMetadata['type'];
+}) {
+  try {
+    const ownerId = await dbGetOrganizationOwnerId({
+      organizationId: subscription.referenceId,
+    });
+
+    if (ownerId === undefined) {
+      console.error(
+        `Owner not found for organization ${subscription.referenceId} for email notification`,
+      );
+      return;
+    }
+
+    const user = await dbGetUserById({ userId: ownerId });
+
+    if (user === undefined) {
+      console.error(`User with ID ${ownerId} not found for email notification`);
+      return;
+    }
+
+    await sendUserActionInformationEmail({
+      to: user.email,
+      information: { type: informationType },
+    });
+  } catch (error) {
+    console.error('Error sending subscription purchased email:', error);
+    return;
+  }
+}
 
 /**
  * Sends emails to user with a specific user action to be executed by the user
@@ -15,12 +54,14 @@ export async function sendUserActionEmail({
   to,
   action,
   actionUrl,
+  extra,
 }: {
   to: string;
   action: EmailAction;
   actionUrl: string;
+  extra?: Record<string, string>;
 }): Promise<EmailActionResult> {
-  const result = await createUserActionMailTemplate({ email: to, action, actionUrl });
+  const result = await createUserActionMailTemplate({ email: to, action, actionUrl, extra });
 
   if (result === undefined || !result.success) {
     return {

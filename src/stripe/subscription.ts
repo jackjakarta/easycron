@@ -1,19 +1,17 @@
 import { auth } from '@/auth';
-import { dbGetUserSubscriptions } from '@/db/functions/subscription';
+import { dbGetOrganizationSubscriptions } from '@/db/functions/subscription';
 import { headers } from 'next/headers';
 
 import { FREE_SUBSCRIPTION, PRO_SUBSCRIPTION } from './const';
 import { type SubscriptionFeaturesAndLimits } from './types';
 
-export async function getUserActiveSubscription({
-  userId,
+export async function getOrgActiveSubscription({
+  referenceId,
 }: {
-  userId: string;
+  referenceId: string;
 }): Promise<SubscriptionFeaturesAndLimits> {
   const subscriptions = await auth.api.listActiveSubscriptions({
-    query: {
-      referenceId: userId,
-    },
+    query: { referenceId },
     headers: await headers(),
   });
 
@@ -32,12 +30,12 @@ export async function getUserActiveSubscription({
   return FREE_SUBSCRIPTION;
 }
 
-export async function getUserActiveSubscriptionApi({
-  userId,
+export async function getOrgActiveSubscriptionApi({
+  organizationId,
 }: {
-  userId: string;
+  organizationId: string;
 }): Promise<SubscriptionFeaturesAndLimits> {
-  const subscriptions = await dbGetUserSubscriptions({ userId });
+  const subscriptions = await dbGetOrganizationSubscriptions({ organizationId });
 
   const activeSubscription = subscriptions.find(
     (sub) => sub.status === 'active' || sub.status === 'trialing',

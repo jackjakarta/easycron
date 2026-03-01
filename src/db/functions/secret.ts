@@ -19,29 +19,33 @@ export async function dbUpsertSecret(data: InsertSecretModel): Promise<SecretMod
 
 export async function dbGetSecretByProjectId({
   projectId,
-  userId,
+  organizationId,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<SecretModel | undefined> {
   const [secret] = await db
     .select()
     .from(secretTable)
-    .where(and(eq(secretTable.projectId, projectId), eq(secretTable.userId, userId)));
+    .where(
+      and(eq(secretTable.projectId, projectId), eq(secretTable.organizationId, organizationId)),
+    );
 
   return secret;
 }
 
 export async function dbDeleteSecret({
   projectId,
-  userId,
+  organizationId,
 }: {
   projectId: string;
-  userId: string;
+  organizationId: string;
 }): Promise<SecretModel | undefined> {
   const [deletedSecret] = await db
     .delete(secretTable)
-    .where(and(eq(secretTable.projectId, projectId), eq(secretTable.userId, userId)))
+    .where(
+      and(eq(secretTable.projectId, projectId), eq(secretTable.organizationId, organizationId)),
+    )
     .returning();
 
   return deletedSecret;

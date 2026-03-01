@@ -8,12 +8,14 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 
 
 type RequestCountChartProps = {
   initialApiKeys: ApiKeyModel[];
+  userId: string;
 };
 
-export default function RequestsCountChart({ initialApiKeys }: RequestCountChartProps) {
+export default function RequestsCountChart({ initialApiKeys, userId }: RequestCountChartProps) {
   const { data: apiKeys = [] } = useApiKeysQuery({
+    userId,
     initialData: initialApiKeys,
-    refetchInterval: 120000, // refetch every 2 minutes
+    refetchInterval: 60_000, // refetch every 1 minute
   });
 
   const topApiKeysByRequestCount = apiKeys
