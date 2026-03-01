@@ -14,7 +14,7 @@ export const FREE_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
     analytics: false,
   },
   limits: {
-    projectsAmount: 2,
+    projectsAmount: 1,
     jobsAmount: 5,
     executionsPerMonth: 500,
     webhookEndpointsPerProject: 1,
@@ -28,8 +28,8 @@ export const PRO_SUBSCRIPTION: SubscriptionFeaturesAndLimits = {
   },
   limits: {
     projectsAmount: Infinity,
-    jobsAmount: 500,
-    executionsPerMonth: 250_000,
+    jobsAmount: Infinity,
+    executionsPerMonth: Infinity,
     webhookEndpointsPerProject: 10,
   },
 };

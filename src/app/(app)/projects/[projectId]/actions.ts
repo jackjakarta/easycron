@@ -1,6 +1,6 @@
 'use server';
 
-import { getUser } from '@/auth/utils';
+import { checkPermissions, getUser } from '@/auth/utils';
 import {
   dbDeleteJob,
   dbGetJobById,
@@ -50,6 +50,21 @@ export async function createJobAction({
   const user = await getUser();
   const { subscription, organizationId } = user;
 
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'job',
+      permissions: ['create'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   if (subscription.type === 'free') {
     const jobsCount = await dbGetJobCountByOrganizationId({ organizationId });
 
@@ -96,6 +111,22 @@ export async function enableOrDisableJobAction({
 
 export async function deleteJobAction({ jobId }: { jobId: string }) {
   const user = await getUser();
+
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'job',
+      permissions: ['delete'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   const deletedJob = await dbDeleteJob({ jobId, organizationId: user.organizationId });
 
   if (deletedJob === undefined) {
@@ -107,6 +138,22 @@ export async function deleteJobAction({ jobId }: { jobId: string }) {
 
 export async function updateJobAction({ jobId, data }: { jobId: string; data: JobFormData }) {
   const user = await getUser();
+
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'job',
+      permissions: ['update'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   const updatedJob = await dbUpdateJob({ jobId, organizationId: user.organizationId, data });
 
   if (updatedJob === undefined) {
@@ -119,6 +166,22 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
 export async function createOrUpdateProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
   const { organizationId } = user;
+
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'project',
+      permissions: ['update'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   const project = await dbGetProjectById({ projectId, organizationId });
 
   if (project === undefined) {
@@ -152,6 +215,22 @@ export async function generateCronExpressionAction({ prompt }: { prompt: string 
 
 export async function deleteProjectSecretAction({ projectId }: { projectId: string }) {
   const user = await getUser();
+
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'project',
+      permissions: ['update'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   const deletedSecret = await dbDeleteSecret({
     projectId,
     organizationId: user.organizationId,
@@ -166,6 +245,22 @@ export async function deleteProjectSecretAction({ projectId }: { projectId: stri
 
 export async function deleteProjectAction({ projectId }: { projectId: string }) {
   const user = await getUser();
+
+  const hasPermission = await checkPermissions([
+    {
+      resource: 'project',
+      permissions: ['delete'],
+    },
+  ]);
+
+  if (!hasPermission) {
+    return {
+      success: false,
+      error: 'You do not have permission to create a job in this organization',
+      code: 403,
+    };
+  }
+
   const deletedProject = await dbDeleteProject({
     projectId,
     organizationId: user.organizationId,
