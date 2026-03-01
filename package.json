@@ -70,7 +70,7 @@
     "date-fns": "4.1.0",
     "drizzle-orm": "0.44.4",
     "hono": "4.10.5",
-    "import-in-the-middle": "3.0.0",
+    "import-in-the-middle": "2.0.6",
     "ioredis": "5.8.0",
     "lucide-react": "0.511.0",
     "nanoid": "5.1.6",

@@ -5,7 +5,6 @@ import { z } from 'zod';
 export const permissionActionSchema = z.enum(['read', 'create', 'update', 'delete']);
 export type PermissionAction = z.infer<typeof permissionActionSchema>;
 
-type DefaultResource = keyof typeof statement;
 export type PermissionResource = 'project' | 'job' | 'apiKeys';
 
 const statement = {

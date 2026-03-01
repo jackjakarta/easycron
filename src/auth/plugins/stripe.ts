@@ -46,7 +46,7 @@ export function getStripePlugin() {
           },
         };
       },
-      authorizeReference: async ({ user, referenceId }) => {
+      authorizeReference: async ({ user, referenceId, action }) => {
         const member = await dbGetOrganizationMember({
           userId: user.id,
           organizationId: referenceId,
@@ -56,7 +56,13 @@ export function getStripePlugin() {
           return false;
         }
 
-        return member.role === 'owner';
+        // Read-only: any member can view subscription status
+        if (action === 'list-subscription') {
+          return true;
+        }
+
+        // Write actions: restricted to owner/admin
+        return member.role === 'owner' || member.role === 'admin';
       },
       onSubscriptionDeleted: async ({ subscription }) => {
         console.info(
