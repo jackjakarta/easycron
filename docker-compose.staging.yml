@@ -1,0 +1,166 @@
+services:
+  traefik:
+    image: traefik:v2.9
+    command:
+      - --api.insecure=false
+      - --api.dashboard=true
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
+      - --providers.docker.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=alextermure@protonmail.com
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    networks: [edge]
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 443
+        published: 443
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-lets-encrypt:/letsencrypt
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+
+  web:
+    image: ghcr.io/jackjakarta/easycron:${SHORT_SHA}
+    command: ['node', 'server.js']
+    networks: [edge]
+    env_file:
+      - .env
+    deploy:
+      replicas: 1
+      placement:
+        preferences:
+          - spread: node.hostname
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.15'
+          memory: 192M
+      update_config:
+        order: start-first
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 20s
+        max_failure_ratio: 0.2
+      rollback_config:
+        order: stop-first
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=easycron_edge
+        - traefik.http.routers.easycron.rule=Host(`staging.easycron.dev`)
+        - traefik.http.routers.easycron.entrypoints=websecure
+        - traefik.http.routers.easycron.tls=true
+        - traefik.http.routers.easycron.tls.certresolver=myresolver
+        - traefik.http.services.easycron.loadbalancer.server.port=3000
+
+  worker:
+    image: ghcr.io/jackjakarta/easycron:${SHORT_SHA}
+    command: ['node', 'dist/worker/index.js']
+    networks: [edge]
+    env_file:
+      - .env
+    deploy:
+      replicas: 1
+      placement:
+        preferences:
+          - spread: node.hostname
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+        reservations:
+          cpus: '0.20'
+          memory: 256M
+      update_config:
+        order: stop-first
+        parallelism: 1
+        failure_action: rollback
+        monitor: 10s
+        delay: 5s
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=false
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  scheduler:
+    image: ghcr.io/jackjakarta/easycron:${SHORT_SHA}
+    command: ['node', 'dist/scheduler/index.js']
+    networks: [edge]
+    env_file:
+      - .env
+    environment:
+      NODE_OPTIONS: '--max-old-space-size=384'
+    deploy:
+      replicas: 1
+      placement:
+        preferences:
+          - spread: node.hostname
+      resources:
+        limits:
+          cpus: '0.35'
+          memory: 512M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+      update_config:
+        order: stop-first
+        parallelism: 1
+        delay: 5s
+        failure_action: rollback
+        monitor: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=false
+
+  redis:
+    image: redis:7-alpine
+    networks: [edge]
+    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    env_file:
+      - .env
+    volumes:
+      - redis_data:/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=false
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a $REDIS_PASSWORD ping']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+networks:
+  edge:
+    driver: overlay
+
+volumes:
+  traefik-lets-encrypt:
+  redis_data:

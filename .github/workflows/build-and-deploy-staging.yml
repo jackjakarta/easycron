@@ -1,0 +1,93 @@
+name: Build and Deploy Staging
+
+on:
+  # push:
+  #   branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+
+    steps:
+      - name: Set up Docker image tags
+        id: vars
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Load 1password secrets
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          DOCKER_USERNAME: 'op://easycron-app/github-secrets/DOCKER_USERNAME'
+          DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build and push docker image
+        run: |
+          docker build -t ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.SHORT_SHA }} -t ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:staging-latest . && \
+          docker push ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.SHORT_SHA }} && \
+          docker push ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:staging-latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: staging
+    needs: build
+
+    steps:
+      - name: Set up Docker image tags
+        id: vars
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Load 1password secrets
+        uses: 1password/load-secrets-action@v1
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          REMOTE_HOST: 'op://easycron-app/github-secrets/REMOTE_HOST'
+          REMOTE_USER: 'op://easycron-app/github-secrets/REMOTE_USER'
+          DOCKER_USERNAME: 'op://easycron-app/github-secrets/DOCKER_USERNAME'
+          DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
+          SSH_PRIVATE_KEY: 'op://easycron-app/github-secrets/SSH_PRIVATE_KEY'
+
+      - name: Deploy to remote server
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ env.REMOTE_HOST }}
+          username: ${{ env.REMOTE_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/jack/easycron
+            git pull
+
+            export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+            echo "${{ env.DOCKER_PASSWORD }}" | docker login ghcr.io -u "${{ env.DOCKER_USERNAME }}" --password-stdin
+
+            ENVIRONMENT=staging op inject -f -i .env.op -o .env
+            echo "SHORT_SHA=${{ env.SHORT_SHA }}" >> .env
+
+            docker pull ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.SHORT_SHA }}
+
+            export $(grep -v '^#' .env | xargs) && \
+            envsubst < docker-compose.staging.yml | docker stack deploy --with-registry-auth -c - easycron && \
+            docker system prune -f
