@@ -1,6 +1,5 @@
 'use client';
 
-import { auth } from '@/auth';
 import { authClient } from '@/auth/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
