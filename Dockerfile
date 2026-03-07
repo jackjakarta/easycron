@@ -37,6 +37,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/cache-handler.js ./cache-handler.js
 
 EXPOSE 3000
 

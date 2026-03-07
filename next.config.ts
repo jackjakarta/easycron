@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  cacheHandler:
+    process.env.NODE_ENV === 'production' ? require.resolve('./cache-handler.js') : undefined,
   serverExternalPackages: ['bullmq', 'ioredis'],
   images: {
     remotePatterns: [
