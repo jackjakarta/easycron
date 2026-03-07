@@ -45,7 +45,7 @@ services:
 
   web:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
-    command: ['node', 'server.js']
+    command: ["node", "server.js"]
     networks: [edge]
     env_file:
       - .env
@@ -58,11 +58,11 @@ services:
           - spread: node.hostname
       resources:
         limits:
-          cpus: '0.50'
-          memory: 512M
+          cpus: "1.00"
+          memory: 1024M
         reservations:
-          cpus: '0.15'
-          memory: 192M
+          cpus: "0.25"
+          memory: 384M
       update_config:
         order: start-first
         parallelism: 1
@@ -85,7 +85,7 @@ services:
 
   worker:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
-    command: ['node', 'dist/worker/index.js']
+    command: ["node", "dist/worker/index.js"]
     networks: [edge]
     env_file:
       - .env
@@ -98,11 +98,11 @@ services:
           - spread: node.hostname
       resources:
         limits:
-          cpus: '0.75'
-          memory: 768M
+          cpus: "1.50"
+          memory: 1536M
         reservations:
-          cpus: '0.20'
-          memory: 256M
+          cpus: "0.40"
+          memory: 512M
       update_config:
         order: stop-first
         parallelism: 1
@@ -114,19 +114,19 @@ services:
       labels:
         - traefik.enable=false
     healthcheck:
-      test: ['CMD', 'node', '-e', 'process.exit(0)']
+      test: ["CMD", "node", "-e", "process.exit(0)"]
       interval: 30s
       timeout: 3s
       retries: 3
 
   scheduler:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
-    command: ['node', 'dist/scheduler/index.js']
+    command: ["node", "dist/scheduler/index.js"]
     networks: [edge]
     env_file:
       - .env
     environment:
-      NODE_OPTIONS: '--max-old-space-size=384'
+      NODE_OPTIONS: "--max-old-space-size=512"
     deploy:
       replicas: 2
       placement:
@@ -136,11 +136,11 @@ services:
           - spread: node.hostname
       resources:
         limits:
-          cpus: '0.35'
-          memory: 512M
+          cpus: "0.60"
+          memory: 768M
         reservations:
-          cpus: '0.10'
-          memory: 128M
+          cpus: "0.15"
+          memory: 256M
       update_config:
         order: stop-first
         parallelism: 1
@@ -155,7 +155,7 @@ services:
   redis:
     image: redis:7-alpine
     networks: [edge]
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     env_file:
       - .env
     volumes:
@@ -170,49 +170,10 @@ services:
       labels:
         - traefik.enable=false
     healthcheck:
-      test: ['CMD-SHELL', 'redis-cli -a $REDIS_PASSWORD ping']
+      test: ["CMD-SHELL", "redis-cli -a $REDIS_PASSWORD ping"]
       interval: 30s
       timeout: 3s
       retries: 3
-
-  # docs:
-  #   image: ghcr.io/jackjakarta/easycron-docs:0.1.0
-  #   networks: [edge]
-  #   env_file:
-  #     - .env
-  #   deploy:
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - node.labels.easycron.role == app
-  #       preferences:
-  #         - spread: node.hostname
-  #     resources:
-  #       limits:
-  #         cpus: '0.50'
-  #         memory: 512M
-  #       reservations:
-  #         cpus: '0.15'
-  #         memory: 192M
-  #     update_config:
-  #       order: start-first
-  #       parallelism: 1
-  #       delay: 10s
-  #       failure_action: rollback
-  #       monitor: 15s
-  #       max_failure_ratio: 0.4
-  #     rollback_config:
-  #       order: stop-first
-  #     restart_policy:
-  #       condition: on-failure
-  #     labels:
-  #       - traefik.enable=true
-  #       - traefik.docker.network=easycron_edge
-  #       - traefik.http.routers.easycron.rule=Host(`docs.easycron.dev`)
-  #       - traefik.http.routers.easycron.entrypoints=websecure
-  #       - traefik.http.routers.easycron.tls=true
-  #       - traefik.http.routers.easycron.tls.certresolver=myresolver
-  #       - traefik.http.services.easycron.loadbalancer.server.port=3002
 
 networks:
   edge:
