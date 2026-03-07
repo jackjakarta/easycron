@@ -34,17 +34,23 @@ export async function dbUpdateJob({
   organizationId: string;
   data: UpdateJobModel;
 }): Promise<JobModel | undefined> {
-  const authorizationHeader =
-    data.authorizationHeader?.k?.trim() && data.authorizationHeader?.v?.trim()
-      ? {
-          k: data.authorizationHeader.k.trim(),
-          v: encryptSecret(data.authorizationHeader.v.trim()),
-        }
-      : null;
+  const updateData: UpdateJobModel = { ...data };
+
+  if ('authorizationHeader' in data) {
+    updateData.authorizationHeader =
+      data.authorizationHeader?.k?.trim() && data.authorizationHeader?.v?.trim()
+        ? {
+            k: data.authorizationHeader.k.trim(),
+            v: encryptSecret(data.authorizationHeader.v.trim()),
+          }
+        : null;
+  } else {
+    delete updateData.authorizationHeader;
+  }
 
   const [updatedJob] = await db
     .update(jobTable)
-    .set({ ...data, authorizationHeader })
+    .set(updateData)
     .where(and(eq(jobTable.id, jobId), eq(jobTable.organizationId, organizationId)))
     .returning();
 

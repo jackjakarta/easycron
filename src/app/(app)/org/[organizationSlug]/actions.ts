@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@/auth';
-import { getUser } from '@/auth/utils';
+import { checkPermissions, getUser } from '@/auth/utils';
 import { dbInsertJob } from '@/db/functions/job';
 import { headers } from 'next/headers';
 
@@ -25,16 +25,16 @@ export async function createJobInOrganizationAction({
       throw new Error('No active organization found');
     }
 
-    const permission = await auth.api.hasPermission({
-      headers: await headers(),
-      body: {
-        permissions: {
-          project: ['create'],
+    const hasPermission = await checkPermissions({
+      permissionSets: [
+        {
+          resource: 'job',
+          permissions: ['create'],
         },
-      },
+      ],
     });
 
-    if (!permission.success) {
+    if (!hasPermission) {
       throw new Error('You do not have permission to create a job in this organization');
     }
 
