@@ -1,27 +1,29 @@
 import { env } from '@/env';
-import { createClient } from 'redis';
+import IORedis from 'ioredis';
 
-const client = createClient({ url: env.redisUrl });
-let connected = false;
+let client: IORedis | null = null;
 
-export async function redis() {
-  if (!connected) {
-    await client.connect();
-    connected = true;
+function getClient(): IORedis {
+  if (!client) {
+    client = new IORedis(env.redisUrl, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: false,
+    });
+    client.on('error', (err) => {
+      console.error('[locks] Redis connection error:', err.message);
+    });
   }
   return client;
 }
 
 export async function tryLock(key: string, ttlMs: number): Promise<boolean> {
-  const redisClient = await redis();
-  const r = await redisClient.set(key, '1', { NX: true, PX: ttlMs });
-
+  const r = await getClient().set(key, '1', 'PX', ttlMs, 'NX');
   return r === 'OK';
 }
 
 export async function disconnectRedis() {
-  if (connected) {
-    client.destroy();
-    connected = false;
+  if (client) {
+    await client.quit();
+    client = null;
   }
 }

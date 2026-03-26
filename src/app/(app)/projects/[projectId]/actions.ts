@@ -12,6 +12,7 @@ import { dbDeleteProject, dbGetProjectById } from '@/db/functions/project';
 import { dbDeleteSecret, dbUpsertSecret } from '@/db/functions/secret';
 import { getRunQueue, type RunJobPayload } from '@/queue/queue';
 import { generateCronExpression } from '@/utils/ai';
+import { computeNextRun } from '@/utils/cron';
 import { encryptSecret } from '@/utils/crypto';
 import { createHmacSigningKey } from '@/utils/hmac';
 import { occurrenceJobId } from '@/utils/job';
@@ -98,10 +99,23 @@ export async function enableOrDisableJobAction({
   enabled: boolean;
 }) {
   const user = await getUser();
+
+  const data: { enabled: boolean; nextRunAt?: Date } = { enabled };
+
+  if (enabled) {
+    const currentJob = await dbGetJobById({ jobId, organizationId: user.organizationId });
+
+    if (currentJob === undefined) {
+      throw new Error('Job not found');
+    }
+
+    data.nextRunAt = computeNextRun(currentJob.scheduleCron, currentJob.timezone, new Date());
+  }
+
   const updatedJob = await dbUpdateJob({
     jobId,
     organizationId: user.organizationId,
-    data: { enabled },
+    data,
   });
 
   if (updatedJob === undefined) {
@@ -160,7 +174,24 @@ export async function updateJobAction({ jobId, data }: { jobId: string; data: Jo
     };
   }
 
-  const updatedJob = await dbUpdateJob({ jobId, organizationId: user.organizationId, data });
+  const currentJob = await dbGetJobById({ jobId, organizationId: user.organizationId });
+
+  if (currentJob === undefined) {
+    throw new Error('Job not found');
+  }
+
+  const scheduleChanged =
+    data.scheduleCron !== currentJob.scheduleCron || data.timezone !== currentJob.timezone;
+
+  const updateData = scheduleChanged
+    ? { ...data, nextRunAt: computeNextRun(data.scheduleCron, data.timezone, new Date()) }
+    : data;
+
+  const updatedJob = await dbUpdateJob({
+    jobId,
+    organizationId: user.organizationId,
+    data: updateData,
+  });
 
   if (updatedJob === undefined) {
     throw new Error('Failed to update job');
