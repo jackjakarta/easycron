@@ -90,7 +90,7 @@ services:
     env_file:
       - .env
     deploy:
-      replicas: 3
+      replicas: 2
       placement:
         constraints:
           - node.labels.easycron.role == app
@@ -98,11 +98,11 @@ services:
           - spread: node.hostname
       resources:
         limits:
-          cpus: "1.50"
-          memory: 1536M
+          cpus: "1.00"
+          memory: 1024M
         reservations:
-          cpus: "0.40"
-          memory: 512M
+          cpus: "0.25"
+          memory: 384M
       update_config:
         order: stop-first
         parallelism: 1
@@ -128,7 +128,7 @@ services:
     environment:
       NODE_OPTIONS: "--max-old-space-size=512"
     deploy:
-      replicas: 2
+      replicas: 1
       placement:
         constraints:
           - node.labels.easycron.role == app
@@ -136,11 +136,11 @@ services:
           - spread: node.hostname
       resources:
         limits:
-          cpus: "0.60"
-          memory: 768M
+          cpus: "0.50"
+          memory: 512M
         reservations:
-          cpus: "0.15"
-          memory: 256M
+          cpus: "0.10"
+          memory: 192M
       update_config:
         order: stop-first
         parallelism: 1
