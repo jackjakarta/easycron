@@ -23,7 +23,8 @@ export async function tryLock(key: string, ttlMs: number): Promise<boolean> {
 
 export async function disconnectRedis() {
   if (client) {
-    await client.quit();
+    const c = client;
     client = null;
+    await c.quit();
   }
 }
