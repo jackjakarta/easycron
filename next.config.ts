@@ -7,11 +7,10 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  cacheHandler:
-    process.env.NODE_ENV === 'production' ? require.resolve('./cache-handler.js') : undefined,
+  cacheHandlers:
+    process.env.NODE_ENV === 'production'
+      ? { default: require.resolve('./cache-handler.js') }
+      : undefined,
   serverExternalPackages: ['bullmq', 'ioredis'],
   images: {
     remotePatterns: [

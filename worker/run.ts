@@ -38,6 +38,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
   const hmacSecret = await dbGetHmacSecretForWorker({ projectId: jobRow.projectId });
 
   let attempt = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let lastError: any = null;
   let finalStatus: ExecutionStatus = 'failed';
   let httpStatus: number | null = null;
@@ -148,6 +149,7 @@ export async function runOnce(bull: Job<RunJobPayload>) {
       }
 
       continue;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       lastError = err?.name === 'AbortError' ? new Error('timeout') : err;
       finalStatus = err?.name === 'AbortError' ? 'timed_out' : 'failed';
