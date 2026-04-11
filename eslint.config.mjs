@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-empty-object-type': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'react/no-unescaped-entities': 'warn',
+      // Suppress false positive from react-hooks plugin with React 19's compiler output
       'react-hooks/incompatible-library': 'off',
     },
   },
