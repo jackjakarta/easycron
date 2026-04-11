@@ -1,13 +1,12 @@
 services:
   traefik:
-    image: traefik:v2.9
+    image: traefik:v3.6
     command:
       - --api.insecure=false
-      - --api.dashboard=true
-      - --providers.docker.swarmMode=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.endpoint=unix:///var/run/docker.sock
-      - --providers.docker.watch=true
+      - --providers.swarm=true
+      - --providers.swarm.exposedbydefault=false
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.watch=true
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
@@ -33,15 +32,6 @@ services:
           - node.role == manager
       restart_policy:
         condition: on-failure
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.dashboard.rule=Host(`traefik.easycron.dev`)
-        - traefik.http.routers.dashboard.entrypoints=websecure
-        - traefik.http.routers.dashboard.tls.certresolver=myresolver
-        - traefik.http.routers.dashboard.service=api@internal
-        - traefik.http.routers.dashboard.middlewares=auth
-        - traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}
-        - traefik.http.services.dashboard.loadbalancer.server.port=8080
 
   web:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}
@@ -77,11 +67,23 @@ services:
       labels:
         - traefik.enable=true
         - traefik.docker.network=easycron_edge
-        - traefik.http.routers.easycron.rule=Host(`easycron.dev`)
+
+        # main router
+        - traefik.http.routers.easycron.rule=Host(`easycron.dev`) || Host(`api.easycron.dev`)
         - traefik.http.routers.easycron.entrypoints=websecure
         - traefik.http.routers.easycron.tls=true
         - traefik.http.routers.easycron.tls.certresolver=myresolver
         - traefik.http.services.easycron.loadbalancer.server.port=3000
+
+        # www to non-www redirect
+        - traefik.http.routers.easycron-www.rule=Host(`www.easycron.dev`)
+        - traefik.http.routers.easycron-www.entrypoints=websecure
+        - traefik.http.routers.easycron-www.tls=true
+        - traefik.http.routers.easycron-www.tls.certresolver=myresolver
+        - traefik.http.routers.easycron-www.middlewares=www-redirect
+        - traefik.http.middlewares.www-redirect.redirectregex.regex=^https://www\.(.*)
+        - traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$${1}
+        - traefik.http.middlewares.www-redirect.redirectregex.permanent=true
 
   worker:
     image: ghcr.io/jackjakarta/easycron:${TAG_VERSION}

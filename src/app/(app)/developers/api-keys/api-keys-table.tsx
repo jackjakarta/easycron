@@ -33,6 +33,8 @@ import { updateApiKeyEnabledAction } from './actions';
 import ApiKeysTableRowSkeleton from './api-keys-table-row-skeleton';
 import CreateKeyDialog from './create-key-dialog';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 export default function ApiKeysTable() {
   const queryClient = useQueryClient();
   const session = authClient.useSession();
@@ -84,6 +86,7 @@ export default function ApiKeysTable() {
   }
 
   const isAllSelected = filteredKeys.length > 0 && selectedKeys.size === filteredKeys.length;
+  const thirtyDaysFromNow = new Date(new Date().getTime() + THIRTY_DAYS_MS);
 
   return (
     <Card className="w-full">
@@ -214,7 +217,7 @@ export default function ApiKeysTable() {
                           className={
                             apiKey.expiresAt < new Date()
                               ? 'text-destructive'
-                              : apiKey.expiresAt < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+                              : apiKey.expiresAt < thirtyDaysFromNow
                                 ? 'text-warning'
                                 : 'text-muted-foreground'
                           }

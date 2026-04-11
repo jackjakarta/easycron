@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { eventTypeSchema, ProjectModel } from '@/db/schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -51,8 +51,8 @@ type CreateWebhookDialogProps = {
 };
 
 export default function CreateWebhookDialog({ projects, trigger }: CreateWebhookDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(webhookEndpointSchema),
