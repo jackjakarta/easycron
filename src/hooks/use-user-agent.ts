@@ -11,6 +11,8 @@ type UAInfo = {
   isSafari: boolean;
   isFirefox: boolean;
   isChrome: boolean;
+  isBrave: boolean;
+  isEdge: boolean;
   ready: boolean;
 };
 
@@ -43,7 +45,9 @@ export function useUserAgent(): UAInfo {
       const isWindows = osName === 'Windows';
       const isSafari = browserName === 'Safari';
       const isFirefox = browserName === 'Firefox';
-      const isChrome = ['Chrome', 'Chromium', 'Brave', 'Microsoft Edge'].includes(browserName);
+      const isChrome = ['Chrome', 'Chromium'].includes(browserName);
+      const isBrave = browserName === 'Brave';
+      const isEdge = browserName === 'Microsoft Edge';
 
       return {
         parsedUserAgent: parser.parse(),
@@ -54,6 +58,8 @@ export function useUserAgent(): UAInfo {
         isSafari,
         isFirefox,
         isChrome,
+        isBrave,
+        isEdge,
       };
     } catch {
       return null;
@@ -69,6 +75,8 @@ export function useUserAgent(): UAInfo {
     isSafari: parsed?.isSafari ?? false,
     isFirefox: parsed?.isFirefox ?? false,
     isChrome: parsed?.isChrome ?? false,
+    isBrave: parsed?.isBrave ?? false,
+    isEdge: parsed?.isEdge ?? false,
     ready: Boolean(ua && parsed),
   };
 }
