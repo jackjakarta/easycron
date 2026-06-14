@@ -22,10 +22,16 @@ jobs:
       - name: Set up Docker image tags
         id: vars
         run: |
-          echo "TAG_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "TAG_VERSION=${{ github.event.inputs.tag || github.ref_name }}" >> $GITHUB_ENV
 
-      - name: Load 1password secrets
-        uses: 1password/load-secrets-action@v1
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Load build secrets
+        uses: 1password/load-secrets-action@v4
         with:
           export-env: true
         env:
@@ -33,14 +39,8 @@ jobs:
           DOCKER_USERNAME: 'op://easycron-app/github-secrets/DOCKER_USERNAME'
           DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Log in to ghcr.io
-        uses: docker/login-action@v2
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ env.DOCKER_USERNAME }}
@@ -62,10 +62,13 @@ jobs:
       - name: Set up Docker image tags
         id: vars
         run: |
-          echo "TAG_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "TAG_VERSION=${{ github.event.inputs.tag || github.ref_name }}" >> $GITHUB_ENV
 
-      - name: Load 1password secrets
-        uses: 1password/load-secrets-action@v1
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Load deploy secrets
+        uses: 1password/load-secrets-action@v4
         with:
           export-env: true
         env:
@@ -76,22 +79,34 @@ jobs:
           DOCKER_PASSWORD: 'op://easycron-app/github-secrets/DOCKER_PASSWORD'
           SSH_PRIVATE_KEY: 'op://easycron-app/github-secrets/SSH_PRIVATE_KEY'
 
+      - name: Install 1Password CLI
+        uses: 1password/install-cli-action@v4
+
+      - name: Inject app secrets into .env
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        run: ENVIRONMENT=production op inject -f -i .env.op -o .env
+
+      - name: Copy .env and compose file to remote server
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ env.REMOTE_HOST }}
+          username: ${{ env.REMOTE_USER }}
+          key: ${{ env.SSH_PRIVATE_KEY }}
+          source: '.env,docker-compose.production.yml'
+          target: '~/easycron'
+
       - name: Deploy to remote server
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ env.REMOTE_HOST }}
           username: ${{ env.REMOTE_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            cd /home/jack/easycron
-            git pull
-
-            export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
-            echo "${{ env.DOCKER_PASSWORD }}" | docker login ghcr.io -u "${{ env.DOCKER_USERNAME }}" --password-stdin
-
-            ENVIRONMENT=production op inject -f -i .env.op -o .env
+            cd ~/easycron
             echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
 
+            echo "${{ env.DOCKER_PASSWORD }}" | docker login ghcr.io -u "${{ env.DOCKER_USERNAME }}" --password-stdin
             docker pull ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
 
             export $(grep -v '^#' .env | xargs) && \
