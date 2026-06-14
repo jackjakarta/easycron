@@ -122,3 +122,44 @@ Organizations are the tenant boundary. Users belong to organizations with roles 
 ## Libraries
 
 When working with libraries always use the context7 mcp tools, never guess APIs from memory.
+
+## Extra Tools
+
+### wcaw | what changed and why
+
+Use this to track git history of a TS symbol in a faster way.
+
+#### wcaw docs
+
+Give wcaw a <path>:<symbol> and it walks git history, tracks the symbol across moves and renames via tree-sitter, groups commits by GitHub PR, and prints a timeline with the effective owner.
+
+Usage:
+
+```
+wcaw [--json] [--no-cache] <path>:<symbol>
+```
+
+| Flag         | Effect                                             |
+| ------------ | -------------------------------------------------- |
+| `--json`     | Emit schema v1 JSON instead of the human timeline. |
+| `--no-cache` | Bypass the local cache for this invocation.        |
+
+Example:
+
+```
+$ wcaw src/auth/login.ts:validateToken
+
+validateToken — introduced 1 year ago, 5 commits across 3 PRs
+
+  Aug 2024  PR #142 "Initial JWT validation"  @maria
+            ─ 19 lines
+            ─ alongside src/auth/login.test.ts
+  Oct 2024  PR #189 "Fix clock-skew tolerance"  @jonas
+            ─ linked issue: SEC-44
+  Mar 2025  PR #311 "Refactor for refresh tokens"  @maria
+            ─ 2 commits
+            ─ also touched src/auth/session.ts
+  Sep 2025  (no PR)
+
+Effective owner: @maria (60% of changes, last touched 14 months ago)
+```

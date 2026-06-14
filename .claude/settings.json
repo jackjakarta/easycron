@@ -10,6 +10,7 @@
       "Bash(tail:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
+      "Bash(wcaw *)",
 
       "Bash(pnpm format:*)",
       "Bash(pnpm format:check:*)",
