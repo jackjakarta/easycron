@@ -1,7 +1,8 @@
+import { type NextURL } from 'next/dist/server/web/next-url';
 import { NextRequest, NextResponse } from 'next/server';
 
 export function proxy(req: NextRequest) {
-  const rewriteUrl = processRequestForProxy(req);
+  const rewriteUrl = getProxyRewriteUrl(req);
 
   if (rewriteUrl !== null) {
     return NextResponse.rewrite(rewriteUrl);
@@ -10,13 +11,12 @@ export function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-function processRequestForProxy(req: NextRequest) {
+export const config = {
+  matcher: ['/((?!api|_next|favicon.ico).*)'],
+};
+
+function getProxyRewriteUrl(req: NextRequest): NextURL | null {
   const { headers, nextUrl } = req;
-
-  if (nextUrl.pathname.startsWith('/_next') || nextUrl.pathname.startsWith('/api/')) {
-    return null;
-  }
-
   const hostname = headers.get('host');
 
   if (hostname === null) {
@@ -28,6 +28,15 @@ function processRequestForProxy(req: NextRequest) {
 
     const _pathname = nextUrl.pathname === '/' ? '' : nextUrl.pathname;
     url.pathname = `/platform-api${_pathname}`;
+
+    return url;
+  }
+
+  if (hostname.startsWith('docs.')) {
+    const url = nextUrl.clone();
+
+    const _pathname = nextUrl.pathname === '/' ? '' : nextUrl.pathname;
+    url.pathname = `/docs${_pathname}`;
 
     return url;
   }

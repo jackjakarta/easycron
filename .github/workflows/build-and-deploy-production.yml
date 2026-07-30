@@ -87,6 +87,9 @@ jobs:
           OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
         run: ENVIRONMENT=production op inject -f -i .env.op -o .env
 
+      - name: Add tag version to .env file
+        run: echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
+
       - name: Copy .env and compose file to remote server
         uses: appleboy/scp-action@v1.0.0
         with:
@@ -104,7 +107,6 @@ jobs:
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
             cd ~/easycron
-            echo "TAG_VERSION=${{ env.TAG_VERSION }}" >> .env
 
             echo "${{ env.DOCKER_PASSWORD }}" | docker login ghcr.io -u "${{ env.DOCKER_USERNAME }}" --password-stdin
             docker pull ghcr.io/${{ env.DOCKER_USERNAME }}/easycron:${{ env.TAG_VERSION }}
