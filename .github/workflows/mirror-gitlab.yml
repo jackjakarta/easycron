@@ -7,6 +7,10 @@ on:
   delete:
   workflow_dispatch:
 
+concurrency:
+  group: mirror-gitlab
+  cancel-in-progress: false
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
