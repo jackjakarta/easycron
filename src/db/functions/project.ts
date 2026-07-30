@@ -7,6 +7,7 @@ import {
   projectTable,
   secretTable,
   webhookEndpointTable,
+  webhookEventTable,
   type InsertProjectModel,
   type JobModel,
   type ProjectModel,
@@ -147,6 +148,15 @@ export async function dbDeleteProject({
         and(
           eq(webhookEndpointTable.projectId, projectId),
           eq(webhookEndpointTable.organizationId, organizationId),
+        ),
+      );
+
+    await tx
+      .delete(webhookEventTable)
+      .where(
+        and(
+          eq(webhookEventTable.projectId, projectId),
+          eq(webhookEventTable.organizationId, organizationId),
         ),
       );
 

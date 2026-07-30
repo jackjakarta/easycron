@@ -69,7 +69,7 @@ services:
         - traefik.docker.network=easycron_edge
 
         # main router
-        - traefik.http.routers.easycron.rule=Host(`easycron.dev`) || Host(`api.easycron.dev`)
+        - traefik.http.routers.easycron.rule=Host(`easycron.dev`) || Host(`api.easycron.dev`) || Host(`docs.easycron.dev`)
         - traefik.http.routers.easycron.entrypoints=websecure
         - traefik.http.routers.easycron.tls=true
         - traefik.http.routers.easycron.tls.certresolver=myresolver
