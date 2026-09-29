@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
 services:
   traefik:
     image: traefik:v3.6
@@ -25,11 +31,16 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-lets-encrypt:/letsencrypt
+    logging: *default-logging
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+        reservations:
+          cpus: '0.10'
+          memory: 64M
       restart_policy:
         condition: on-failure
 
@@ -39,19 +50,15 @@ services:
     networks: [edge]
     env_file:
       - .env
+    logging: *default-logging
     deploy:
       replicas: 2
-      placement:
-        constraints:
-          - node.labels.easycron.role == app
-        preferences:
-          - spread: node.hostname
       resources:
         limits:
-          cpus: '1.00'
+          cpus: '1.50'
           memory: 1280M
         reservations:
-          cpus: '0.40'
+          cpus: '0.50'
           memory: 512M
       update_config:
         order: start-first
@@ -91,20 +98,16 @@ services:
     networks: [edge]
     env_file:
       - .env
+    logging: *default-logging
     deploy:
       replicas: 2
-      placement:
-        constraints:
-          - node.labels.easycron.role == app
-        preferences:
-          - spread: node.hostname
       resources:
         limits:
           cpus: '1.00'
-          memory: 1280M
+          memory: 768M
         reservations:
-          cpus: '0.40'
-          memory: 512M
+          cpus: '0.25'
+          memory: 256M
       update_config:
         order: stop-first
         parallelism: 1
@@ -128,21 +131,17 @@ services:
     env_file:
       - .env
     environment:
-      NODE_OPTIONS: '--max-old-space-size=512'
+      NODE_OPTIONS: '--max-old-space-size=384'
+    logging: *default-logging
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.labels.easycron.role == app
-        preferences:
-          - spread: node.hostname
       resources:
         limits:
           cpus: '0.50'
           memory: 512M
         reservations:
-          cpus: '0.20'
-          memory: 256M
+          cpus: '0.10'
+          memory: 128M
       update_config:
         order: stop-first
         parallelism: 1
@@ -157,16 +156,30 @@ services:
   redis:
     image: redis:7-alpine
     networks: [edge]
-    command: ['redis-server', '--requirepass', '${REDIS_PASSWORD}']
+    command:
+      - redis-server
+      - --requirepass
+      - '${REDIS_PASSWORD}'
+      - --appendonly
+      - 'yes'
+      - --maxmemory
+      - 768mb
+      - --maxmemory-policy
+      - noeviction
     env_file:
       - .env
     volumes:
       - redis_data:/data
+    logging: *default-logging
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.labels.easycron.role == redis
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
       restart_policy:
         condition: on-failure
       labels:
